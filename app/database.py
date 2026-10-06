@@ -1,68 +1,79 @@
 import sqlite3
-import os
+from typing import Generator
+from app.config import settings
 
-DB_FILE = "database.db"
-
-def get_db():
-    conn = sqlite3.connect(DB_FILE, check_same_thread=False)
+def get_db_connection():
+    """
+    Creates and returns a connection to the SQLite database.
+    """
+    db_file = settings.DATABASE_URL.replace("sqlite:///", "")
+    conn = sqlite3.connect(db_file, check_same_thread=False)
     conn.row_factory = sqlite3.Row
+    # Enable foreign keys
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 def init_db():
-    # Remove existing db for clean demo start
-    if os.path.exists(DB_FILE):
-        os.remove(DB_FILE)
-        
-    conn = get_db()
+    """
+    Initializes the database schemas.
+    """
+    conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Create Users table
+    # users table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,
-            name TEXT,
-            email TEXT,
-            password TEXT
+            username TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            role TEXT DEFAULT 'user',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
     
-    # Create Objects table
+    # objects table (resources)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS objects (
             id INTEGER PRIMARY KEY,
-            name TEXT,
-            owner_id INTEGER,
-            data TEXT
+            object_type TEXT NOT NULL,
+            owner_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            parent_id INTEGER,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(owner_id) REFERENCES users(id),
+            FOREIGN KEY(parent_id) REFERENCES objects(id)
         )
     ''')
     
-    # Create Audit Logs table
+    # audit_logs table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS audit_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
             user_id INTEGER,
+            role TEXT,
+            operation TEXT,
+            object_type TEXT,
             object_id INTEGER,
+            path TEXT,
             decision TEXT,
-            reason TEXT
+            reason TEXT,
+            risk_score INTEGER,
+            risk_level TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id),
+            FOREIGN KEY(object_id) REFERENCES objects(id)
         )
     ''')
     
-    # Insert sample users
-    users = [
-        (101, "Alice", "alice@example.com", "alice123"),
-        (102, "Bob", "bob@example.com", "bob123")
-    ]
-    cursor.executemany("INSERT INTO users (id, name, email, password) VALUES (?, ?, ?, ?)", users)
-    
-    # Insert sample objects
-    objects = [
-        (501, "Alice's Secret Note 1", 101, "Confidential data A1"),
-        (502, "Alice's Secret Note 2", 101, "Confidential data A2"),
-        (601, "Bob's Financial Record 1", 102, "Confidential data B1"),
-        (602, "Bob's Financial Record 2", 102, "Confidential data B2")
-    ]
-    cursor.executemany("INSERT INTO objects (id, name, owner_id, data) VALUES (?, ?, ?, ?)", objects)
-    
     conn.commit()
     conn.close()
+
+def get_db() -> Generator[sqlite3.Connection, None, None]:
+    """
+    FastAPI dependency that provides a database connection per request.
+    """
+    conn = get_db_connection()
+    try:
+        yield conn
+    finally:
+        conn.close()
