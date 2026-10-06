@@ -105,38 +105,29 @@ python -m scripts.evaluate_performance
 
 ---
 
-## 🎯 5. Demo Instructions
+## 🎯 5. Quick Start & Demonstration
 
-To manually demonstrate the core BOLA protection to your professor:
+To best evaluate this project, we highly recommend a **Live Manual Demonstration** where you interact with the running server using real HTTP requests. This proves that the Gateway is dynamically intercepting traffic in real-time.
 
-**1. Log in as Alice (User 101):**
+**Terminal 1 (The Server):**
 ```bash
-curl -X POST "http://localhost:8000/api/v1/auth/login" \
--H "Content-Type: application/json" \
--d '{"username":"alice","password":"alice123"}'
+# Seed the database and start the FastAPI security server
+python -m app.seed
+uvicorn app.main:app --reload
 ```
-*(Copy the `access_token`)*
+*(As you send requests, you will see a detailed, live Security Trace output here showing the exact Ownership, Risk, and Policy Evaluation decisions).*
 
-**2. Legitimate Request (Alice requesting Alice's Resource):**
-```bash
-curl -X POST "http://localhost:8000/graphql" \
--H "Authorization: Bearer <ALICE_TOKEN>" \
--H "Content-Type: application/json" \
--d '{"query": "{ resource(id: 101) { name } }"}'
-```
-*Result: HTTP 200 OK (Returns Data)*
+**Terminal 2 (The Client):**
+Follow the **[`LIVE_DEMONSTRATION_GUIDE.md`](./LIVE_DEMONSTRATION_GUIDE.md)** for the exact `curl` commands to authenticate and execute:
+1. Legitimate GraphQL Access
+2. Direct BOLA Attacks
+3. Nested BOLA Attacks
+4. Invalid JWT Rejections
 
-**3. Direct BOLA Attack (Alice attempting to read Bob's Resource 102):**
-```bash
-curl -X POST "http://localhost:8000/graphql" \
--H "Authorization: Bearer <ALICE_TOKEN>" \
--H "Content-Type: application/json" \
--d '{"query": "{ resource(id: 102) { name } }"}'
-```
-*Result: HTTP 403 Forbidden (Blocked by Gateway, High Risk Score)*
+**Browser (The Dashboard):**
+Navigate to `http://localhost:8000/dashboard` to view the live GUI reflecting your manual attacks.
 
-**4. View Dashboard:**
-Navigate to `http://localhost:8000/dashboard` in your browser to see the live telemetry and audit logs of the attacks you just executed.
+*(Note: We have also provided `python scripts/run_demo.py` as an automated, deterministic regression utility, but the live manual interaction is the primary evaluation method).*
 
 ---
 

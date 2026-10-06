@@ -57,6 +57,25 @@ async def bola_enforcement_middleware(request: Request, current_user: dict = Dep
         # Evaluate policy engine rules
         result = policy_engine.evaluate(context)
         
+        # Live Security Debug View (Terminal Logging)
+        print("\n" + "="*50)
+        print("🛡️  GraphQL Shield: Live Security Trace")
+        print("="*50)
+        print(f"[AUTH]")
+        print(f"User ID: {user_id}")
+        print(f"Role:    {role.upper()}")
+        print(f"\n[GRAPHQL]")
+        print(f"Path:      {path}")
+        print(f"Object:    {object_type}")
+        print(f"Object ID: {object_id}")
+        print(f"\n[OWNERSHIP]")
+        print(f"Requesting User: {user_id}")
+        print(f"True Owner ID:   {owner_id}")
+        print(f"\n[AUTHORIZATION]")
+        print(f"Decision: {result['decision']}")
+        print(f"Reason:   {result['reason']}")
+        print(f"Risk:     {result['risk_level']} ({result['risk_score']}/100)")
+        
         # Audit log the decision
         log_decision(
             user_id=user_id,
@@ -73,6 +92,8 @@ async def bola_enforcement_middleware(request: Request, current_user: dict = Dep
         
         # Enforcement Block
         if result["decision"] == "DENY":
+            print("[ENFORCEMENT]\nHTTP 403 Forbidden - Request Dropped.")
+            print("="*50 + "\n")
             raise HTTPException(
                 status_code=403, 
                 detail={
@@ -84,3 +105,6 @@ async def bola_enforcement_middleware(request: Request, current_user: dict = Dep
                     "risk_level": result["risk_level"]
                 }
             )
+        else:
+            print("[ENFORCEMENT]\nALLOW - Executing GraphQL Backend...")
+            print("="*50 + "\n")
