@@ -59,7 +59,7 @@ async def bola_enforcement_middleware(request: Request, current_user: dict = Dep
         
         # Live Security Debug View (Terminal Logging)
         print("\n" + "="*50)
-        print("🛡️  GraphQL Shield: Live Security Trace")
+        print("[GraphQL Shield: Live Security Trace]")
         print("="*50)
         print(f"[AUTH]")
         print(f"User ID: {user_id}")
