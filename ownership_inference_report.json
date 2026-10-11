@@ -1,0 +1,56 @@
+{
+  "summary": {
+    "graphql_types_analyzed": 3,
+    "candidate_relationships_detected": 3,
+    "accepted_rules": 3,
+    "high_confidence_rules": 2,
+    "medium_confidence_rules": 1,
+    "low_confidence_rules": 0,
+    "rejected_or_ambiguous_relationships": 0,
+    "analysis_time_ms": 0.759
+  },
+  "analyzed_types": [
+    "HealthCheckType",
+    "ResourceType",
+    "UserType"
+  ],
+  "accepted_rules": [
+    {
+      "source_type": "UserType",
+      "source_field": "resources",
+      "target_type": "ResourceType",
+      "owner_field": "id",
+      "confidence": "MEDIUM",
+      "pattern": "COLLECTION",
+      "source": "INFERRED",
+      "reason": "Field 'resources' on UserType is a collection of ResourceType"
+    },
+    {
+      "source_type": "UserType",
+      "source_field": "id",
+      "target_type": "UserType",
+      "owner_field": "id",
+      "confidence": "HIGH",
+      "pattern": "SELF_OWNERSHIP",
+      "source": "INFERRED",
+      "reason": "Type UserType owns its own record (self-ownership)"
+    },
+    {
+      "source_type": "ResourceType",
+      "source_field": "owner_id",
+      "target_type": "UserType",
+      "owner_field": "id",
+      "confidence": "HIGH",
+      "pattern": "OWNER_FIELD",
+      "source": "INFERRED",
+      "reason": "Field 'owner_id' on ResourceType is a scalar ownership identifier referencing UserType"
+    }
+  ],
+  "rejected_or_ambiguous": [],
+  "priority": [
+    "1. Explicit configured authorization / ownership rule",
+    "2. Validated schema-inferred ownership rule",
+    "3. UNKNOWN OWNERSHIP -> explicit policy required -> DENY"
+  ],
+  "source": "app.graphql.schema (analyzed at report generation time)"
+}

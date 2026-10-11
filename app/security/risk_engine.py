@@ -9,8 +9,8 @@ def calculate_risk(context, decision_reason: str) -> tuple[int, str]:
     """
     score = 0
     
-    # Rule 1: Ownership Mismatch (Major Indicator)
-    if decision_reason in ["OWNERSHIP_MISMATCH", "NESTED_AUTHORIZATION_VIOLATION"]:
+    # Rule 1: Ownership Mismatch or unattributable object (Major Indicator)
+    if decision_reason in ["OWNERSHIP_MISMATCH", "NESTED_AUTHORIZATION_VIOLATION", "UNKNOWN_OWNERSHIP"]:
         score += 80
         
     # Rule 2: Suspicious Nested Access (Elevated Baseline)

@@ -84,5 +84,33 @@ def verify():
         print("Dashboard: FAIL", r_dash.status_code)
         return
 
+    # Check Schema Ownership Inference endpoint (ADMIN only)
+    r_admin = httpx.post(f"{BASE_URL}/api/v1/auth/login", json={"username": "charlie", "password": "charlie123"})
+    if r_admin.status_code != 200:
+        print("Schema ownership (admin login): FAIL")
+        return
+    admin_token = r_admin.json()["access_token"]
+    r_own = httpx.get(f"{BASE_URL}/api/v1/security/schema-ownership",
+                      headers={"Authorization": f"Bearer {admin_token}"})
+    if r_own.status_code == 200 and r_own.json().get("status") == "analyzed" \
+            and r_own.json().get("relationships_detected", 0) > 0:
+        print("Schema ownership inference: PASS "
+              f"({r_own.json()['relationships_detected']} rules from "
+              f"{r_own.json()['types_analyzed']} types)")
+    else:
+        print("Schema ownership inference: FAIL", r_own.status_code, r_own.text)
+        return
+
+    # Non-admin users must be rejected from the inference endpoint
+    r_own_user = httpx.get(f"{BASE_URL}/api/v1/security/schema-ownership",
+                           headers={"Authorization": f"Bearer {token}"})
+    if r_own_user.status_code == 403:
+        print("Schema ownership access control: PASS")
+    else:
+        print("Schema ownership access control: FAIL", r_own_user.status_code)
+        return
+
+    print("--- All verifications passed ---")
+
 if __name__ == "__main__":
     verify()

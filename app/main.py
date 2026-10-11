@@ -16,10 +16,24 @@ app = FastAPI(
     description="Schema-Aware Security Gateway for Preventing GraphQL BOLA Vulnerabilities"
 )
 
-# Initialize database on startup
+# Initialize database and schema ownership inference on startup
 @app.on_event("startup")
 def startup_event():
     init_db()
+    # Schema-Aware Ownership Inference (built once, cached for all requests)
+    from app.security.ownership_inference import inference_engine
+    report = inference_engine.build_from_strawberry_schema(schema)
+    print("\n" + "="*50)
+    print("[Schema Ownership Inference]")
+    print("="*50)
+    for rule in report.rules:
+        print(f"  {rule.source_type}.{rule.source_field} -> {rule.target_type}  [{rule.confidence}]")
+    print(f"\nTypes analyzed: {report.types_analyzed}")
+    print(f"Ownership relationships detected: {report.relationships_detected}")
+    print(f"High-confidence rules: {report.high_confidence}")
+    print(f"Ambiguous/rejected relationships: {report.ambiguous}")
+    print(f"Analysis time: {report.analysis_time_ms}ms")
+    print("="*50 + "\n")
 
 # Basic REST health check
 @app.get("/health")
@@ -126,6 +140,18 @@ def read_dashboard():
         return f.read()
 
 from app.security.enforcement import bola_enforcement_middleware
+from app.security.ownership_inference import inference_engine, ensure_inference_ready
+
+@app.get("/api/v1/security/schema-ownership")
+def get_schema_ownership(current_user: dict = Depends(get_current_user)):
+    """
+    Inspection endpoint showing the ownership relationships inferred
+    from the GraphQL schema. Restricted to ADMIN users.
+    """
+    if current_user.get("role", "").upper() != "ADMIN":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    ensure_inference_ready()
+    return inference_engine.to_dict()
 
 # Secure Strawberry GraphQL router protected by the BOLA security gateway
 graphql_app = GraphQLRouter(schema, context_getter=None, dependencies=[Depends(bola_enforcement_middleware)])

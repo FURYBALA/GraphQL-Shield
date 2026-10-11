@@ -35,18 +35,24 @@ class PolicyEngine:
             base_decision, reason = "DENY", "INVALID_CONTEXT"
             
         # Policy 1: Object must exist to be accessed
+        elif context.owner_id is None and context.metadata.get("ownership_status") == "UNKNOWN_OWNERSHIP":
+            # Fail-closed: neither an explicit rule nor a validated schema-inferred
+            # rule explains this object type -> explicit policy required.
+            base_decision, reason = "DENY", "UNKNOWN_OWNERSHIP"
+
+        # Policy 2: Object must exist to be accessed
         elif context.owner_id is None:
             base_decision, reason = "DENY", "OBJECT_NOT_FOUND"
             
-        # Policy 2: Admins have unrestricted access to all resources
+        # Policy 3: Admins have unrestricted access to all resources
         elif context.role.upper() == "ADMIN":
             base_decision, reason = "ALLOW", "ADMIN_OVERRIDE"
             
-        # Policy 3: Owner can access their own object
+        # Policy 4: Owner can access their own object
         elif str(context.user_id) == str(context.owner_id):
             base_decision, reason = "ALLOW", "OWNER_MATCH"
             
-        # Policy 4: Unauthorized nested resource access is explicitly denied
+        # Policy 5: Unauthorized nested resource access is explicitly denied
         elif "." in context.path:
             base_decision, reason = "DENY", "NESTED_AUTHORIZATION_VIOLATION"
             

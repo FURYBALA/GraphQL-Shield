@@ -97,6 +97,134 @@ curl -X POST "http://localhost:8000/graphql" \
 
 ---
 
+### Demo 5: Schema-Aware Ownership Inference
+
+This demo proves that the gateway is **not** only following hard-coded rules: it understands ownership *from the GraphQL schema itself*.
+
+**Step 5.1 — Show the GraphQL schema**
+
+Open `app/graphql/types.py` (or introspect the live API):
+
+```bash
+curl -X POST "http://localhost:8000/graphql" \
+-H "Authorization: Bearer <YOUR_TOKEN>" \
+-H "Content-Type: application/json" \
+-d "{\"query\": \"{ __schema { types { name fields { name type { name kind ofType { name } } } } } }\"}"
+```
+
+Point at the two relationships that matter:
+
+```graphql
+type User     { id: ID!, resources: [Resource] }   # User -> resources -> Resource
+type Resource { id: ID!, owner_id: ID! }           # Resource.ownerId -> User
+```
+
+**Step 5.2 — Show what the gateway inferred from that schema**
+
+On application startup the server already printed the analysis:
+
+```
+[Schema Ownership Inference]
+  ResourceType.owner_id -> UserType  [HIGH]
+  UserType.resources -> ResourceType  [MEDIUM]
+  UserType.id -> UserType  [HIGH]
+Types analyzed: 3
+Ownership relationships detected: 3
+```
+
+Now inspect it live through the ADMIN endpoint (login as Charlie first):
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/auth/login" \
+-H "Content-Type: application/json" \
+-d "{\"username\":\"charlie\",\"password\":\"charlie123\"}"
+
+curl "http://localhost:8000/api/v1/security/schema-ownership" \
+-H "Authorization: Bearer <ADMIN_TOKEN>"
+```
+
+**Expected:** JSON describing the real analysis, e.g.
+
+```json
+{
+  "status": "analyzed",
+  "types_analyzed": 3,
+  "relationships_detected": 3,
+  "high_confidence_rules": 2,
+  "ambiguous_relationships": 0,
+  "rules": [
+    {"source_type": "ResourceType", "source_field": "owner_id",
+     "target_type": "UserType", "confidence": "HIGH",
+     "reason": "Field 'owner_id' on ResourceType is a scalar ownership identifier referencing UserType"}
+  ],
+  "priority": ["1. Explicit configured authorization / ownership rule", "..."]
+}
+```
+
+*(This is live output from the real schema — nothing in this response is hardcoded.)*
+
+You can also generate the standalone inference report for your slides:
+
+```bash
+python scripts/generate_inference_report.py
+```
+
+It writes `ownership_inference_report.json` with the types analyzed, the accepted rules (confidence + reason), the rejected/ambiguous relationships and the summary counts — all recomputed from the real schema on every run.
+
+**Step 5.3 — Authenticate as User 101**
+
+Use the Alice token from Step 1 (`alice` / `alice123`).
+
+**Step 5.4 — Request Alice's own Resource 101**
+
+```bash
+curl -X POST "http://localhost:8000/graphql" \
+-H "Authorization: Bearer <YOUR_TOKEN>" \
+-H "Content-Type: application/json" \
+-d "{\"query\": \"{ resource(id: 101) { id name } }\"}"
+```
+**Expected:** HTTP 200. In the server terminal, read the `[OWNERSHIP]` block:
+
+```
+Requesting User: 101
+True Owner ID:   101
+Resolution:      RESOLVED (EXPLICIT_DB)
+Schema Rule:     ResourceType.owner_id -> UserType [HIGH] (INFERRED)
+[AUTHORIZATION] Decision: ALLOW  Reason: OWNER_MATCH
+```
+
+**Step 5.5 — Change only the resource ID to 102**
+
+```bash
+curl -X POST "http://localhost:8000/graphql" \
+-H "Authorization: Bearer <YOUR_TOKEN>" \
+-H "Content-Type: application/json" \
+-d "{\"query\": \"{ resource(id: 102) { id name } }\"}"
+```
+**Expected:** HTTP 403, `reason: OWNERSHIP_MISMATCH`, `risk_level: HIGH`.
+
+**Step 5.6 — Explain the decision**
+
+The gateway resolves ownership through a fixed priority order:
+
+1. explicit configured rule + authoritative database ownership lookup,
+2. validated schema-inferred rule (`ResourceType.owner_id -> UserType`),
+3. otherwise `UNKNOWN_OWNERSHIP` → explicit policy required → DENY (fail closed).
+
+For `resource(id: 102)` the schema-inferred rule tells the gateway that a `Resource` is owned through `owner_id` referencing a `User`; the database then says the owner is **102** while the authenticated user is **101** → `DENY`, BOLA detected, HTTP 403. Changing nothing but the ID is what flipped the decision — and the rule that justified it is visible in the trace and in the inference endpoint.
+
+**Bonus — fail closed demo:** query a type the schema has no ownership rule for:
+
+```bash
+curl -X POST "http://localhost:8000/graphql" \
+-H "Authorization: Bearer <YOUR_TOKEN>" \
+-H "Content-Type: application/json" \
+-d "{\"query\": \"{ widget(id: 1) { name } }\"}"
+```
+**Expected:** HTTP 403 with `reason: UNKNOWN_OWNERSHIP` — the gateway refuses to guess.
+
+---
+
 ### Final Step: Live Security Dashboard
 
 To prove that all decisions were permanently recorded:
