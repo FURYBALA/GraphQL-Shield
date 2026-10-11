@@ -1,0 +1,2330 @@
+[
+  {
+    "id": "CORPUS-001",
+    "name": "Direct cross-user document lookup (Alice -> Bob doc)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 102) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice (101) accesses Bob's document 102 without authorization."
+  },
+  {
+    "id": "CORPUS-002",
+    "name": "Direct cross-user document lookup (Bob -> Alice doc)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { resource(id: 101) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob (102) accesses Alice's document 101 without authorization."
+  },
+  {
+    "id": "CORPUS-003",
+    "name": "Direct access to admin confidential document (Alice -> Charlie doc)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 103) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 103,
+    "target_object_type": "Resource",
+    "true_owner_id": 103,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice (101) accesses Admin Charlie's document 103 without admin privileges."
+  },
+  {
+    "id": "CORPUS-004",
+    "name": "Direct access to admin confidential document (Bob -> Charlie doc)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { resource(id: 103) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 103,
+    "target_object_type": "Resource",
+    "true_owner_id": 103,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob (102) accesses Admin Charlie's document 103 without admin privileges."
+  },
+  {
+    "id": "CORPUS-005",
+    "name": "Direct cross-user folder access (Bob -> Alice folder 201)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { resource(id: 201) { id name object_type } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob (102) accesses Alice's project folder 201 without authorization."
+  },
+  {
+    "id": "CORPUS-006",
+    "name": "Direct cross-user sub-document access (Bob -> Alice plan 202)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { resource(id: 202) { id name parent_id } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 202,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob (102) directly targets Alice's plan document 202."
+  },
+  {
+    "id": "CORPUS-007",
+    "name": "Direct cross-user sub-document access (Bob -> Alice plan 203)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { resource(id: 203) { id name parent_id } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 203,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob (102) directly targets Alice's second plan document 203."
+  },
+  {
+    "id": "CORPUS-008",
+    "name": "Direct cross-user profile access (Alice -> Bob user profile)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { user(id: 102) { id username role } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice (101) accesses Bob's user profile object 102."
+  },
+  {
+    "id": "CORPUS-009",
+    "name": "Direct cross-user profile access (Bob -> Alice user profile)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { user(id: 101) { id username role } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob (102) accesses Alice's user profile object 101."
+  },
+  {
+    "id": "CORPUS-010",
+    "name": "Direct cross-user profile access (Alice -> Admin Charlie profile)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { user(id: 103) { id username role } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 103,
+    "target_object_type": "User",
+    "true_owner_id": 103,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice (101) accesses Admin Charlie's profile object 103."
+  },
+  {
+    "id": "CORPUS-011",
+    "name": "Direct cross-user profile access (Bob -> Admin Charlie profile)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { user(id: 103) { id username role } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 103,
+    "target_object_type": "User",
+    "true_owner_id": 103,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob (102) accesses Admin Charlie's profile object 103."
+  },
+  {
+    "id": "CORPUS-012",
+    "name": "Aliased direct BOLA on document (Alice -> Bob doc)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "ALIAS",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { victimDoc: resource(id: 102) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice obfuscates access to Bob's document using the response alias 'victimDoc'."
+  },
+  {
+    "id": "CORPUS-013",
+    "name": "Aliased direct BOLA on user (Bob -> Alice profile)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "ALIAS",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { stolenUser: user(id: 101) { username role } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob obfuscates access to Alice's profile using alias 'stolenUser'."
+  },
+  {
+    "id": "CORPUS-014",
+    "name": "Variable-driven direct BOLA (Alice -> Bob doc)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "VARIABLE",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query GetRes($rId: Int!) { resource(id: $rId) { id name } }",
+    "variables": {
+      "rId": 102
+    },
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice passes Bob's document ID via GraphQL variable $rId."
+  },
+  {
+    "id": "CORPUS-015",
+    "name": "Variable-driven direct BOLA (Bob -> Alice folder)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "VARIABLE",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query GetFolder($fId: Int!) { resource(id: $fId) { id name } }",
+    "variables": {
+      "fId": 201
+    },
+    "operation_name": null,
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob passes Alice's folder ID 201 via GraphQL variable $fId."
+  },
+  {
+    "id": "CORPUS-016",
+    "name": "Named fragment direct BOLA (Alice -> Bob doc)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "FRAGMENT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 102) { ...DocData } }\n        fragment DocData on ResourceType { id name object_type }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice queries Bob's document 102 using a named fragment spread."
+  },
+  {
+    "id": "CORPUS-017",
+    "name": "Inline fragment direct BOLA (Bob -> Alice plan)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "INLINE_FRAGMENT",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { resource(id: 202) { ... on ResourceType { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 202,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob accesses Alice's plan 202 wrapped inside an inline fragment."
+  },
+  {
+    "id": "CORPUS-018",
+    "name": "Variable with default value direct BOLA (Alice -> Bob doc)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "VARIABLE",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query GetDoc($target: Int = 102) { resource(id: $target) { name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice accesses Bob's document using a GraphQL variable default value of 102."
+  },
+  {
+    "id": "CORPUS-019",
+    "name": "Reconnaissance probe for non-existent unowned ID (Alice -> ID 999)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 999) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 999,
+    "target_object_type": "Resource",
+    "true_owner_id": null,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice probes unowned resource ID 999 (not owned by Alice, fails-closed at gateway)."
+  },
+  {
+    "id": "CORPUS-020",
+    "name": "Reconnaissance probe for non-existent unowned ID (Bob -> ID 888)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { resource(id: 888) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 888,
+    "target_object_type": "Resource",
+    "true_owner_id": null,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob probes unowned resource ID 888 (unowned, fails-closed)."
+  },
+  {
+    "id": "CORPUS-021",
+    "name": "Aliased user probe with variable (Alice -> Bob profile)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "ALIAS_VARIABLE",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query FetchVictim($vId: Int!) { victim: user(id: $vId) { id username } }",
+    "variables": {
+      "vId": 102
+    },
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Combined alias and variable pointing to Bob's profile."
+  },
+  {
+    "id": "CORPUS-022",
+    "name": "Fragment with alias on unauthorized target (Bob -> Alice doc)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "FRAGMENT_ALIAS",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { stolen: resource(id: 101) { ...F } }\n        fragment F on ResourceType { id name }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Combined alias and named fragment on Alice's document."
+  },
+  {
+    "id": "CORPUS-023",
+    "name": "Indirect BOLA via User.resources collection (Alice -> Bob resources)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { user(id: 102) { resources { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice accesses Bob's entire resources collection through the user navigation field."
+  },
+  {
+    "id": "CORPUS-024",
+    "name": "Indirect BOLA via User.resources collection (Bob -> Alice resources)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { user(id: 101) { resources { id name parent_id } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob accesses Alice's complete collection of resources through User(id: 101)."
+  },
+  {
+    "id": "CORPUS-025",
+    "name": "Indirect BOLA on admin resources (Alice -> Charlie resources)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { user(id: 103) { resources { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 103,
+    "target_object_type": "User",
+    "true_owner_id": 103,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice traverses Admin Charlie's resources collection."
+  },
+  {
+    "id": "CORPUS-026",
+    "name": "Indirect BOLA on admin resources (Bob -> Charlie resources)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { user(id: 103) { resources { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 103,
+    "target_object_type": "User",
+    "true_owner_id": 103,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob traverses Admin Charlie's resources collection."
+  },
+  {
+    "id": "CORPUS-027",
+    "name": "Nested parameterized BOLA under own user node (Alice -> Bob doc)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "NESTED_PARAM",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { user(id: 101) { resource(id: 102) { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice queries her own user node but requests Bob's resource 102 inside nested field."
+  },
+  {
+    "id": "CORPUS-028",
+    "name": "Nested parameterized BOLA under own user node (Bob -> Alice doc)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "NESTED_PARAM",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { user(id: 102) { resource(id: 101) { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob queries his own user node but requests Alice's resource 101 inside nested field."
+  },
+  {
+    "id": "CORPUS-029",
+    "name": "Nested parameterized BOLA under victim user node (Alice -> Bob user -> Bob doc)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "NESTED_PARAM",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { user(id: 102) { resource(id: 102) { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice traverses Bob's user node to fetch Bob's document 102."
+  },
+  {
+    "id": "CORPUS-030",
+    "name": "Nested parameterized BOLA under victim user node (Bob -> Alice user -> Alice doc)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "NESTED_PARAM",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { user(id: 101) { resource(id: 101) { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob traverses Alice's user node to fetch Alice's document 101."
+  },
+  {
+    "id": "CORPUS-031",
+    "name": "Indirect traversal of victim folder hierarchy (Bob -> Alice folder children)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "RELATIONSHIP",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { resource(id: 201) { children { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob queries Alice's folder 201 and navigates to its child documents."
+  },
+  {
+    "id": "CORPUS-032",
+    "name": "Aliased indirect BOLA on collection (Alice -> Bob user)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "ALIAS",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { u: user(id: 102) { docs: resources { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice queries Bob's resources using aliases on root and nested collections."
+  },
+  {
+    "id": "CORPUS-033",
+    "name": "Aliased indirect BOLA on collection (Bob -> Alice user)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "ALIAS",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { targetUser: user(id: 101) { allDocs: resources { name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob queries Alice's resources using nested aliases."
+  },
+  {
+    "id": "CORPUS-034",
+    "name": "Variable-driven indirect BOLA (Alice -> Bob user resources)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "VARIABLE",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query TraverseUser($userId: Int!) { user(id: $userId) { resources { id name } } }",
+    "variables": {
+      "userId": 102
+    },
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice passes Bob's user ID into variable $userId and selects resources collection."
+  },
+  {
+    "id": "CORPUS-035",
+    "name": "Variable-driven indirect BOLA (Bob -> Alice user resources)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "VARIABLE",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query TraverseUser($userId: Int!) { user(id: $userId) { resources { id name } } }",
+    "variables": {
+      "userId": 101
+    },
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob passes Alice's user ID into variable $userId and selects resources collection."
+  },
+  {
+    "id": "CORPUS-036",
+    "name": "Variable in nested field parameter (Alice -> own user with Bob resId)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "NESTED_PARAM_VAR",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query Nested($rId: Int!) { user(id: 101) { resource(id: $rId) { name } } }",
+    "variables": {
+      "rId": 102
+    },
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice queries her own user ID 101 but binds Bob's document ID 102 into nested variable $rId."
+  },
+  {
+    "id": "CORPUS-037",
+    "name": "Named fragment on indirect collection traversal (Alice -> Bob user)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "FRAGMENT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { user(id: 102) { ...UserResources } }\n        fragment UserResources on UserType { id resources { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice traverses Bob's user resources through a named fragment spread."
+  },
+  {
+    "id": "CORPUS-038",
+    "name": "Named fragment on nested resource field (Bob -> Alice user)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "FRAGMENT",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { user(id: 101) { ...NestedRes } }\n        fragment NestedRes on UserType { resource(id: 101) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob spreads a fragment accessing Alice's nested resource."
+  },
+  {
+    "id": "CORPUS-039",
+    "name": "Inline fragment on indirect collection traversal (Alice -> Bob user)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "INLINE_FRAGMENT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { user(id: 102) { ... on UserType { resources { id name } } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice accesses Bob's resources through an inline fragment."
+  },
+  {
+    "id": "CORPUS-040",
+    "name": "Indirect probe of unowned non-existent user collection (Alice -> User 999)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { user(id: 999) { resources { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 999,
+    "target_object_type": "User",
+    "true_owner_id": null,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice probes unowned non-existent user ID 999 resources collection."
+  },
+  {
+    "id": "CORPUS-041",
+    "name": "Indirect probe of unowned non-existent user collection (Bob -> User 888)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { user(id: 888) { resources { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 888,
+    "target_object_type": "User",
+    "true_owner_id": null,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob probes unowned non-existent user ID 888 resources collection."
+  },
+  {
+    "id": "CORPUS-042",
+    "name": "Indirect traversal with operation name (Alice -> Bob user resources)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query InfiltrateBob { user(id: 102) { resources { id name } } }",
+    "variables": {},
+    "operation_name": "InfiltrateBob",
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Named operation traversing Bob's resources collection."
+  },
+  {
+    "id": "CORPUS-043",
+    "name": "Multi-hop indirect traversal through victim folder and children (Bob -> Alice folder)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "DEEP_TRAVERSAL",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { resource(id: 201) { children { children { id name } } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob traverses multiple hops down Alice's folder hierarchy."
+  },
+  {
+    "id": "CORPUS-044",
+    "name": "Indirect collection traversal with field selection only (Alice -> Bob resources)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { user(id: 102) { resources { name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice accesses Bob's resources selecting only the name field."
+  },
+  {
+    "id": "CORPUS-045",
+    "name": "Legitimate direct access to own document (Alice -> Alice doc 101)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 101) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice accesses her own document 101. Principal matches owner."
+  },
+  {
+    "id": "CORPUS-046",
+    "name": "Legitimate direct access to own folder (Alice -> Alice folder 201)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 201) { id name object_type } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice accesses her own folder 201. Principal matches owner."
+  },
+  {
+    "id": "CORPUS-047",
+    "name": "Legitimate direct access to own plan (Alice -> Alice doc 202)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 202) { id name parent_id } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 202,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice accesses her own plan document 202."
+  },
+  {
+    "id": "CORPUS-048",
+    "name": "Legitimate direct access to own plan (Alice -> Alice doc 203)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 203) { id name parent_id } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 203,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice accesses her own plan document 203."
+  },
+  {
+    "id": "CORPUS-049",
+    "name": "Legitimate direct access to own document (Bob -> Bob doc 102)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { resource(id: 102) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Bob accesses his own document 102."
+  },
+  {
+    "id": "CORPUS-050",
+    "name": "Legitimate direct access to own profile (Alice -> Alice user 101)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { user(id: 101) { id username role } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice accesses her own user profile."
+  },
+  {
+    "id": "CORPUS-051",
+    "name": "Legitimate direct access to own profile (Bob -> Bob user 102)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { user(id: 102) { id username role } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Bob accesses his own user profile."
+  },
+  {
+    "id": "CORPUS-052",
+    "name": "Legitimate indirect access to own resources (Alice -> Alice resources)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { user(id: 101) { resources { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice accesses her own resources collection."
+  },
+  {
+    "id": "CORPUS-053",
+    "name": "Legitimate indirect access to own resources (Bob -> Bob resources)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { user(id: 102) { resources { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Bob accesses his own resources collection."
+  },
+  {
+    "id": "CORPUS-054",
+    "name": "Legitimate nested resource access (Alice -> Alice user -> Alice doc 101)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "NESTED_PARAM",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { user(id: 101) { resource(id: 101) { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice accesses her own document 101 under her own user node."
+  },
+  {
+    "id": "CORPUS-055",
+    "name": "Legitimate nested resource access (Bob -> Bob user -> Bob doc 102)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "NESTED_PARAM",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { user(id: 102) { resource(id: 102) { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Bob accesses his own document 102 under his own user node."
+  },
+  {
+    "id": "CORPUS-056",
+    "name": "Legitimate folder hierarchy traversal (Alice -> Alice folder 201 children)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "RELATIONSHIP",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 201) { children { id name parent_id } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice traverses children of folder 201 which she owns."
+  },
+  {
+    "id": "CORPUS-057",
+    "name": "Aliased legitimate document access (Alice -> Alice doc 101)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "ALIAS",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { myNote: resource(id: 101) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice accesses her own document 101 using alias 'myNote'."
+  },
+  {
+    "id": "CORPUS-058",
+    "name": "Aliased legitimate document access (Bob -> Bob doc 102)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "ALIAS",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { financialRecord: resource(id: 102) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Bob accesses his own document 102 using alias 'financialRecord'."
+  },
+  {
+    "id": "CORPUS-059",
+    "name": "Variable-driven legitimate access (Alice -> Alice doc 101)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "VARIABLE",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query GetMyDoc($id: Int!) { resource(id: $id) { id name } }",
+    "variables": {
+      "id": 101
+    },
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice passes her own document ID 101 via variable."
+  },
+  {
+    "id": "CORPUS-060",
+    "name": "Variable-driven legitimate access (Bob -> Bob doc 102)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "VARIABLE",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query GetMyDoc($id: Int!) { resource(id: $id) { id name } }",
+    "variables": {
+      "id": 102
+    },
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Bob passes his own document ID 102 via variable."
+  },
+  {
+    "id": "CORPUS-061",
+    "name": "Named fragment legitimate document access (Alice -> Alice doc 101)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "FRAGMENT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 101) { ...MyFields } }\n        fragment MyFields on ResourceType { id name object_type }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice accesses her own document through a named fragment."
+  },
+  {
+    "id": "CORPUS-062",
+    "name": "Named fragment legitimate document access (Bob -> Bob doc 102)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "FRAGMENT",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { resource(id: 102) { ...BobFields } }\n        fragment BobFields on ResourceType { id name object_type }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Bob accesses his own document through a named fragment."
+  },
+  {
+    "id": "CORPUS-063",
+    "name": "Inline fragment legitimate access (Alice -> Alice folder 201)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "INLINE_FRAGMENT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 201) { ... on ResourceType { id name object_type } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice accesses her folder using an inline fragment."
+  },
+  {
+    "id": "CORPUS-064",
+    "name": "Variable-driven legitimate collection traversal (Alice -> User 101 resources)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "VARIABLE",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query MyResources($uid: Int!) { user(id: $uid) { resources { id name } } }",
+    "variables": {
+      "uid": 101
+    },
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice queries her own resources passing $uid = 101."
+  },
+  {
+    "id": "CORPUS-065",
+    "name": "Variable-driven legitimate collection traversal (Bob -> User 102 resources)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "VARIABLE",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query MyResources($uid: Int!) { user(id: $uid) { resources { id name } } }",
+    "variables": {
+      "uid": 102
+    },
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Bob queries his own resources passing $uid = 102."
+  },
+  {
+    "id": "CORPUS-066",
+    "name": "Named fragment legitimate collection traversal (Alice -> User 101)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "FRAGMENT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { user(id: 101) { ...OwnUserFrag } }\n        fragment OwnUserFrag on UserType { id resources { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice traverses her resources via named fragment on UserType."
+  },
+  {
+    "id": "CORPUS-067",
+    "name": "Multiple own resources selection (Alice -> doc 101 and folder 201)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "MULTI_FIELD",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { doc: resource(id: 101) { name } folder: resource(id: 201) { name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice requests two objects she legitimately owns in a single query."
+  },
+  {
+    "id": "CORPUS-068",
+    "name": "Named operation legitimate query (Alice -> own profile and docs)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query GetMyData { user(id: 101) { username resources { id name } } }",
+    "variables": {},
+    "operation_name": "GetMyData",
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice accesses her profile and resources in named operation 'GetMyData'."
+  },
+  {
+    "id": "CORPUS-069",
+    "name": "Named operation legitimate query (Bob -> own profile and docs)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query GetBobData { user(id: 102) { username resources { id name } } }",
+    "variables": {},
+    "operation_name": "GetBobData",
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Bob accesses his profile and resources in named operation 'GetBobData'."
+  },
+  {
+    "id": "CORPUS-070",
+    "name": "Admin override on Alice document (Charlie -> doc 101)",
+    "category": "ADMIN_PRIVILEGED",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 103,
+      "role": "admin"
+    },
+    "query": "query { resource(id: 101) { id name owner_id } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Admin Charlie inspects Alice's document 101. Admin role grants override."
+  },
+  {
+    "id": "CORPUS-071",
+    "name": "Admin override on Bob document (Charlie -> doc 102)",
+    "category": "ADMIN_PRIVILEGED",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 103,
+      "role": "admin"
+    },
+    "query": "query { resource(id: 102) { id name owner_id } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Admin Charlie inspects Bob's document 102. Admin role grants override."
+  },
+  {
+    "id": "CORPUS-072",
+    "name": "Admin access to own admin log (Charlie -> doc 103)",
+    "category": "ADMIN_PRIVILEGED",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 103,
+      "role": "admin"
+    },
+    "query": "query { resource(id: 103) { id name owner_id } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 103,
+    "target_object_type": "Resource",
+    "true_owner_id": 103,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Admin Charlie inspects his own admin log 103."
+  },
+  {
+    "id": "CORPUS-073",
+    "name": "Admin override on Alice profile (Charlie -> user 101)",
+    "category": "ADMIN_PRIVILEGED",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 103,
+      "role": "admin"
+    },
+    "query": "query { user(id: 101) { id username role } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Admin Charlie inspects Alice's profile 101."
+  },
+  {
+    "id": "CORPUS-074",
+    "name": "Admin override on Bob profile (Charlie -> user 102)",
+    "category": "ADMIN_PRIVILEGED",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 103,
+      "role": "admin"
+    },
+    "query": "query { user(id: 102) { id username role } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Admin Charlie inspects Bob's profile 102."
+  },
+  {
+    "id": "CORPUS-075",
+    "name": "Admin override on Alice resources collection (Charlie -> User 101 resources)",
+    "category": "ADMIN_PRIVILEGED",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 103,
+      "role": "admin"
+    },
+    "query": "query { user(id: 101) { resources { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Admin Charlie audits Alice's resources collection."
+  },
+  {
+    "id": "CORPUS-076",
+    "name": "Admin override on Bob resources collection (Charlie -> User 102 resources)",
+    "category": "ADMIN_PRIVILEGED",
+    "syntax_type": "BASIC",
+    "caller": {
+      "user_id": 103,
+      "role": "admin"
+    },
+    "query": "query { user(id: 102) { resources { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Admin Charlie audits Bob's resources collection."
+  },
+  {
+    "id": "CORPUS-077",
+    "name": "Admin aliased inspection (Charlie -> Bob doc 102)",
+    "category": "ADMIN_PRIVILEGED",
+    "syntax_type": "ALIAS",
+    "caller": {
+      "user_id": 103,
+      "role": "admin"
+    },
+    "query": "query { auditDoc: resource(id: 102) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Admin Charlie audits Bob's document using alias 'auditDoc'."
+  },
+  {
+    "id": "CORPUS-078",
+    "name": "Admin variable-driven inspection (Charlie -> Alice folder 201)",
+    "category": "ADMIN_PRIVILEGED",
+    "syntax_type": "VARIABLE",
+    "caller": {
+      "user_id": 103,
+      "role": "admin"
+    },
+    "query": "query AuditFolder($fId: Int!) { resource(id: $fId) { id name children { id } } }",
+    "variables": {
+      "fId": 201
+    },
+    "operation_name": null,
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Admin Charlie audits Alice's folder hierarchy using a variable."
+  },
+  {
+    "id": "CORPUS-079",
+    "name": "Admin fragment-driven multi-tenant audit (Charlie -> User 101 and 102)",
+    "category": "ADMIN_PRIVILEGED",
+    "syntax_type": "MULTI_FIELD",
+    "caller": {
+      "user_id": 103,
+      "role": "admin"
+    },
+    "query": "query {\n            u1: user(id: 101) { ...AuditFrag }\n            u2: user(id: 102) { ...AuditFrag }\n        }\n        fragment AuditFrag on UserType { id username resources { id } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Admin Charlie performs a multi-tenant audit across Alice and Bob using fragments."
+  },
+  {
+    "id": "CORPUS-080",
+    "name": "Public health check (Alice)",
+    "category": "PUBLIC_INTROSPECTION",
+    "syntax_type": "PUBLIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { health { status message } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Public health check executed by authenticated user Alice."
+  },
+  {
+    "id": "CORPUS-081",
+    "name": "Public health check (Bob)",
+    "category": "PUBLIC_INTROSPECTION",
+    "syntax_type": "PUBLIC",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { health { status message } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Public health check executed by authenticated user Bob."
+  },
+  {
+    "id": "CORPUS-082",
+    "name": "Public health check (Charlie Admin)",
+    "category": "PUBLIC_INTROSPECTION",
+    "syntax_type": "PUBLIC",
+    "caller": {
+      "user_id": 103,
+      "role": "admin"
+    },
+    "query": "query { health { status message } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Public health check executed by Admin Charlie."
+  },
+  {
+    "id": "CORPUS-083",
+    "name": "Public health check with alias",
+    "category": "PUBLIC_INTROSPECTION",
+    "syntax_type": "PUBLIC_ALIAS",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { ping: health { status } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Public health check with alias 'ping'."
+  },
+  {
+    "id": "CORPUS-084",
+    "name": "Root typename introspection query",
+    "category": "PUBLIC_INTROSPECTION",
+    "syntax_type": "INTROSPECTION",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { __typename }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Standard GraphQL root typename introspection."
+  },
+  {
+    "id": "CORPUS-085",
+    "name": "Schema query type introspection",
+    "category": "PUBLIC_INTROSPECTION",
+    "syntax_type": "INTROSPECTION",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { __schema { queryType { name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Standard GraphQL schema queryType introspection."
+  },
+  {
+    "id": "CORPUS-086",
+    "name": "Specific type introspection (UserType)",
+    "category": "PUBLIC_INTROSPECTION",
+    "syntax_type": "INTROSPECTION",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { __type(name: \"UserType\") { name kind fields { name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "GraphQL schema introspection on UserType."
+  },
+  {
+    "id": "CORPUS-087",
+    "name": "Named operation public health query",
+    "category": "PUBLIC_INTROSPECTION",
+    "syntax_type": "PUBLIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query PingServer { health { status } }",
+    "variables": {},
+    "operation_name": "PingServer",
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Named operation 'PingServer' on public health field."
+  },
+  {
+    "id": "CORPUS-088",
+    "name": "Public query with leading comments",
+    "category": "PUBLIC_INTROSPECTION",
+    "syntax_type": "PUBLIC",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "# System status check\n# Health ping\nquery { health { status } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Public health query with GraphQL comments."
+  },
+  {
+    "id": "CORPUS-089",
+    "name": "Introspection query using named fragment",
+    "category": "PUBLIC_INTROSPECTION",
+    "syntax_type": "INTROSPECTION_FRAGMENT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { __schema { ...SchemaFrag } }\n        fragment SchemaFrag on __Schema { queryType { name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Introspection query using fragment spread."
+  },
+  {
+    "id": "CORPUS-090",
+    "name": "Dual unauthorized roots (Alice -> Bob doc and Bob user)",
+    "category": "MULTI_ROOT",
+    "syntax_type": "MULTI_ATTACK",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { r: resource(id: 102) { name } u: user(id: 102) { username } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice combines two unauthorized targets in one query."
+  },
+  {
+    "id": "CORPUS-091",
+    "name": "Mixed root: legitimate first, attack second (Alice -> own doc 101 + Bob doc 102)",
+    "category": "MULTI_ROOT",
+    "syntax_type": "MIXED_ROOT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { legit: resource(id: 101) { name } attack: resource(id: 102) { name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice attempts to smuggle an attack on Bob doc 102 alongside her own document 101."
+  },
+  {
+    "id": "CORPUS-092",
+    "name": "Mixed root: attack first, legitimate second (Bob -> Alice doc 101 + Bob doc 102)",
+    "category": "MULTI_ROOT",
+    "syntax_type": "MIXED_ROOT",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { attack: resource(id: 101) { name } legit: resource(id: 102) { name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob places unauthorized access to Alice doc 101 before his own document 102."
+  },
+  {
+    "id": "CORPUS-093",
+    "name": "Mixed root: public health + unauthorized document (Alice -> health + Bob doc 102)",
+    "category": "MULTI_ROOT",
+    "syntax_type": "MIXED_ROOT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { h: health { status } attack: resource(id: 102) { name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice combines a benign public health query with an unauthorized target."
+  },
+  {
+    "id": "CORPUS-094",
+    "name": "Mixed root: public health + legitimate document (Alice -> health + own doc 101)",
+    "category": "MULTI_ROOT",
+    "syntax_type": "MIXED_LEGIT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { h: health { status } legit: resource(id: 101) { name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice combines benign public health query with her own legitimate document."
+  },
+  {
+    "id": "CORPUS-095",
+    "name": "Dual legitimate roots (Alice -> own doc 101 and own folder 201)",
+    "category": "MULTI_ROOT",
+    "syntax_type": "MULTI_LEGIT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { r1: resource(id: 101) { name } r2: resource(id: 201) { name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice requests two distinct objects she legitimately owns."
+  },
+  {
+    "id": "CORPUS-096",
+    "name": "Dual legitimate roots (Bob -> own doc 102 and own user profile 102)",
+    "category": "MULTI_ROOT",
+    "syntax_type": "MULTI_LEGIT",
+    "caller": {
+      "user_id": 102,
+      "role": "user"
+    },
+    "query": "query { r: resource(id: 102) { name } u: user(id: 102) { username } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Bob requests his own document and his own user profile."
+  },
+  {
+    "id": "CORPUS-097",
+    "name": "Triple roots: all legitimate (Alice -> doc 101, folder 201, plan 202)",
+    "category": "MULTI_ROOT",
+    "syntax_type": "MULTI_LEGIT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { d: resource(id: 101) { name } f: resource(id: 201) { name } p: resource(id: 202) { name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice requests three objects she owns."
+  },
+  {
+    "id": "CORPUS-098",
+    "name": "Triple roots: two legitimate, one unauthorized (Alice -> doc 101, plan 202, Bob doc 102)",
+    "category": "MULTI_ROOT",
+    "syntax_type": "MIXED_ROOT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { d1: resource(id: 101) { name } d2: resource(id: 202) { name } bad: resource(id: 102) { name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice bundles two owned objects with one unowned victim document."
+  },
+  {
+    "id": "CORPUS-099",
+    "name": "Admin multi-root cross-user access (Charlie -> doc 101 and doc 102)",
+    "category": "MULTI_ROOT",
+    "syntax_type": "ADMIN_MULTI",
+    "caller": {
+      "user_id": 103,
+      "role": "admin"
+    },
+    "query": "query { aliceDoc: resource(id: 101) { name } bobDoc: resource(id: 102) { name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Admin Charlie requests documents belonging to two distinct users."
+  },
+  {
+    "id": "CORPUS-100",
+    "name": "Malformed GraphQL syntax: unclosed brace",
+    "category": "MALFORMED_SYNTAX",
+    "syntax_type": "SYNTAX_ERROR",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 101) { id name }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "MALFORMED",
+    "ground_truth_attack_type": "SYNTAX_ERROR",
+    "expected_gateway_decision": "ERROR",
+    "rationale": "Query is syntactically invalid due to missing closing curly brace."
+  },
+  {
+    "id": "CORPUS-101",
+    "name": "Malformed GraphQL syntax: unknown field on ResourceType",
+    "category": "MALFORMED_SYNTAX",
+    "syntax_type": "SYNTAX_ERROR",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 101) { nonExistentFieldXYZ } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "MALFORMED",
+    "ground_truth_attack_type": "SYNTAX_ERROR",
+    "expected_gateway_decision": "ERROR",
+    "rationale": "Query selects an undefined schema field."
+  },
+  {
+    "id": "CORPUS-102",
+    "name": "Malformed GraphQL syntax: unclosed string literal in argument",
+    "category": "MALFORMED_SYNTAX",
+    "syntax_type": "SYNTAX_ERROR",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: \"101) { name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "MALFORMED",
+    "ground_truth_attack_type": "SYNTAX_ERROR",
+    "expected_gateway_decision": "ERROR",
+    "rationale": "Query has an unclosed string quotation mark."
+  },
+  {
+    "id": "CORPUS-103",
+    "name": "Malformed query: unknown directive",
+    "category": "MALFORMED_SYNTAX",
+    "syntax_type": "SYNTAX_ERROR",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query @nonExistentDirectiveXYZ { health { status } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "MALFORMED",
+    "ground_truth_attack_type": "SYNTAX_ERROR",
+    "expected_gateway_decision": "ERROR",
+    "rationale": "Query specifies an undefined directive."
+  },
+  {
+    "id": "CORPUS-104",
+    "name": "Malformed query: missing required argument on resource",
+    "category": "MALFORMED_SYNTAX",
+    "syntax_type": "SYNTAX_ERROR",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource { name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "MALFORMED",
+    "ground_truth_attack_type": "SYNTAX_ERROR",
+    "expected_gateway_decision": "ERROR",
+    "rationale": "Query omits mandatory 'id' argument on Query.resource."
+  },
+  {
+    "id": "CORPUS-105",
+    "name": "Malformed query: wrong argument scalar type literal",
+    "category": "MALFORMED_SYNTAX",
+    "syntax_type": "SYNTAX_ERROR",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: \"notAnInteger\") { name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "MALFORMED",
+    "ground_truth_attack_type": "SYNTAX_ERROR",
+    "expected_gateway_decision": "ERROR",
+    "rationale": "Query supplies a string literal where Int is required."
+  },
+  {
+    "id": "CORPUS-106",
+    "name": "Empty query document string",
+    "category": "MALFORMED_SYNTAX",
+    "syntax_type": "EMPTY_INPUT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "MALFORMED",
+    "ground_truth_attack_type": "SYNTAX_ERROR",
+    "expected_gateway_decision": "ERROR",
+    "rationale": "Query string is completely empty."
+  },
+  {
+    "id": "CORPUS-107",
+    "name": "Whitespace-only query document",
+    "category": "MALFORMED_SYNTAX",
+    "syntax_type": "EMPTY_INPUT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "MALFORMED",
+    "ground_truth_attack_type": "SYNTAX_ERROR",
+    "expected_gateway_decision": "ERROR",
+    "rationale": "Query string consists only of whitespace characters."
+  },
+  {
+    "id": "CORPUS-108",
+    "name": "Comments-only query document",
+    "category": "MALFORMED_SYNTAX",
+    "syntax_type": "EMPTY_INPUT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "# Only comments\n# No GraphQL operations here",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "MALFORMED",
+    "ground_truth_attack_type": "SYNTAX_ERROR",
+    "expected_gateway_decision": "ERROR",
+    "rationale": "Query string contains comments without an operation definition."
+  },
+  {
+    "id": "CORPUS-109",
+    "name": "Unbound required variable definition",
+    "category": "MALFORMED_SYNTAX",
+    "syntax_type": "VARIABLE_ERROR",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query GetRes($resId: Int!) { resource(id: $resId) { name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": null,
+    "true_owner_id": null,
+    "ground_truth_security": "MALFORMED",
+    "ground_truth_attack_type": "SYNTAX_ERROR",
+    "expected_gateway_decision": "ERROR",
+    "rationale": "Non-null variable $resId is defined in query header but omitted from variables map."
+  },
+  {
+    "id": "CORPUS-110",
+    "name": "Probe ID boundary zero (Alice -> resource 0)",
+    "category": "EDGE_CASE",
+    "syntax_type": "BOUNDARY_ID",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 0) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 0,
+    "target_object_type": "Resource",
+    "true_owner_id": null,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice queries boundary ID 0 (unowned; fails-closed at authorization boundary)."
+  },
+  {
+    "id": "CORPUS-111",
+    "name": "Probe ID boundary negative (Alice -> resource -1)",
+    "category": "EDGE_CASE",
+    "syntax_type": "BOUNDARY_ID",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: -1) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": -1,
+    "target_object_type": "Resource",
+    "true_owner_id": null,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice queries negative boundary ID -1 (unowned; fails-closed)."
+  },
+  {
+    "id": "CORPUS-112",
+    "name": "Deep nested own hierarchy (Alice -> folder 201 -> children -> children)",
+    "category": "EDGE_CASE",
+    "syntax_type": "DEEP_TRAVERSAL",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 201) { children { children { id name } } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice navigates deep hierarchy within her legitimately owned project folder."
+  },
+  {
+    "id": "CORPUS-113",
+    "name": "Multi-fragment reuse on own resource (Alice -> doc 101)",
+    "category": "EDGE_CASE",
+    "syntax_type": "MULTI_FRAGMENT",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query { resource(id: 101) { ...F1 ...F2 } }\n        fragment F1 on ResourceType { id name }\n        fragment F2 on ResourceType { object_type parent_id }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice uses multiple distinct fragments on her own document."
+  },
+  {
+    "id": "CORPUS-114",
+    "name": "Multi-variable query on own nested resource (Alice -> user 101 + doc 101)",
+    "category": "EDGE_CASE",
+    "syntax_type": "MULTI_VAR",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query MyData($uid: Int!, $rid: Int!) { user(id: $uid) { resource(id: $rid) { name } } }",
+    "variables": {
+      "uid": 101,
+      "rid": 101
+    },
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice binds two variables simultaneously for her own user and document."
+  },
+  {
+    "id": "CORPUS-115",
+    "name": "Multi-variable query on cross-user target (Alice -> user 101 + Bob doc 102)",
+    "category": "EDGE_CASE",
+    "syntax_type": "MULTI_VAR",
+    "caller": {
+      "user_id": 101,
+      "role": "user"
+    },
+    "query": "query StealData($uid: Int!, $rid: Int!) { user(id: $uid) { resource(id: $rid) { name } } }",
+    "variables": {
+      "uid": 101,
+      "rid": 102
+    },
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice binds her own user ID 101 with Bob's document ID 102 using multiple variables."
+  }
+]

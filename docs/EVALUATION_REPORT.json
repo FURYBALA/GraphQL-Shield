@@ -1,0 +1,4695 @@
+{
+  "metadata": {
+    "evaluation_timestamp": "2026-10-11T11:31:40Z",
+    "corpus_file": "data/ground_truth_corpus.json",
+    "total_corpus_cases": 115,
+    "valid_security_cases": 105,
+    "malformed_syntax_cases": 10,
+    "profiling_iterations": 3
+  },
+  "method_comparison": {
+    "method_1_gateway_alone": {
+      "method_name": "Method 1: Gateway Alone (Runtime Baseline)",
+      "total_evaluated": 105,
+      "true_positives": 51,
+      "false_positives": 0,
+      "true_negatives": 53,
+      "false_negatives": 1,
+      "precision": 1.0,
+      "recall": 0.9808,
+      "f1_score": 0.9903,
+      "accuracy": 0.9905,
+      "legitimate_denial_rate": 0.0,
+      "direct_bola_recall": 0.9655,
+      "indirect_bola_recall": 1.0
+    },
+    "method_2_static_taint_alone": {
+      "method_name": "Method 2: Static Taint Analysis Alone",
+      "total_evaluated": 105,
+      "true_positives": 52,
+      "false_positives": 43,
+      "true_negatives": 10,
+      "false_negatives": 0,
+      "precision": 0.5474,
+      "recall": 1.0,
+      "f1_score": 0.7075,
+      "accuracy": 0.5905,
+      "legitimate_denial_rate": 0.8113,
+      "direct_bola_recall": 1.0,
+      "indirect_bola_recall": 1.0
+    },
+    "method_3_correlated_defense": {
+      "method_name": "Method 3: Correlated Defense (Taint + Gateway)",
+      "total_evaluated": 105,
+      "true_positives": 51,
+      "false_positives": 0,
+      "true_negatives": 53,
+      "false_negatives": 1,
+      "precision": 1.0,
+      "recall": 0.9808,
+      "f1_score": 0.9903,
+      "accuracy": 0.9905,
+      "legitimate_denial_rate": 0.0,
+      "direct_bola_recall": 0.9655,
+      "indirect_bola_recall": 1.0
+    }
+  },
+  "latency_profile": {
+    "cold_start_ms": 0.362,
+    "warmed_mean_ms": 0.308,
+    "warmed_median_ms": 0.293,
+    "warmed_min_ms": 0.047,
+    "warmed_max_ms": 4.613,
+    "warmed_p95_ms": 0.419,
+    "warmed_stdev_ms": 0.254,
+    "iterations": 3
+  },
+  "syntax_category_breakdown": {
+    "ADMIN_MULTI": {
+      "total_cases": 1,
+      "vulnerable_count": 0,
+      "benign_count": 1,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 1,
+      "m3_correlated_false_positives": 0
+    },
+    "ALIAS": {
+      "total_cases": 7,
+      "vulnerable_count": 4,
+      "benign_count": 3,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 3,
+      "m3_correlated_false_positives": 0
+    },
+    "ALIAS_VARIABLE": {
+      "total_cases": 1,
+      "vulnerable_count": 1,
+      "benign_count": 0,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 0,
+      "m3_correlated_false_positives": 0
+    },
+    "BASIC": {
+      "total_cases": 39,
+      "vulnerable_count": 21,
+      "benign_count": 18,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 18,
+      "m3_correlated_false_positives": 0
+    },
+    "BOUNDARY_ID": {
+      "total_cases": 2,
+      "vulnerable_count": 2,
+      "benign_count": 0,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 0,
+      "m3_correlated_false_positives": 0
+    },
+    "DEEP_TRAVERSAL": {
+      "total_cases": 2,
+      "vulnerable_count": 1,
+      "benign_count": 1,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 1,
+      "m3_correlated_false_positives": 0
+    },
+    "FRAGMENT": {
+      "total_cases": 6,
+      "vulnerable_count": 3,
+      "benign_count": 3,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 3,
+      "m3_correlated_false_positives": 0
+    },
+    "FRAGMENT_ALIAS": {
+      "total_cases": 1,
+      "vulnerable_count": 1,
+      "benign_count": 0,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 0,
+      "m3_correlated_false_positives": 0
+    },
+    "INLINE_FRAGMENT": {
+      "total_cases": 3,
+      "vulnerable_count": 2,
+      "benign_count": 1,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 1,
+      "m3_correlated_false_positives": 0
+    },
+    "INTROSPECTION": {
+      "total_cases": 3,
+      "vulnerable_count": 0,
+      "benign_count": 3,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 0,
+      "m3_correlated_false_positives": 0
+    },
+    "INTROSPECTION_FRAGMENT": {
+      "total_cases": 1,
+      "vulnerable_count": 0,
+      "benign_count": 1,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 0,
+      "m3_correlated_false_positives": 0
+    },
+    "MIXED_LEGIT": {
+      "total_cases": 1,
+      "vulnerable_count": 0,
+      "benign_count": 1,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 1,
+      "m3_correlated_false_positives": 0
+    },
+    "MIXED_ROOT": {
+      "total_cases": 4,
+      "vulnerable_count": 4,
+      "benign_count": 0,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 0,
+      "m3_correlated_false_positives": 0
+    },
+    "MULTI_ATTACK": {
+      "total_cases": 1,
+      "vulnerable_count": 1,
+      "benign_count": 0,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 0,
+      "m3_correlated_false_positives": 0
+    },
+    "MULTI_FIELD": {
+      "total_cases": 2,
+      "vulnerable_count": 0,
+      "benign_count": 2,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 2,
+      "m3_correlated_false_positives": 0
+    },
+    "MULTI_FRAGMENT": {
+      "total_cases": 1,
+      "vulnerable_count": 0,
+      "benign_count": 1,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 1,
+      "m3_correlated_false_positives": 0
+    },
+    "MULTI_LEGIT": {
+      "total_cases": 3,
+      "vulnerable_count": 0,
+      "benign_count": 3,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 3,
+      "m3_correlated_false_positives": 0
+    },
+    "MULTI_VAR": {
+      "total_cases": 2,
+      "vulnerable_count": 1,
+      "benign_count": 1,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 1,
+      "m3_correlated_false_positives": 0
+    },
+    "NESTED_PARAM": {
+      "total_cases": 6,
+      "vulnerable_count": 4,
+      "benign_count": 2,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 2,
+      "m3_correlated_false_positives": 0
+    },
+    "NESTED_PARAM_VAR": {
+      "total_cases": 1,
+      "vulnerable_count": 1,
+      "benign_count": 0,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 0,
+      "m3_correlated_false_positives": 0
+    },
+    "PUBLIC": {
+      "total_cases": 5,
+      "vulnerable_count": 0,
+      "benign_count": 5,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 0,
+      "m3_correlated_false_positives": 0
+    },
+    "PUBLIC_ALIAS": {
+      "total_cases": 1,
+      "vulnerable_count": 0,
+      "benign_count": 1,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 0,
+      "m3_correlated_false_positives": 0
+    },
+    "RELATIONSHIP": {
+      "total_cases": 2,
+      "vulnerable_count": 1,
+      "benign_count": 1,
+      "m1_gateway_detection_rate": 1.0,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 1.0,
+      "m2_static_false_positives": 1,
+      "m3_correlated_false_positives": 0
+    },
+    "VARIABLE": {
+      "total_cases": 10,
+      "vulnerable_count": 5,
+      "benign_count": 5,
+      "m1_gateway_detection_rate": 0.8,
+      "m2_static_detection_rate": 1.0,
+      "m3_correlated_detection_rate": 0.8,
+      "m2_static_false_positives": 5,
+      "m3_correlated_false_positives": 0
+    }
+  },
+  "predictions": [
+    {
+      "id": "CORPUS-001",
+      "name": "Direct cross-user document lookup (Alice -> Bob doc)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-002",
+      "name": "Direct cross-user document lookup (Bob -> Alice doc)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-003",
+      "name": "Direct access to admin confidential document (Alice -> Charlie doc)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 103,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-004",
+      "name": "Direct access to admin confidential document (Bob -> Charlie doc)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 103,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-005",
+      "name": "Direct cross-user folder access (Bob -> Alice folder 201)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 201,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-006",
+      "name": "Direct cross-user sub-document access (Bob -> Alice plan 202)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 202,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-007",
+      "name": "Direct cross-user sub-document access (Bob -> Alice plan 203)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 203,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-008",
+      "name": "Direct cross-user profile access (Alice -> Bob user profile)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-009",
+      "name": "Direct cross-user profile access (Bob -> Alice user profile)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-010",
+      "name": "Direct cross-user profile access (Alice -> Admin Charlie profile)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 103,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-011",
+      "name": "Direct cross-user profile access (Bob -> Admin Charlie profile)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 103,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-012",
+      "name": "Aliased direct BOLA on document (Alice -> Bob doc)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "ALIAS",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-013",
+      "name": "Aliased direct BOLA on user (Bob -> Alice profile)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "ALIAS",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-014",
+      "name": "Variable-driven direct BOLA (Alice -> Bob doc)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "VARIABLE",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-015",
+      "name": "Variable-driven direct BOLA (Bob -> Alice folder)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "VARIABLE",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 201,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-016",
+      "name": "Named fragment direct BOLA (Alice -> Bob doc)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "FRAGMENT",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-017",
+      "name": "Inline fragment direct BOLA (Bob -> Alice plan)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "INLINE_FRAGMENT",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 202,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-018",
+      "name": "Variable with default value direct BOLA (Alice -> Bob doc)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "VARIABLE",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-019",
+      "name": "Reconnaissance probe for non-existent unowned ID (Alice -> ID 999)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OBJECT_NOT_FOUND"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 999,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OBJECT_NOT_FOUND",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OBJECT_NOT_FOUND) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-020",
+      "name": "Reconnaissance probe for non-existent unowned ID (Bob -> ID 888)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OBJECT_NOT_FOUND"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 888,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OBJECT_NOT_FOUND",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OBJECT_NOT_FOUND) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-021",
+      "name": "Aliased user probe with variable (Alice -> Bob profile)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "ALIAS_VARIABLE",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-022",
+      "name": "Fragment with alias on unauthorized target (Bob -> Alice doc)",
+      "category": "DIRECT_BOLA",
+      "syntax_type": "FRAGMENT_ALIAS",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-023",
+      "name": "Indirect BOLA via User.resources collection (Alice -> Bob resources)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-024",
+      "name": "Indirect BOLA via User.resources collection (Bob -> Alice resources)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-025",
+      "name": "Indirect BOLA on admin resources (Alice -> Charlie resources)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 103,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-026",
+      "name": "Indirect BOLA on admin resources (Bob -> Charlie resources)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 103,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-027",
+      "name": "Nested parameterized BOLA under own user node (Alice -> Bob doc)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "NESTED_PARAM",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "INDIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "NESTED_AUTHORIZATION_VIOLATION"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "INDIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "user.resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "NESTED_AUTHORIZATION_VIOLATION",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "INDIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate INDIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (NESTED_AUTHORIZATION_VIOLATION) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-028",
+      "name": "Nested parameterized BOLA under own user node (Bob -> Alice doc)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "NESTED_PARAM",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "INDIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "NESTED_AUTHORIZATION_VIOLATION"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "INDIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "user.resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "DENY",
+            "runtime_reason": "NESTED_AUTHORIZATION_VIOLATION",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "INDIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate INDIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (NESTED_AUTHORIZATION_VIOLATION) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-029",
+      "name": "Nested parameterized BOLA under victim user node (Alice -> Bob user -> Bob doc)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "NESTED_PARAM",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          },
+          {
+            "path": "user.resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "NESTED_AUTHORIZATION_VIOLATION",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "INDIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate INDIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (NESTED_AUTHORIZATION_VIOLATION) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-030",
+      "name": "Nested parameterized BOLA under victim user node (Bob -> Alice user -> Alice doc)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "NESTED_PARAM",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          },
+          {
+            "path": "user.resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "DENY",
+            "runtime_reason": "NESTED_AUTHORIZATION_VIOLATION",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "INDIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate INDIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (NESTED_AUTHORIZATION_VIOLATION) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-031",
+      "name": "Indirect traversal of victim folder hierarchy (Bob -> Alice folder children)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "RELATIONSHIP",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 201,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-032",
+      "name": "Aliased indirect BOLA on collection (Alice -> Bob user)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "ALIAS",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-033",
+      "name": "Aliased indirect BOLA on collection (Bob -> Alice user)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "ALIAS",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-034",
+      "name": "Variable-driven indirect BOLA (Alice -> Bob user resources)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "VARIABLE",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-035",
+      "name": "Variable-driven indirect BOLA (Bob -> Alice user resources)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "VARIABLE",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-036",
+      "name": "Variable in nested field parameter (Alice -> own user with Bob resId)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "NESTED_PARAM_VAR",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "INDIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "NESTED_AUTHORIZATION_VIOLATION"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "INDIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "user.resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "NESTED_AUTHORIZATION_VIOLATION",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "INDIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate INDIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (NESTED_AUTHORIZATION_VIOLATION) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-037",
+      "name": "Named fragment on indirect collection traversal (Alice -> Bob user)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "FRAGMENT",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-038",
+      "name": "Named fragment on nested resource field (Bob -> Alice user)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "FRAGMENT",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          },
+          {
+            "path": "user.resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "DENY",
+            "runtime_reason": "NESTED_AUTHORIZATION_VIOLATION",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "INDIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate INDIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (NESTED_AUTHORIZATION_VIOLATION) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-039",
+      "name": "Inline fragment on indirect collection traversal (Alice -> Bob user)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "INLINE_FRAGMENT",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-040",
+      "name": "Indirect probe of unowned non-existent user collection (Alice -> User 999)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OBJECT_NOT_FOUND"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 999,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OBJECT_NOT_FOUND",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OBJECT_NOT_FOUND) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-041",
+      "name": "Indirect probe of unowned non-existent user collection (Bob -> User 888)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OBJECT_NOT_FOUND"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 888,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OBJECT_NOT_FOUND",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OBJECT_NOT_FOUND) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-042",
+      "name": "Indirect traversal with operation name (Alice -> Bob user resources)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-043",
+      "name": "Multi-hop indirect traversal through victim folder and children (Bob -> Alice folder)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "DEEP_TRAVERSAL",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 2,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 201,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-044",
+      "name": "Indirect collection traversal with field selection only (Alice -> Bob resources)",
+      "category": "INDIRECT_BOLA",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-045",
+      "name": "Legitimate direct access to own document (Alice -> Alice doc 101)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-046",
+      "name": "Legitimate direct access to own folder (Alice -> Alice folder 201)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 201,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-047",
+      "name": "Legitimate direct access to own plan (Alice -> Alice doc 202)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 202,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-048",
+      "name": "Legitimate direct access to own plan (Alice -> Alice doc 203)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 203,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-049",
+      "name": "Legitimate direct access to own document (Bob -> Bob doc 102)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-050",
+      "name": "Legitimate direct access to own profile (Alice -> Alice user 101)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-051",
+      "name": "Legitimate direct access to own profile (Bob -> Bob user 102)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-052",
+      "name": "Legitimate indirect access to own resources (Alice -> Alice resources)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-053",
+      "name": "Legitimate indirect access to own resources (Bob -> Bob resources)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-054",
+      "name": "Legitimate nested resource access (Alice -> Alice user -> Alice doc 101)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "NESTED_PARAM",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "user.resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "INDIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate INDIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-055",
+      "name": "Legitimate nested resource access (Bob -> Bob user -> Bob doc 102)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "NESTED_PARAM",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "user.resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "INDIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate INDIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-056",
+      "name": "Legitimate folder hierarchy traversal (Alice -> Alice folder 201 children)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "RELATIONSHIP",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 201,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-057",
+      "name": "Aliased legitimate document access (Alice -> Alice doc 101)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "ALIAS",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-058",
+      "name": "Aliased legitimate document access (Bob -> Bob doc 102)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "ALIAS",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-059",
+      "name": "Variable-driven legitimate access (Alice -> Alice doc 101)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "VARIABLE",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-060",
+      "name": "Variable-driven legitimate access (Bob -> Bob doc 102)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "VARIABLE",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-061",
+      "name": "Named fragment legitimate document access (Alice -> Alice doc 101)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "FRAGMENT",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-062",
+      "name": "Named fragment legitimate document access (Bob -> Bob doc 102)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "FRAGMENT",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-063",
+      "name": "Inline fragment legitimate access (Alice -> Alice folder 201)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "INLINE_FRAGMENT",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 201,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-064",
+      "name": "Variable-driven legitimate collection traversal (Alice -> User 101 resources)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "VARIABLE",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-065",
+      "name": "Variable-driven legitimate collection traversal (Bob -> User 102 resources)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "VARIABLE",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-066",
+      "name": "Named fragment legitimate collection traversal (Alice -> User 101)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "FRAGMENT",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-067",
+      "name": "Multiple own resources selection (Alice -> doc 101 and folder 201)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "MULTI_FIELD",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 2,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 201,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-068",
+      "name": "Named operation legitimate query (Alice -> own profile and docs)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-069",
+      "name": "Named operation legitimate query (Bob -> own profile and docs)",
+      "category": "LEGITIMATE_OWNER",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-070",
+      "name": "Admin override on Alice document (Charlie -> doc 101)",
+      "category": "ADMIN_PRIVILEGED",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "ADMIN_OVERRIDE"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "ADMIN_OVERRIDE",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (ADMIN_OVERRIDE)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-071",
+      "name": "Admin override on Bob document (Charlie -> doc 102)",
+      "category": "ADMIN_PRIVILEGED",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "ADMIN_OVERRIDE"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "ADMIN_OVERRIDE",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (ADMIN_OVERRIDE)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-072",
+      "name": "Admin access to own admin log (Charlie -> doc 103)",
+      "category": "ADMIN_PRIVILEGED",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "ADMIN_OVERRIDE"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 103,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "ADMIN_OVERRIDE",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (ADMIN_OVERRIDE)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-073",
+      "name": "Admin override on Alice profile (Charlie -> user 101)",
+      "category": "ADMIN_PRIVILEGED",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "ADMIN_OVERRIDE"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "ADMIN_OVERRIDE",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (ADMIN_OVERRIDE)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-074",
+      "name": "Admin override on Bob profile (Charlie -> user 102)",
+      "category": "ADMIN_PRIVILEGED",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "ADMIN_OVERRIDE"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "ADMIN_OVERRIDE",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (ADMIN_OVERRIDE)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-075",
+      "name": "Admin override on Alice resources collection (Charlie -> User 101 resources)",
+      "category": "ADMIN_PRIVILEGED",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "ADMIN_OVERRIDE"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "ADMIN_OVERRIDE",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (ADMIN_OVERRIDE)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-076",
+      "name": "Admin override on Bob resources collection (Charlie -> User 102 resources)",
+      "category": "ADMIN_PRIVILEGED",
+      "syntax_type": "BASIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "ADMIN_OVERRIDE"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "ADMIN_OVERRIDE",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (ADMIN_OVERRIDE)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-077",
+      "name": "Admin aliased inspection (Charlie -> Bob doc 102)",
+      "category": "ADMIN_PRIVILEGED",
+      "syntax_type": "ALIAS",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "ADMIN_OVERRIDE"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "ADMIN_OVERRIDE",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (ADMIN_OVERRIDE)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-078",
+      "name": "Admin variable-driven inspection (Charlie -> Alice folder 201)",
+      "category": "ADMIN_PRIVILEGED",
+      "syntax_type": "VARIABLE",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "ADMIN_OVERRIDE"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 201,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "ADMIN_OVERRIDE",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (ADMIN_OVERRIDE)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-079",
+      "name": "Admin fragment-driven multi-tenant audit (Charlie -> User 101 and 102)",
+      "category": "ADMIN_PRIVILEGED",
+      "syntax_type": "MULTI_FIELD",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "ADMIN_OVERRIDE"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 2,
+        "indirect_candidates_count": 2,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "ADMIN_OVERRIDE",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (ADMIN_OVERRIDE)."
+          },
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "ADMIN_OVERRIDE",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (ADMIN_OVERRIDE)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-080",
+      "name": "Public health check (Alice)",
+      "category": "PUBLIC_INTROSPECTION",
+      "syntax_type": "PUBLIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-081",
+      "name": "Public health check (Bob)",
+      "category": "PUBLIC_INTROSPECTION",
+      "syntax_type": "PUBLIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-082",
+      "name": "Public health check (Charlie Admin)",
+      "category": "PUBLIC_INTROSPECTION",
+      "syntax_type": "PUBLIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-083",
+      "name": "Public health check with alias",
+      "category": "PUBLIC_INTROSPECTION",
+      "syntax_type": "PUBLIC_ALIAS",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-084",
+      "name": "Root typename introspection query",
+      "category": "PUBLIC_INTROSPECTION",
+      "syntax_type": "INTROSPECTION",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-085",
+      "name": "Schema query type introspection",
+      "category": "PUBLIC_INTROSPECTION",
+      "syntax_type": "INTROSPECTION",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-086",
+      "name": "Specific type introspection (UserType)",
+      "category": "PUBLIC_INTROSPECTION",
+      "syntax_type": "INTROSPECTION",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-087",
+      "name": "Named operation public health query",
+      "category": "PUBLIC_INTROSPECTION",
+      "syntax_type": "PUBLIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-088",
+      "name": "Public query with leading comments",
+      "category": "PUBLIC_INTROSPECTION",
+      "syntax_type": "PUBLIC",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-089",
+      "name": "Introspection query using named fragment",
+      "category": "PUBLIC_INTROSPECTION",
+      "syntax_type": "INTROSPECTION_FRAGMENT",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-090",
+      "name": "Dual unauthorized roots (Alice -> Bob doc and Bob user)",
+      "category": "MULTI_ROOT",
+      "syntax_type": "MULTI_ATTACK",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 2,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          },
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-091",
+      "name": "Mixed root: legitimate first, attack second (Alice -> own doc 101 + Bob doc 102)",
+      "category": "MULTI_ROOT",
+      "syntax_type": "MIXED_ROOT",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 2,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-092",
+      "name": "Mixed root: attack first, legitimate second (Bob -> Alice doc 101 + Bob doc 102)",
+      "category": "MULTI_ROOT",
+      "syntax_type": "MIXED_ROOT",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 2,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          },
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-093",
+      "name": "Mixed root: public health + unauthorized document (Alice -> health + Bob doc 102)",
+      "category": "MULTI_ROOT",
+      "syntax_type": "MIXED_ROOT",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-094",
+      "name": "Mixed root: public health + legitimate document (Alice -> health + own doc 101)",
+      "category": "MULTI_ROOT",
+      "syntax_type": "MIXED_LEGIT",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-095",
+      "name": "Dual legitimate roots (Alice -> own doc 101 and own folder 201)",
+      "category": "MULTI_ROOT",
+      "syntax_type": "MULTI_LEGIT",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 2,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 201,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-096",
+      "name": "Dual legitimate roots (Bob -> own doc 102 and own user profile 102)",
+      "category": "MULTI_ROOT",
+      "syntax_type": "MULTI_LEGIT",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 2,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-097",
+      "name": "Triple roots: all legitimate (Alice -> doc 101, folder 201, plan 202)",
+      "category": "MULTI_ROOT",
+      "syntax_type": "MULTI_LEGIT",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 3,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 201,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 202,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-098",
+      "name": "Triple roots: two legitimate, one unauthorized (Alice -> doc 101, plan 202, Bob doc 102)",
+      "category": "MULTI_ROOT",
+      "syntax_type": "MIXED_ROOT",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 3,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 202,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-099",
+      "name": "Admin multi-root cross-user access (Charlie -> doc 101 and doc 102)",
+      "category": "MULTI_ROOT",
+      "syntax_type": "ADMIN_MULTI",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "ADMIN_OVERRIDE"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 2,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "ADMIN_OVERRIDE",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (ADMIN_OVERRIDE)."
+          },
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "ADMIN_OVERRIDE",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (ADMIN_OVERRIDE)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-100",
+      "name": "Malformed GraphQL syntax: unclosed brace",
+      "category": "MALFORMED_SYNTAX",
+      "syntax_type": "SYNTAX_ERROR",
+      "ground_truth_security": "MALFORMED",
+      "ground_truth_attack_type": "SYNTAX_ERROR",
+      "method_1_gateway": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "decision": "ERROR",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": "GraphQL syntax error: unable to parse document AST"
+      },
+      "method_3_correlated": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-101",
+      "name": "Malformed GraphQL syntax: unknown field on ResourceType",
+      "category": "MALFORMED_SYNTAX",
+      "syntax_type": "SYNTAX_ERROR",
+      "ground_truth_security": "MALFORMED",
+      "ground_truth_attack_type": "SYNTAX_ERROR",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-102",
+      "name": "Malformed GraphQL syntax: unclosed string literal in argument",
+      "category": "MALFORMED_SYNTAX",
+      "syntax_type": "SYNTAX_ERROR",
+      "ground_truth_security": "MALFORMED",
+      "ground_truth_attack_type": "SYNTAX_ERROR",
+      "method_1_gateway": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "decision": "ERROR",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": "GraphQL syntax error: unable to parse document AST"
+      },
+      "method_3_correlated": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-103",
+      "name": "Malformed query: unknown directive",
+      "category": "MALFORMED_SYNTAX",
+      "syntax_type": "SYNTAX_ERROR",
+      "ground_truth_security": "MALFORMED",
+      "ground_truth_attack_type": "SYNTAX_ERROR",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-104",
+      "name": "Malformed query: missing required argument on resource",
+      "category": "MALFORMED_SYNTAX",
+      "syntax_type": "SYNTAX_ERROR",
+      "ground_truth_security": "MALFORMED",
+      "ground_truth_attack_type": "SYNTAX_ERROR",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-105",
+      "name": "Malformed query: wrong argument scalar type literal",
+      "category": "MALFORMED_SYNTAX",
+      "syntax_type": "SYNTAX_ERROR",
+      "ground_truth_security": "MALFORMED",
+      "ground_truth_attack_type": "SYNTAX_ERROR",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OBJECT_NOT_FOUND"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": "notAnInteger",
+            "runtime_decision": "DENY",
+            "runtime_reason": "OBJECT_NOT_FOUND",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OBJECT_NOT_FOUND) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-106",
+      "name": "Empty query document string",
+      "category": "MALFORMED_SYNTAX",
+      "syntax_type": "EMPTY_INPUT",
+      "ground_truth_security": "MALFORMED",
+      "ground_truth_attack_type": "SYNTAX_ERROR",
+      "method_1_gateway": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "decision": "ERROR",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": "GraphQL syntax error: unable to parse document AST"
+      },
+      "method_3_correlated": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-107",
+      "name": "Whitespace-only query document",
+      "category": "MALFORMED_SYNTAX",
+      "syntax_type": "EMPTY_INPUT",
+      "ground_truth_security": "MALFORMED",
+      "ground_truth_attack_type": "SYNTAX_ERROR",
+      "method_1_gateway": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "decision": "ERROR",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": "GraphQL syntax error: unable to parse document AST"
+      },
+      "method_3_correlated": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-108",
+      "name": "Comments-only query document",
+      "category": "MALFORMED_SYNTAX",
+      "syntax_type": "EMPTY_INPUT",
+      "ground_truth_security": "MALFORMED",
+      "ground_truth_attack_type": "SYNTAX_ERROR",
+      "method_1_gateway": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "decision": "ERROR",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "direct_candidates_count": 0,
+        "indirect_candidates_count": 0,
+        "error": "GraphQL syntax error: unable to parse document AST"
+      },
+      "method_3_correlated": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-109",
+      "name": "Unbound required variable definition",
+      "category": "MALFORMED_SYNTAX",
+      "syntax_type": "VARIABLE_ERROR",
+      "ground_truth_security": "MALFORMED",
+      "ground_truth_attack_type": "SYNTAX_ERROR",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "NO_OBJECTS"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": []
+      }
+    },
+    {
+      "id": "CORPUS-110",
+      "name": "Probe ID boundary zero (Alice -> resource 0)",
+      "category": "EDGE_CASE",
+      "syntax_type": "BOUNDARY_ID",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OBJECT_NOT_FOUND"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 0,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OBJECT_NOT_FOUND",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OBJECT_NOT_FOUND) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-111",
+      "name": "Probe ID boundary negative (Alice -> resource -1)",
+      "category": "EDGE_CASE",
+      "syntax_type": "BOUNDARY_ID",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "DIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OBJECT_NOT_FOUND"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": -1,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OBJECT_NOT_FOUND",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OBJECT_NOT_FOUND) and blocked."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-112",
+      "name": "Deep nested own hierarchy (Alice -> folder 201 -> children -> children)",
+      "category": "EDGE_CASE",
+      "syntax_type": "DEEP_TRAVERSAL",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 2,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 201,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-113",
+      "name": "Multi-fragment reuse on own resource (Alice -> doc 101)",
+      "category": "EDGE_CASE",
+      "syntax_type": "MULTI_FRAGMENT",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 0,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-114",
+      "name": "Multi-variable query on own nested resource (Alice -> user 101 + doc 101)",
+      "category": "EDGE_CASE",
+      "syntax_type": "MULTI_VAR",
+      "ground_truth_security": "BENIGN",
+      "ground_truth_attack_type": "NONE",
+      "method_1_gateway": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "user.resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "INDIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate INDIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "CORPUS-115",
+      "name": "Multi-variable query on cross-user target (Alice -> user 101 + Bob doc 102)",
+      "category": "EDGE_CASE",
+      "syntax_type": "MULTI_VAR",
+      "ground_truth_security": "VULNERABLE",
+      "ground_truth_attack_type": "INDIRECT_BOLA",
+      "method_1_gateway": {
+        "prediction": "VULNERABLE",
+        "attack_type": "INDIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "NESTED_AUTHORIZATION_VIOLATION"
+      },
+      "method_2_static_taint": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "direct_candidates_count": 1,
+        "indirect_candidates_count": 1,
+        "error": null
+      },
+      "method_3_correlated": {
+        "prediction": "VULNERABLE",
+        "attack_type": "INDIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "user.resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "NESTED_AUTHORIZATION_VIOLATION",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "INDIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate INDIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (NESTED_AUTHORIZATION_VIOLATION) and blocked."
+          }
+        ]
+      }
+    }
+  ]
+}
