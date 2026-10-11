@@ -1,0 +1,974 @@
+[
+  {
+    "case_id": "CORPUS-001",
+    "case_name": "Direct cross-user document lookup (Alice -> Bob doc)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "query": "query { resource(id: 102) { id name } }",
+    "variables": {},
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "rubric_scores": {
+      "case_id": "CORPUS-001",
+      "case_name": "Direct cross-user document lookup (Alice -> Bob doc)",
+      "category": "DIRECT_BOLA",
+      "m1_score": 4,
+      "m2_score": 6,
+      "m3_score": 8,
+      "max_score": 8,
+      "m1_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 1,
+        "boundary_evidence": 0,
+        "candidate_confirmed": 1
+      },
+      "m2_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 1,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 1
+      },
+      "m3_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 2,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 2
+      }
+    },
+    "method_explanations": {
+      "m1_gateway_alone": {
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH",
+        "extracted_paths": [
+          "resource"
+        ],
+        "explanation_text": "HTTP 403: Decision=DENY, Reason=OWNERSHIP_MISMATCH, Paths=['resource']"
+      },
+      "m2_static_taint_alone": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "schema_paths": [
+          "resource",
+          "resource.id",
+          "resource.name"
+        ],
+        "response_paths": [
+          "resource",
+          "resource.id",
+          "resource.name"
+        ],
+        "findings_count": 1,
+        "explanation_text": "Static Finding: Candidate=DIRECT_BOLA, SchemaPath=['resource', 'resource.id', 'resource.name'], BoundaryUncertainty=True (Lacks JWT caller context)"
+      },
+      "m3_correlated_defense": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ],
+        "explanation_text": "Correlated Defense: Status=TRUE_POSITIVE_BLOCKED, Rationale=Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked. (Attributed schema path and verified against JWT caller)"
+      }
+    }
+  },
+  {
+    "case_id": "CORPUS-011",
+    "case_name": "Direct cross-user profile access (Bob -> Admin Charlie profile)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "query": "query { user(id: 103) { id username role } }",
+    "variables": {},
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "rubric_scores": {
+      "case_id": "CORPUS-011",
+      "case_name": "Direct cross-user profile access (Bob -> Admin Charlie profile)",
+      "category": "DIRECT_BOLA",
+      "m1_score": 4,
+      "m2_score": 6,
+      "m3_score": 8,
+      "max_score": 8,
+      "m1_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 1,
+        "boundary_evidence": 0,
+        "candidate_confirmed": 1
+      },
+      "m2_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 1,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 1
+      },
+      "m3_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 2,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 2
+      }
+    },
+    "method_explanations": {
+      "m1_gateway_alone": {
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH",
+        "extracted_paths": [
+          "user"
+        ],
+        "explanation_text": "HTTP 403: Decision=DENY, Reason=OWNERSHIP_MISMATCH, Paths=['user']"
+      },
+      "m2_static_taint_alone": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "schema_paths": [
+          "user",
+          "user.id",
+          "user.username",
+          "user.role"
+        ],
+        "response_paths": [
+          "user",
+          "user.id",
+          "user.username",
+          "user.role"
+        ],
+        "findings_count": 1,
+        "explanation_text": "Static Finding: Candidate=DIRECT_BOLA, SchemaPath=['user', 'user.id', 'user.username', 'user.role'], BoundaryUncertainty=True (Lacks JWT caller context)"
+      },
+      "m3_correlated_defense": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 103,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ],
+        "explanation_text": "Correlated Defense: Status=TRUE_POSITIVE_BLOCKED, Rationale=Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked. (Attributed schema path and verified against JWT caller)"
+      }
+    }
+  },
+  {
+    "case_id": "CORPUS-018",
+    "case_name": "Variable with default value direct BOLA (Alice -> Bob doc)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "VARIABLE",
+    "query": "query GetDoc($target: Int = 102) { resource(id: $target) { name } }",
+    "variables": {},
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "rubric_scores": {
+      "case_id": "CORPUS-018",
+      "case_name": "Variable with default value direct BOLA (Alice -> Bob doc)",
+      "category": "DIRECT_BOLA",
+      "m1_score": 4,
+      "m2_score": 6,
+      "m3_score": 8,
+      "max_score": 8,
+      "m1_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 1,
+        "boundary_evidence": 0,
+        "candidate_confirmed": 1
+      },
+      "m2_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 1,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 1
+      },
+      "m3_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 2,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 2
+      }
+    },
+    "method_explanations": {
+      "m1_gateway_alone": {
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH",
+        "extracted_paths": [
+          "resource"
+        ],
+        "explanation_text": "HTTP 403: Decision=DENY, Reason=OWNERSHIP_MISMATCH, Paths=['resource']"
+      },
+      "m2_static_taint_alone": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "schema_paths": [
+          "resource",
+          "resource.name"
+        ],
+        "response_paths": [
+          "resource",
+          "resource.name"
+        ],
+        "findings_count": 1,
+        "explanation_text": "Static Finding: Candidate=DIRECT_BOLA, SchemaPath=['resource', 'resource.name'], BoundaryUncertainty=True (Lacks JWT caller context)"
+      },
+      "m3_correlated_defense": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ],
+        "explanation_text": "Correlated Defense: Status=TRUE_POSITIVE_BLOCKED, Rationale=Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked. (Attributed schema path and verified against JWT caller)"
+      }
+    }
+  },
+  {
+    "case_id": "CORPUS-019",
+    "case_name": "Reconnaissance probe for non-existent unowned ID (Alice -> ID 999)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "query": "query { resource(id: 999) { id name } }",
+    "variables": {},
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "rubric_scores": {
+      "case_id": "CORPUS-019",
+      "case_name": "Reconnaissance probe for non-existent unowned ID (Alice -> ID 999)",
+      "category": "DIRECT_BOLA",
+      "m1_score": 3,
+      "m2_score": 6,
+      "m3_score": 8,
+      "max_score": 8,
+      "m1_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 0,
+        "boundary_evidence": 0,
+        "candidate_confirmed": 1
+      },
+      "m2_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 1,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 1
+      },
+      "m3_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 2,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 2
+      }
+    },
+    "method_explanations": {
+      "m1_gateway_alone": {
+        "decision": "DENY",
+        "reason": "OBJECT_NOT_FOUND",
+        "extracted_paths": [
+          "resource"
+        ],
+        "explanation_text": "HTTP 403: Decision=DENY, Reason=OBJECT_NOT_FOUND, Paths=['resource']"
+      },
+      "m2_static_taint_alone": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "schema_paths": [
+          "resource",
+          "resource.id",
+          "resource.name"
+        ],
+        "response_paths": [
+          "resource",
+          "resource.id",
+          "resource.name"
+        ],
+        "findings_count": 1,
+        "explanation_text": "Static Finding: Candidate=DIRECT_BOLA, SchemaPath=['resource', 'resource.id', 'resource.name'], BoundaryUncertainty=True (Lacks JWT caller context)"
+      },
+      "m3_correlated_defense": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 999,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OBJECT_NOT_FOUND",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OBJECT_NOT_FOUND) and blocked."
+          }
+        ],
+        "explanation_text": "Correlated Defense: Status=TRUE_POSITIVE_BLOCKED, Rationale=Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OBJECT_NOT_FOUND) and blocked. (Attributed schema path and verified against JWT caller)"
+      }
+    }
+  },
+  {
+    "case_id": "CORPUS-020",
+    "case_name": "Reconnaissance probe for non-existent unowned ID (Bob -> ID 888)",
+    "category": "DIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "query": "query { resource(id: 888) { id name } }",
+    "variables": {},
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "rubric_scores": {
+      "case_id": "CORPUS-020",
+      "case_name": "Reconnaissance probe for non-existent unowned ID (Bob -> ID 888)",
+      "category": "DIRECT_BOLA",
+      "m1_score": 3,
+      "m2_score": 6,
+      "m3_score": 8,
+      "max_score": 8,
+      "m1_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 0,
+        "boundary_evidence": 0,
+        "candidate_confirmed": 1
+      },
+      "m2_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 1,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 1
+      },
+      "m3_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 2,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 2
+      }
+    },
+    "method_explanations": {
+      "m1_gateway_alone": {
+        "decision": "DENY",
+        "reason": "OBJECT_NOT_FOUND",
+        "extracted_paths": [
+          "resource"
+        ],
+        "explanation_text": "HTTP 403: Decision=DENY, Reason=OBJECT_NOT_FOUND, Paths=['resource']"
+      },
+      "m2_static_taint_alone": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "schema_paths": [
+          "resource",
+          "resource.id",
+          "resource.name"
+        ],
+        "response_paths": [
+          "resource",
+          "resource.id",
+          "resource.name"
+        ],
+        "findings_count": 1,
+        "explanation_text": "Static Finding: Candidate=DIRECT_BOLA, SchemaPath=['resource', 'resource.id', 'resource.name'], BoundaryUncertainty=True (Lacks JWT caller context)"
+      },
+      "m3_correlated_defense": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 888,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OBJECT_NOT_FOUND",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OBJECT_NOT_FOUND) and blocked."
+          }
+        ],
+        "explanation_text": "Correlated Defense: Status=TRUE_POSITIVE_BLOCKED, Rationale=Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OBJECT_NOT_FOUND) and blocked. (Attributed schema path and verified against JWT caller)"
+      }
+    }
+  },
+  {
+    "case_id": "CORPUS-023",
+    "case_name": "Indirect BOLA via User.resources collection (Alice -> Bob resources)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "query": "query { user(id: 102) { resources { id name } } }",
+    "variables": {},
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "rubric_scores": {
+      "case_id": "CORPUS-023",
+      "case_name": "Indirect BOLA via User.resources collection (Alice -> Bob resources)",
+      "category": "INDIRECT_BOLA",
+      "m1_score": 3,
+      "m2_score": 6,
+      "m3_score": 8,
+      "max_score": 8,
+      "m1_breakdown": {
+        "path_correctness": 1,
+        "auth_rationale": 1,
+        "boundary_evidence": 0,
+        "candidate_confirmed": 1
+      },
+      "m2_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 1,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 1
+      },
+      "m3_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 2,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 2
+      }
+    },
+    "method_explanations": {
+      "m1_gateway_alone": {
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH",
+        "extracted_paths": [
+          "user"
+        ],
+        "explanation_text": "HTTP 403: Decision=DENY, Reason=OWNERSHIP_MISMATCH, Paths=['user']"
+      },
+      "m2_static_taint_alone": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "schema_paths": [
+          "user",
+          "user.resources",
+          "user.resources.id",
+          "user.resources.name"
+        ],
+        "response_paths": [
+          "user",
+          "user.resources",
+          "user.resources.id",
+          "user.resources.name"
+        ],
+        "findings_count": 2,
+        "explanation_text": "Static Finding: Candidate=DIRECT_BOLA, SchemaPath=['user', 'user.resources', 'user.resources.id', 'user.resources.name'], BoundaryUncertainty=True (Lacks JWT caller context)"
+      },
+      "m3_correlated_defense": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ],
+        "explanation_text": "Correlated Defense: Status=TRUE_POSITIVE_BLOCKED, Rationale=Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked. (Attributed schema path and verified against JWT caller)"
+      }
+    }
+  },
+  {
+    "case_id": "CORPUS-028",
+    "case_name": "Nested parameterized BOLA under own user node (Bob -> Alice doc)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "NESTED_PARAM",
+    "query": "query { user(id: 102) { resource(id: 101) { id name } } }",
+    "variables": {},
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "rubric_scores": {
+      "case_id": "CORPUS-028",
+      "case_name": "Nested parameterized BOLA under own user node (Bob -> Alice doc)",
+      "category": "INDIRECT_BOLA",
+      "m1_score": 3,
+      "m2_score": 5,
+      "m3_score": 7,
+      "max_score": 8,
+      "m1_breakdown": {
+        "path_correctness": 1,
+        "auth_rationale": 1,
+        "boundary_evidence": 0,
+        "candidate_confirmed": 1
+      },
+      "m2_breakdown": {
+        "path_correctness": 1,
+        "auth_rationale": 1,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 1
+      },
+      "m3_breakdown": {
+        "path_correctness": 1,
+        "auth_rationale": 2,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 2
+      }
+    },
+    "method_explanations": {
+      "m1_gateway_alone": {
+        "decision": "DENY",
+        "reason": "NESTED_AUTHORIZATION_VIOLATION",
+        "extracted_paths": [
+          "user",
+          "user.resource"
+        ],
+        "explanation_text": "HTTP 403: Decision=DENY, Reason=NESTED_AUTHORIZATION_VIOLATION, Paths=['user', 'user.resource']"
+      },
+      "m2_static_taint_alone": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "schema_paths": [
+          "user",
+          "user.resource",
+          "user.resource.id",
+          "user.resource.name"
+        ],
+        "response_paths": [
+          "user",
+          "user.resource",
+          "user.resource.id",
+          "user.resource.name"
+        ],
+        "findings_count": 2,
+        "explanation_text": "Static Finding: Candidate=DIRECT_BOLA, SchemaPath=['user', 'user.resource', 'user.resource.id', 'user.resource.name'], BoundaryUncertainty=True (Lacks JWT caller context)"
+      },
+      "m3_correlated_defense": {
+        "prediction": "VULNERABLE",
+        "attack_type": "INDIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          },
+          {
+            "path": "user.resource",
+            "object_type": "Resource",
+            "object_id": 101,
+            "runtime_decision": "DENY",
+            "runtime_reason": "NESTED_AUTHORIZATION_VIOLATION",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "INDIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate INDIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (NESTED_AUTHORIZATION_VIOLATION) and blocked."
+          }
+        ],
+        "explanation_text": "Correlated Defense: Status=RUNTIME_PROTECTED_ALLOWED, Rationale=Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH). (Attributed schema path and verified against JWT caller)"
+      }
+    }
+  },
+  {
+    "case_id": "CORPUS-033",
+    "case_name": "Aliased indirect BOLA on collection (Bob -> Alice user)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "ALIAS",
+    "query": "query { targetUser: user(id: 101) { allDocs: resources { name } } }",
+    "variables": {},
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "rubric_scores": {
+      "case_id": "CORPUS-033",
+      "case_name": "Aliased indirect BOLA on collection (Bob -> Alice user)",
+      "category": "INDIRECT_BOLA",
+      "m1_score": 3,
+      "m2_score": 6,
+      "m3_score": 8,
+      "max_score": 8,
+      "m1_breakdown": {
+        "path_correctness": 1,
+        "auth_rationale": 1,
+        "boundary_evidence": 0,
+        "candidate_confirmed": 1
+      },
+      "m2_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 1,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 1
+      },
+      "m3_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 2,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 2
+      }
+    },
+    "method_explanations": {
+      "m1_gateway_alone": {
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH",
+        "extracted_paths": [
+          "user"
+        ],
+        "explanation_text": "HTTP 403: Decision=DENY, Reason=OWNERSHIP_MISMATCH, Paths=['user']"
+      },
+      "m2_static_taint_alone": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "schema_paths": [
+          "user",
+          "user.resources",
+          "user.resources.name"
+        ],
+        "response_paths": [
+          "targetUser",
+          "targetUser.allDocs",
+          "targetUser.allDocs.name"
+        ],
+        "findings_count": 2,
+        "explanation_text": "Static Finding: Candidate=DIRECT_BOLA, SchemaPath=['user', 'user.resources', 'user.resources.name'], BoundaryUncertainty=True (Lacks JWT caller context)"
+      },
+      "m3_correlated_defense": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 101,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ],
+        "explanation_text": "Correlated Defense: Status=TRUE_POSITIVE_BLOCKED, Rationale=Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked. (Attributed schema path and verified against JWT caller)"
+      }
+    }
+  },
+  {
+    "case_id": "CORPUS-041",
+    "case_name": "Indirect probe of unowned non-existent user collection (Bob -> User 888)",
+    "category": "INDIRECT_BOLA",
+    "syntax_type": "BASIC",
+    "query": "query { user(id: 888) { resources { id name } } }",
+    "variables": {},
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "rubric_scores": {
+      "case_id": "CORPUS-041",
+      "case_name": "Indirect probe of unowned non-existent user collection (Bob -> User 888)",
+      "category": "INDIRECT_BOLA",
+      "m1_score": 2,
+      "m2_score": 6,
+      "m3_score": 8,
+      "max_score": 8,
+      "m1_breakdown": {
+        "path_correctness": 1,
+        "auth_rationale": 0,
+        "boundary_evidence": 0,
+        "candidate_confirmed": 1
+      },
+      "m2_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 1,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 1
+      },
+      "m3_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 2,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 2
+      }
+    },
+    "method_explanations": {
+      "m1_gateway_alone": {
+        "decision": "DENY",
+        "reason": "OBJECT_NOT_FOUND",
+        "extracted_paths": [
+          "user"
+        ],
+        "explanation_text": "HTTP 403: Decision=DENY, Reason=OBJECT_NOT_FOUND, Paths=['user']"
+      },
+      "m2_static_taint_alone": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "schema_paths": [
+          "user",
+          "user.resources",
+          "user.resources.id",
+          "user.resources.name"
+        ],
+        "response_paths": [
+          "user",
+          "user.resources",
+          "user.resources.id",
+          "user.resources.name"
+        ],
+        "findings_count": 2,
+        "explanation_text": "Static Finding: Candidate=DIRECT_BOLA, SchemaPath=['user', 'user.resources', 'user.resources.id', 'user.resources.name'], BoundaryUncertainty=True (Lacks JWT caller context)"
+      },
+      "m3_correlated_defense": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 888,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OBJECT_NOT_FOUND",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OBJECT_NOT_FOUND) and blocked."
+          }
+        ],
+        "explanation_text": "Correlated Defense: Status=TRUE_POSITIVE_BLOCKED, Rationale=Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OBJECT_NOT_FOUND) and blocked. (Attributed schema path and verified against JWT caller)"
+      }
+    }
+  },
+  {
+    "case_id": "CORPUS-051",
+    "case_name": "Legitimate direct access to own profile (Bob -> Bob user 102)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "BASIC",
+    "query": "query { user(id: 102) { id username role } }",
+    "variables": {},
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "rubric_scores": {
+      "case_id": "CORPUS-051",
+      "case_name": "Legitimate direct access to own profile (Bob -> Bob user 102)",
+      "category": "LEGITIMATE_OWNER",
+      "m1_score": 4,
+      "m2_score": 6,
+      "m3_score": 8,
+      "max_score": 8,
+      "m1_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 1,
+        "boundary_evidence": 0,
+        "candidate_confirmed": 1
+      },
+      "m2_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 1,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 1
+      },
+      "m3_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 2,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 2
+      }
+    },
+    "method_explanations": {
+      "m1_gateway_alone": {
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH",
+        "extracted_paths": [
+          "user"
+        ],
+        "explanation_text": "HTTP 200: Decision=ALLOW, Reason=OWNER_MATCH, Paths=['user']"
+      },
+      "m2_static_taint_alone": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "schema_paths": [
+          "user",
+          "user.id",
+          "user.username",
+          "user.role"
+        ],
+        "response_paths": [
+          "user",
+          "user.id",
+          "user.username",
+          "user.role"
+        ],
+        "findings_count": 1,
+        "explanation_text": "Static Finding: Candidate=DIRECT_BOLA, SchemaPath=['user', 'user.id', 'user.username', 'user.role'], BoundaryUncertainty=True (Lacks JWT caller context)"
+      },
+      "m3_correlated_defense": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "user",
+            "object_type": "User",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ],
+        "explanation_text": "Correlated Defense: Status=RUNTIME_PROTECTED_ALLOWED, Rationale=Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH). (Attributed schema path and verified against JWT caller)"
+      }
+    }
+  },
+  {
+    "case_id": "CORPUS-060",
+    "case_name": "Variable-driven legitimate access (Bob -> Bob doc 102)",
+    "category": "LEGITIMATE_OWNER",
+    "syntax_type": "VARIABLE",
+    "query": "query GetMyDoc($id: Int!) { resource(id: $id) { id name } }",
+    "variables": {
+      "id": 102
+    },
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "rubric_scores": {
+      "case_id": "CORPUS-060",
+      "case_name": "Variable-driven legitimate access (Bob -> Bob doc 102)",
+      "category": "LEGITIMATE_OWNER",
+      "m1_score": 4,
+      "m2_score": 6,
+      "m3_score": 8,
+      "max_score": 8,
+      "m1_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 1,
+        "boundary_evidence": 0,
+        "candidate_confirmed": 1
+      },
+      "m2_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 1,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 1
+      },
+      "m3_breakdown": {
+        "path_correctness": 2,
+        "auth_rationale": 2,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 2
+      }
+    },
+    "method_explanations": {
+      "m1_gateway_alone": {
+        "decision": "ALLOW",
+        "reason": "OWNER_MATCH",
+        "extracted_paths": [
+          "resource"
+        ],
+        "explanation_text": "HTTP 200: Decision=ALLOW, Reason=OWNER_MATCH, Paths=['resource']"
+      },
+      "m2_static_taint_alone": {
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "schema_paths": [
+          "resource",
+          "resource.id",
+          "resource.name"
+        ],
+        "response_paths": [
+          "resource",
+          "resource.id",
+          "resource.name"
+        ],
+        "findings_count": 1,
+        "explanation_text": "Static Finding: Candidate=DIRECT_BOLA, SchemaPath=['resource', 'resource.id', 'resource.name'], BoundaryUncertainty=True (Lacks JWT caller context)"
+      },
+      "m3_correlated_defense": {
+        "prediction": "BENIGN",
+        "attack_type": "NONE",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "ALLOW",
+            "runtime_reason": "OWNER_MATCH",
+            "risk_level": "LOW",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "RUNTIME_PROTECTED_ALLOWED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
+          }
+        ],
+        "explanation_text": "Correlated Defense: Status=RUNTIME_PROTECTED_ALLOWED, Rationale=Static candidate DIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH). (Attributed schema path and verified against JWT caller)"
+      }
+    }
+  },
+  {
+    "case_id": "CORPUS-106",
+    "case_name": "Empty query document string",
+    "category": "MALFORMED_SYNTAX",
+    "syntax_type": "EMPTY_INPUT",
+    "query": "",
+    "variables": {},
+    "ground_truth_security": "MALFORMED",
+    "ground_truth_attack_type": "SYNTAX_ERROR",
+    "rubric_scores": {
+      "case_id": "CORPUS-106",
+      "case_name": "Empty query document string",
+      "category": "MALFORMED_SYNTAX",
+      "m1_score": 3,
+      "m2_score": 4,
+      "m3_score": 7,
+      "max_score": 8,
+      "m1_breakdown": {
+        "path_correctness": 1,
+        "auth_rationale": 1,
+        "boundary_evidence": 0,
+        "candidate_confirmed": 1
+      },
+      "m2_breakdown": {
+        "path_correctness": 1,
+        "auth_rationale": 1,
+        "boundary_evidence": 1,
+        "candidate_confirmed": 1
+      },
+      "m3_breakdown": {
+        "path_correctness": 1,
+        "auth_rationale": 2,
+        "boundary_evidence": 2,
+        "candidate_confirmed": 2
+      }
+    },
+    "method_explanations": {
+      "m1_gateway_alone": {
+        "decision": "ERROR",
+        "reason": "NO_OBJECTS",
+        "extracted_paths": [],
+        "explanation_text": "HTTP 200: Decision=ERROR, Reason=NO_OBJECTS, Paths=[]"
+      },
+      "m2_static_taint_alone": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "schema_paths": [],
+        "response_paths": [],
+        "findings_count": 0,
+        "explanation_text": "Static Finding: Candidate=SYNTAX_ERROR, SchemaPath=[], BoundaryUncertainty=True (Lacks JWT caller context)"
+      },
+      "m3_correlated_defense": {
+        "prediction": "MALFORMED",
+        "attack_type": "SYNTAX_ERROR",
+        "correlations": [],
+        "explanation_text": "Correlated Defense: Status=BENIGN, Rationale=No objects (Attributed schema path and verified against JWT caller)"
+      }
+    }
+  }
+]

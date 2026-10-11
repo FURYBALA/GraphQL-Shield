@@ -271,6 +271,7 @@ class AnalysisFinding:
     risk_assessment: str               # "HIGH", "MEDIUM", "LOW"
     explanation: str
     assumptions_and_uncertainties: Tuple[str, ...] = dc_field(default_factory=tuple)
+    explicit_response_path: Optional[str] = None
 
     @property
     def schema_path(self) -> str:
@@ -278,7 +279,7 @@ class AnalysisFinding:
 
     @property
     def response_path(self) -> str:
-        return self.propagation_context.field_path
+        return self.explicit_response_path or self.propagation_context.field_path
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -431,6 +432,7 @@ class TaintAnalysisModel:
         source: Optional[TaintSource],
         sink: SensitiveSink,
         boundary_evidence: BoundaryEvidence,
+        response_path: Optional[str] = None,
     ) -> AnalysisFinding:
         """
         Synthesizes a formal AnalysisFinding from context, source, sink, and boundary evidence.
@@ -488,6 +490,7 @@ class TaintAnalysisModel:
             risk_assessment=risk,
             explanation=explanation,
             assumptions_and_uncertainties=tuple(sorted(set(uncertainties))),
+            explicit_response_path=response_path,
         )
 
     # -------------------------------------------------------------------------

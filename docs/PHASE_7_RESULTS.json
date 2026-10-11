@@ -1,0 +1,484 @@
+{
+  "metadata": {
+    "evaluation_phase": "Phase 7",
+    "research_question": "Does context-sensitive AST-driven taint analysis correlated with runtime authorization evidence provide more useful source-to-sink explanations and authorization-boundary evidence than the existing gateway alone, without changing existing authorization outcomes?",
+    "timestamp": "2026-10-11T12:07:12Z",
+    "corpus_file": "data/ground_truth_corpus.json",
+    "total_corpus_cases": 115,
+    "valid_security_cases": 105,
+    "malformed_syntax_cases": 10,
+    "representative_explanation_cases": 12
+  },
+  "dimension_1_security_detection": {
+    "m1_gateway_alone": {
+      "method_name": "Method 1: Gateway Alone",
+      "total_evaluated": 105,
+      "true_positives": 52,
+      "false_positives": 0,
+      "true_negatives": 53,
+      "false_negatives": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "accuracy": 1.0,
+      "legitimate_denial_rate": 0.0,
+      "direct_bola_recall": 1.0,
+      "indirect_bola_recall": 1.0
+    },
+    "m2_static_taint_alone": {
+      "method_name": "Method 2: Static Taint Alone",
+      "total_evaluated": 105,
+      "true_positives": 52,
+      "false_positives": 43,
+      "true_negatives": 10,
+      "false_negatives": 0,
+      "precision": 0.5474,
+      "recall": 1.0,
+      "f1_score": 0.7075,
+      "accuracy": 0.5905,
+      "legitimate_denial_rate": 0.8113,
+      "direct_bola_recall": 1.0,
+      "indirect_bola_recall": 1.0
+    },
+    "m3_correlated_defense": {
+      "method_name": "Method 3: Correlated Defense",
+      "total_evaluated": 105,
+      "true_positives": 52,
+      "false_positives": 0,
+      "true_negatives": 53,
+      "false_negatives": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "accuracy": 1.0,
+      "legitimate_denial_rate": 0.0,
+      "direct_bola_recall": 1.0,
+      "indirect_bola_recall": 1.0
+    }
+  },
+  "dimension_2_path_attribution": {
+    "m1_gateway_alone": {
+      "method_name": "Method 1: Gateway Alone",
+      "total_cases": 115,
+      "exact_matches": 59,
+      "partial_matches": 34,
+      "incorrect_paths": 2,
+      "missing_paths": 10,
+      "unsupported_cases": 10,
+      "exact_match_rate": 0.5619,
+      "attribution_coverage_rate": 0.8857
+    },
+    "m2_static_taint_alone": {
+      "method_name": "Method 2: Static Taint Alone",
+      "total_cases": 115,
+      "exact_matches": 94,
+      "partial_matches": 11,
+      "incorrect_paths": 0,
+      "missing_paths": 0,
+      "unsupported_cases": 10,
+      "exact_match_rate": 0.8952,
+      "attribution_coverage_rate": 1.0
+    },
+    "m3_correlated_defense": {
+      "method_name": "Method 3: Correlated Defense",
+      "total_cases": 115,
+      "exact_matches": 94,
+      "partial_matches": 11,
+      "incorrect_paths": 0,
+      "missing_paths": 0,
+      "unsupported_cases": 10,
+      "exact_match_rate": 0.8952,
+      "attribution_coverage_rate": 1.0
+    }
+  },
+  "dimension_3_boundary_evidence": {
+    "m1_gateway_alone": {
+      "method_name": "Method 1: Gateway Alone",
+      "total_cases": 105,
+      "structured_criteria_reported": 0,
+      "principal_binding_tracked": 0,
+      "target_binding_tracked": 0,
+      "mandatory_path_tracked": 0,
+      "operation_coverage_tracked": 0,
+      "explicit_uncertainties_stated": 0,
+      "structured_evidence_rate": 0.0,
+      "uncertainty_transparency_rate": 0.0
+    },
+    "m2_static_taint_alone": {
+      "method_name": "Method 2: Static Taint Alone",
+      "total_cases": 105,
+      "structured_criteria_reported": 105,
+      "principal_binding_tracked": 105,
+      "target_binding_tracked": 105,
+      "mandatory_path_tracked": 105,
+      "operation_coverage_tracked": 105,
+      "explicit_uncertainties_stated": 105,
+      "structured_evidence_rate": 1.0,
+      "uncertainty_transparency_rate": 1.0
+    },
+    "m3_correlated_defense": {
+      "method_name": "Method 3: Correlated Defense",
+      "total_cases": 105,
+      "structured_criteria_reported": 105,
+      "principal_binding_tracked": 105,
+      "target_binding_tracked": 105,
+      "mandatory_path_tracked": 105,
+      "operation_coverage_tracked": 105,
+      "explicit_uncertainties_stated": 105,
+      "structured_evidence_rate": 1.0,
+      "uncertainty_transparency_rate": 1.0
+    }
+  },
+  "dimension_4_explanation_quality": {
+    "rubric_max_score": 8,
+    "m1_mean_score": 3.33,
+    "m2_mean_score": 5.75,
+    "m3_mean_score": 7.83,
+    "m1_percentage": 41.6,
+    "m2_percentage": 71.9,
+    "m3_percentage": 97.9,
+    "scores_by_case": [
+      {
+        "case_id": "CORPUS-001",
+        "case_name": "Direct cross-user document lookup (Alice -> Bob doc)",
+        "category": "DIRECT_BOLA",
+        "m1_score": 4,
+        "m2_score": 6,
+        "m3_score": 8,
+        "max_score": 8,
+        "m1_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 1,
+          "boundary_evidence": 0,
+          "candidate_confirmed": 1
+        },
+        "m2_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 1,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 1
+        },
+        "m3_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 2,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 2
+        }
+      },
+      {
+        "case_id": "CORPUS-011",
+        "case_name": "Direct cross-user profile access (Bob -> Admin Charlie profile)",
+        "category": "DIRECT_BOLA",
+        "m1_score": 4,
+        "m2_score": 6,
+        "m3_score": 8,
+        "max_score": 8,
+        "m1_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 1,
+          "boundary_evidence": 0,
+          "candidate_confirmed": 1
+        },
+        "m2_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 1,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 1
+        },
+        "m3_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 2,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 2
+        }
+      },
+      {
+        "case_id": "CORPUS-018",
+        "case_name": "Variable with default value direct BOLA (Alice -> Bob doc)",
+        "category": "DIRECT_BOLA",
+        "m1_score": 4,
+        "m2_score": 6,
+        "m3_score": 8,
+        "max_score": 8,
+        "m1_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 1,
+          "boundary_evidence": 0,
+          "candidate_confirmed": 1
+        },
+        "m2_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 1,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 1
+        },
+        "m3_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 2,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 2
+        }
+      },
+      {
+        "case_id": "CORPUS-019",
+        "case_name": "Reconnaissance probe for non-existent unowned ID (Alice -> ID 999)",
+        "category": "DIRECT_BOLA",
+        "m1_score": 3,
+        "m2_score": 6,
+        "m3_score": 8,
+        "max_score": 8,
+        "m1_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 0,
+          "boundary_evidence": 0,
+          "candidate_confirmed": 1
+        },
+        "m2_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 1,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 1
+        },
+        "m3_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 2,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 2
+        }
+      },
+      {
+        "case_id": "CORPUS-020",
+        "case_name": "Reconnaissance probe for non-existent unowned ID (Bob -> ID 888)",
+        "category": "DIRECT_BOLA",
+        "m1_score": 3,
+        "m2_score": 6,
+        "m3_score": 8,
+        "max_score": 8,
+        "m1_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 0,
+          "boundary_evidence": 0,
+          "candidate_confirmed": 1
+        },
+        "m2_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 1,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 1
+        },
+        "m3_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 2,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 2
+        }
+      },
+      {
+        "case_id": "CORPUS-023",
+        "case_name": "Indirect BOLA via User.resources collection (Alice -> Bob resources)",
+        "category": "INDIRECT_BOLA",
+        "m1_score": 3,
+        "m2_score": 6,
+        "m3_score": 8,
+        "max_score": 8,
+        "m1_breakdown": {
+          "path_correctness": 1,
+          "auth_rationale": 1,
+          "boundary_evidence": 0,
+          "candidate_confirmed": 1
+        },
+        "m2_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 1,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 1
+        },
+        "m3_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 2,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 2
+        }
+      },
+      {
+        "case_id": "CORPUS-028",
+        "case_name": "Nested parameterized BOLA under own user node (Bob -> Alice doc)",
+        "category": "INDIRECT_BOLA",
+        "m1_score": 3,
+        "m2_score": 5,
+        "m3_score": 7,
+        "max_score": 8,
+        "m1_breakdown": {
+          "path_correctness": 1,
+          "auth_rationale": 1,
+          "boundary_evidence": 0,
+          "candidate_confirmed": 1
+        },
+        "m2_breakdown": {
+          "path_correctness": 1,
+          "auth_rationale": 1,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 1
+        },
+        "m3_breakdown": {
+          "path_correctness": 1,
+          "auth_rationale": 2,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 2
+        }
+      },
+      {
+        "case_id": "CORPUS-033",
+        "case_name": "Aliased indirect BOLA on collection (Bob -> Alice user)",
+        "category": "INDIRECT_BOLA",
+        "m1_score": 3,
+        "m2_score": 6,
+        "m3_score": 8,
+        "max_score": 8,
+        "m1_breakdown": {
+          "path_correctness": 1,
+          "auth_rationale": 1,
+          "boundary_evidence": 0,
+          "candidate_confirmed": 1
+        },
+        "m2_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 1,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 1
+        },
+        "m3_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 2,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 2
+        }
+      },
+      {
+        "case_id": "CORPUS-041",
+        "case_name": "Indirect probe of unowned non-existent user collection (Bob -> User 888)",
+        "category": "INDIRECT_BOLA",
+        "m1_score": 2,
+        "m2_score": 6,
+        "m3_score": 8,
+        "max_score": 8,
+        "m1_breakdown": {
+          "path_correctness": 1,
+          "auth_rationale": 0,
+          "boundary_evidence": 0,
+          "candidate_confirmed": 1
+        },
+        "m2_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 1,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 1
+        },
+        "m3_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 2,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 2
+        }
+      },
+      {
+        "case_id": "CORPUS-051",
+        "case_name": "Legitimate direct access to own profile (Bob -> Bob user 102)",
+        "category": "LEGITIMATE_OWNER",
+        "m1_score": 4,
+        "m2_score": 6,
+        "m3_score": 8,
+        "max_score": 8,
+        "m1_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 1,
+          "boundary_evidence": 0,
+          "candidate_confirmed": 1
+        },
+        "m2_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 1,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 1
+        },
+        "m3_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 2,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 2
+        }
+      },
+      {
+        "case_id": "CORPUS-060",
+        "case_name": "Variable-driven legitimate access (Bob -> Bob doc 102)",
+        "category": "LEGITIMATE_OWNER",
+        "m1_score": 4,
+        "m2_score": 6,
+        "m3_score": 8,
+        "max_score": 8,
+        "m1_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 1,
+          "boundary_evidence": 0,
+          "candidate_confirmed": 1
+        },
+        "m2_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 1,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 1
+        },
+        "m3_breakdown": {
+          "path_correctness": 2,
+          "auth_rationale": 2,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 2
+        }
+      },
+      {
+        "case_id": "CORPUS-106",
+        "case_name": "Empty query document string",
+        "category": "MALFORMED_SYNTAX",
+        "m1_score": 3,
+        "m2_score": 4,
+        "m3_score": 7,
+        "max_score": 8,
+        "m1_breakdown": {
+          "path_correctness": 1,
+          "auth_rationale": 1,
+          "boundary_evidence": 0,
+          "candidate_confirmed": 1
+        },
+        "m2_breakdown": {
+          "path_correctness": 1,
+          "auth_rationale": 1,
+          "boundary_evidence": 1,
+          "candidate_confirmed": 1
+        },
+        "m3_breakdown": {
+          "path_correctness": 1,
+          "auth_rationale": 2,
+          "boundary_evidence": 2,
+          "candidate_confirmed": 2
+        }
+      }
+    ]
+  },
+  "dimension_5_runtime_overhead": {
+    "cold_start_ms": 0.441,
+    "warmed_mean_ms": 0.285,
+    "warmed_median_ms": 0.276,
+    "warmed_min_ms": 0.048,
+    "warmed_max_ms": 0.78,
+    "warmed_p95_ms": 0.44,
+    "warmed_stdev_ms": 0.092,
+    "total_profiling_samples": 345
+  },
+  "dimension_6_behavioral_compatibility": {
+    "valid_security_cases_evaluated": 105,
+    "matching_gateway_decisions": 105,
+    "valid_security_decision_preservation_rate": 100.0,
+    "zero_divergence_preservation_rate": 100.0,
+    "is_backward_compatible": true
+  }
+}

@@ -312,7 +312,17 @@ class TaintPropagationEngine:
         op_type = target_op.operation.value.lower()
         root_type_name = self.graph.root_operations.get(op_type, "Query")
 
-        # 3. Context state accumulator
+        # 3. Resolve effective variables: client variables take precedence, AST defaults fill omitted variables
+        effective_vars = dict(variables) if isinstance(variables, dict) else {}
+        if target_op.variable_definitions:
+            for var_def in target_op.variable_definitions:
+                var_name = var_def.variable.name.value
+                if var_name not in effective_vars and var_def.default_value is not None:
+                    val, _ = resolve_ast_value(var_def.default_value, {})
+                    if val is not None:
+                        effective_vars[var_name] = val
+
+        # 4. Context state accumulator
         steps: List[PropagationStep] = []
         findings: List[AnalysisFinding] = []
         identified_sources: List[TaintSource] = []
@@ -322,7 +332,7 @@ class TaintPropagationEngine:
             "has_cycles": False,
         }
 
-        # 4. Recursive traversal
+        # 5. Recursive traversal
         if target_op.selection_set:
             self._traverse_selection_set(
                 selection_set=target_op.selection_set,
@@ -335,7 +345,7 @@ class TaintPropagationEngine:
                 fragment_stack=set(),
                 op_name=op_name,
                 op_type=op_type,
-                variables=variables,
+                variables=effective_vars,
                 fragments=fragments,
                 steps=steps,
                 findings=findings,
@@ -537,7 +547,9 @@ class TaintPropagationEngine:
             else:
                 evidence = self.taint_model._default_static_evidence(ctx, introduced_source, sink)
 
-            finding = self.taint_model.evaluate_candidate(ctx, introduced_source, sink, evidence)
+            finding = self.taint_model.evaluate_candidate(
+                ctx, introduced_source, sink, evidence, response_path=curr_response_path
+            )
             findings.append(finding)
         else:
             evidence = BoundaryEvidence(
@@ -570,6 +582,7 @@ class TaintPropagationEngine:
                     risk_assessment="LOW",
                     explanation=f"Public or infrastructure field '{curr_schema_path}' does not require BOLA authorization.",
                     assumptions_and_uncertainties=(),
+                    explicit_response_path=curr_response_path,
                 )
                 findings.append(safe_finding)
                 finding = safe_finding
