@@ -1,10 +1,19 @@
 import json
+import time
 from fastapi import Request, HTTPException, Depends
+from app.config import settings
 from app.core.dependencies import get_current_user
 from .object_extractor import normalize_query
 from .ownership import resolve_ownership
 from .authorization import AuthorizationContext, PolicyEngine
-from .audit import log_decision
+from .audit import log_decision, record_taint_audit
+from .taint_engine import analyze_query_taint
+from .taint_correlation import (
+    sanitize_variables,
+    correlate_path_decision,
+    CorrelationStatus,
+    PathCorrelation,
+)
 
 policy_engine = PolicyEngine()
 
@@ -12,6 +21,7 @@ async def bola_enforcement_middleware(request: Request, current_user: dict = Dep
     """
     Centralized Security Gateway dependency.
     Runs BEFORE the GraphQL backend, blocking BOLA attacks at the edge.
+    Now integrates Phase 5 Context-Sensitive AST Taint Analysis in audit-only mode.
     """
     if request.method != "POST":
         return
@@ -24,16 +34,59 @@ async def bola_enforcement_middleware(request: Request, current_user: dict = Dep
 
     query = data.get("query", "")
     variables = data.get("variables", {})
+    operation_name = data.get("operationName")
+
+    # Phase 5: AST-Driven Context-Sensitive Taint Analysis (Audit-Only)
+    mode = getattr(settings, "TAINT_ANALYSIS_MODE", "audit_only")
+    taint_report = None
+    taint_duration_ms = 0.0
+
+    if mode != "disabled" and isinstance(query, str) and query.strip():
+        start_time = time.perf_counter()
+        try:
+            sanitized_vars = sanitize_variables(variables) if isinstance(variables, dict) else {}
+            taint_report = analyze_query_taint(
+                query=query,
+                variables=sanitized_vars,
+                operation_name=operation_name,
+            )
+            taint_duration_ms = round((time.perf_counter() - start_time) * 1000, 3)
+        except Exception as exc:
+            taint_duration_ms = round((time.perf_counter() - start_time) * 1000, 3)
+            # Fail-safe: internal analyzer errors must never crash live requests
+            print(f"[TAINT ANALYSIS WARNING] Analysis error: {type(exc).__name__}: {exc}")
+            taint_report = None
+
+    # Attach to request state for inspection, testing, and downstream audit
+    if hasattr(request, "state"):
+        request.state.taint_report = taint_report
+        request.state.taint_duration_ms = taint_duration_ms
+        request.state.taint_mode = mode
+        request.state.taint_correlations = []
+
+    user_id = current_user.get("user_id")
+    role = current_user.get("role", "user")
 
     normalized = normalize_query(query, variables)
     
     if not normalized or not normalized["objects"]:
+        # Record audit-only static analysis event if findings were identified on unparameterized query
+        if taint_report and mode != "disabled":
+            record_taint_audit({
+                "operation_name": operation_name or taint_report.operation_name,
+                "query_snippet": query[:120].strip(),
+                "findings_count": len(taint_report.findings),
+                "direct_bola_candidates": len(taint_report.direct_bola_candidates),
+                "indirect_bola_candidates": len(taint_report.indirect_bola_candidates),
+                "user_id": user_id,
+                "role": role,
+                "mode": mode,
+                "duration_ms": taint_duration_ms,
+                "correlations": [],
+            })
         return
 
-    user_id = current_user.get("user_id")
-    role = current_user.get("role", "user")
-    
-    # Phase 6: Contextual Policy Evaluation
+    # Phase 6 & Phase 5: Contextual Policy Evaluation with Taint Correlation
     for obj in normalized["objects"]:
         object_id = obj["id"]
         object_type = obj["type"]
@@ -62,6 +115,38 @@ async def bola_enforcement_middleware(request: Request, current_user: dict = Dep
         
         # Evaluate policy engine rules
         result = policy_engine.evaluate(context)
+
+        # Correlate taint candidate with runtime authorization decision
+        correlation = correlate_path_decision(
+            path=path,
+            object_type=object_type,
+            object_id=object_id,
+            runtime_result=result,
+            taint_report=taint_report,
+        )
+        if hasattr(request, "state") and hasattr(request.state, "taint_correlations"):
+            request.state.taint_correlations.append(correlation)
+
+        # Record structured audit-only taint log
+        if mode != "disabled":
+            record_taint_audit({
+                "operation_name": operation_name or (taint_report.operation_name if taint_report else None),
+                "schema_path": path,
+                "response_path": path,
+                "object_type": object_type,
+                "object_id": object_id,
+                "user_id": user_id,
+                "role": role,
+                "mode": mode,
+                "duration_ms": taint_duration_ms,
+                "finding_category": correlation.static_candidate_kind or "NONE",
+                "runtime_decision": result["decision"],
+                "runtime_reason": result["reason"],
+                "risk_score": result["risk_score"],
+                "risk_level": result["risk_level"],
+                "correlation_status": correlation.status.value,
+                "rationale": correlation.rationale,
+            })
         
         # Live Security Debug View (Terminal Logging)
         print("\n" + "="*50)
@@ -88,6 +173,15 @@ async def bola_enforcement_middleware(request: Request, current_user: dict = Dep
         print(f"Decision: {result['decision']}")
         print(f"Reason:   {result['reason']}")
         print(f"Risk:     {result['risk_level']} ({result['risk_score']}/100)")
+        print(f"\n[TAINT ANALYSIS (AUDIT ONLY)]")
+        print(f"Mode:        {mode}")
+        if taint_report:
+            print(f"Duration:    {taint_duration_ms}ms")
+            print(f"Candidates:  {len(taint_report.direct_bola_candidates)} direct, {len(taint_report.indirect_bola_candidates)} indirect")
+            print(f"Correlation: {correlation.status.value}")
+            print(f"Rationale:   {correlation.rationale}")
+        else:
+            print(f"Status:      Skipped or unanalyzable (fail-safe active)")
         
         # Audit log the decision (enforcement must never depend on audit success)
         try:

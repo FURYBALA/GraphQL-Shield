@@ -32,3 +32,34 @@ def log_decision(user_id: int, role: str, operation: str, object_type: str, obje
             conn.commit()
     finally:
         conn.close()
+
+
+# -----------------------------------------------------------------------------
+# Structured Taint Analysis Audit Log Store (Phase 5 Audit-Only Mode)
+# -----------------------------------------------------------------------------
+
+_TAINT_AUDIT_LOGS: list = []
+MAX_TAINT_AUDIT_LOGS: int = 1000
+
+
+def record_taint_audit(record: dict) -> None:
+    """
+    Records a structured taint analysis finding or correlation event in memory.
+    Ensures memory boundedness and thread-safe appending.
+    """
+    global _TAINT_AUDIT_LOGS
+    if len(_TAINT_AUDIT_LOGS) >= MAX_TAINT_AUDIT_LOGS:
+        _TAINT_AUDIT_LOGS.pop(0)
+    _TAINT_AUDIT_LOGS.append(record)
+
+
+def get_taint_audit_records() -> list:
+    """Returns a shallow copy of recorded taint analysis audit entries."""
+    return list(_TAINT_AUDIT_LOGS)
+
+
+def clear_taint_audit_records() -> None:
+    """Clears the in-memory taint audit store (useful for tests)."""
+    global _TAINT_AUDIT_LOGS
+    _TAINT_AUDIT_LOGS.clear()
+

@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./shield.db"
     JWT_SECRET: str = "super_secret_dev_key"
     JWT_ALGORITHM: str = "HS256"
+    TAINT_ANALYSIS_MODE: str = "audit_only"
 
     class Config:
         env_file = ".env"

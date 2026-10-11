@@ -272,10 +272,20 @@ class AnalysisFinding:
     explanation: str
     assumptions_and_uncertainties: Tuple[str, ...] = dc_field(default_factory=tuple)
 
+    @property
+    def schema_path(self) -> str:
+        return self.propagation_context.field_path
+
+    @property
+    def response_path(self) -> str:
+        return self.propagation_context.field_path
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "finding_id": self.finding_id,
             "candidate_kind": self.candidate_kind.value,
+            "schema_path": self.schema_path,
+            "response_path": self.response_path,
             "taint_source": self.taint_source.to_dict() if self.taint_source else None,
             "propagation_context": self.propagation_context.to_dict(),
             "sensitive_sink": self.sensitive_sink.to_dict(),

@@ -165,6 +165,21 @@ def get_security_graph_endpoint(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Admin access required")
     return get_security_graph().to_dict()
 
+from app.security.audit import get_taint_audit_records
+
+@app.get("/api/v1/security/taint-audit")
+def get_taint_audit_endpoint(current_user: dict = Depends(get_current_user)):
+    """
+    Inspection endpoint exposing recent context-sensitive taint analysis audit events.
+    Restricted to ADMIN users.
+    """
+    if current_user.get("role", "").upper() != "ADMIN":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return {
+        "mode": getattr(settings, "TAINT_ANALYSIS_MODE", "audit_only"),
+        "records": get_taint_audit_records()
+    }
+
 # Secure Strawberry GraphQL router protected by the BOLA security gateway
 graphql_app = GraphQLRouter(schema, context_getter=None, dependencies=[Depends(bola_enforcement_middleware)])
 app.include_router(graphql_app, prefix="/graphql")
