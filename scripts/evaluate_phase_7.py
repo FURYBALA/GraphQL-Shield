@@ -756,12 +756,16 @@ def run_phase_7_evaluation(
                 cov_op += 1
                 # But static analysis alone CANNOT verify criteria in program (lacks JWT & DB state)
             elif m_key == "method_3_correlated":
-                # Correlated defense represents criteria AND verifies them via dynamic policy correlation
-                p_bound += 1
-                t_bound += 1
-                mand += 1
-                cov_op += 1
-                verified_count += 1
+                # Correlated defense represents criteria AND verifies them via dynamic policy correlation.
+                # A criterion is verified in the program ONLY if actual runtime policy evidence was evaluated for this case.
+                corrs = r["method_3_correlated"].get("correlations", [])
+                if corrs:
+                    # Verified from actual runtime policy execution on this case's objects
+                    p_bound += 1
+                    t_bound += 1
+                    mand += 1
+                    cov_op += 1
+                    verified_count += 1
 
         rep_rate = represented_count / total_valid if total_valid > 0 else 0.0
         ver_rate = verified_count / total_valid if total_valid > 0 else 0.0

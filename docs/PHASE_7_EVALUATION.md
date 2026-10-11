@@ -112,18 +112,19 @@ To ensure scientific honesty, the evaluation strictly distinguishes between:
 | Evidence Dimension | Method 1: Gateway Alone | Method 2: Static Alone | Method 3: Correlated Defense |
 | :--- | :---: | :---: | :---: |
 | **Criteria Represented in Report** | **0.0%** (0 / 105) | **100.0%** (105 / 105) | **100.0%** (105 / 105) |
-| **Criteria Verified in Program** | **0.0%** (0 / 105)* | **0.0%** (0 / 105) | **100.0%** (105 / 105) |
-| **Principal Binding Tracked** | 0 / 105 | 105 / 105 | 105 / 105 |
-| **Target Binding Tracked** | 0 / 105 | 105 / 105 | 105 / 105 |
-| **Mandatory Path Tracked** | 0 / 105 | 105 / 105 | 105 / 105 |
-| **Operation Coverage Tracked** | 0 / 105 | 105 / 105 | 105 / 105 |
+| **Criteria Verified in Program** | **0.0%** (0 / 105)* | **0.0%** (0 / 105) | **90.5%** (95 / 105)** |
+| **Principal Binding Tracked** | 0 / 105 | 105 / 105 | 95 / 105 |
+| **Target Binding Tracked** | 0 / 105 | 105 / 105 | 95 / 105 |
+| **Mandatory Path Tracked** | 0 / 105 | 105 / 105 | 95 / 105 |
+| **Operation Coverage Tracked** | 0 / 105 | 105 / 105 | 95 / 105 |
 | **Explicit Uncertainties Disclosed**| **0.0%** (0 / 105) | **100.0%** (105 / 105) | **100.0%** (105 / 105) |
 
-*\*Note: Gateway Alone executes an implicit SQL ownership query during request handling, but does not represent or verify a formal, query-wide boundary model in its outputs or reports.*
+*\*Note: Gateway Alone executes an implicit SQL ownership query during request handling, but does not represent or verify a formal, query-wide boundary model in its outputs or reports.*  
+*\*\*Note: Correlated Defense dynamically verifies criteria from actual runtime policy evaluations on all 95 protected domain object cases (100.0% of cases requiring authorization). The remaining 10 valid cases are public infrastructure/introspection queries that touch no protected entities and thus require no runtime authorization boundary.*
 
 #### Empirical Finding:
 1. **Static Taint Alone (Method 2)** achieves **100.0% criteria representation**, but **0.0% verification in the program**. Because static analysis cannot access caller JWT tokens or live database ownership records, it appropriately marks boundaries as unverified and explicitly discloses uncertainties.
-2. **Correlated Defense (Method 3)** achieves both **100.0% criteria representation** AND **100.0% verification in the program**, linking static boundary structure with runtime policy evaluation.
+2. **Correlated Defense (Method 3)** achieves **100.0% criteria representation** across all valid cases, and dynamically verifies all 4 criteria in the program for **95 / 95 (100.0%) of protected domain object cases** (90.5% of all valid cases, with the remaining 10 being safe public queries requiring no authorization check).
 3. **Gateway Alone (Method 1)** provides **0.0% structured representation**, emitting only binary ALLOW/DENY decisions and opaque string reasons without formal boundary evidence.
 
 ---

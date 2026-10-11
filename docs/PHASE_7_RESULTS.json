@@ -2,7 +2,7 @@
   "metadata": {
     "evaluation_phase": "Phase 7",
     "research_question": "Does context-sensitive AST-driven taint analysis correlated with runtime authorization evidence provide more useful source-to-sink explanations and authorization-boundary evidence than the existing gateway alone, without changing existing authorization outcomes?",
-    "timestamp": "2026-10-11T12:15:30Z",
+    "timestamp": "2026-10-11T12:24:26Z",
     "corpus_file": "data/ground_truth_corpus.json",
     "total_corpus_cases": 115,
     "valid_security_cases": 105,
@@ -124,13 +124,13 @@
       "method_name": "Method 3: Correlated Defense",
       "total_cases": 105,
       "criteria_represented_in_report": 105,
-      "criteria_verified_in_program": 105,
+      "criteria_verified_in_program": 95,
       "representation_rate": 1.0,
-      "verification_rate": 1.0,
-      "principal_binding_tracked": 105,
-      "target_binding_tracked": 105,
-      "mandatory_path_tracked": 105,
-      "operation_coverage_tracked": 105,
+      "verification_rate": 0.9048,
+      "principal_binding_tracked": 95,
+      "target_binding_tracked": 95,
+      "mandatory_path_tracked": 95,
+      "operation_coverage_tracked": 95,
       "explicit_uncertainties_stated": 105,
       "uncertainty_transparency_rate": 1.0
     }
@@ -473,12 +473,12 @@
     ]
   },
   "dimension_5_runtime_overhead": {
-    "cold_start_ms": 0.341,
-    "warmed_mean_ms": 0.29,
-    "warmed_median_ms": 0.283,
-    "warmed_min_ms": 0.049,
-    "warmed_max_ms": 0.806,
-    "warmed_p95_ms": 0.409,
+    "cold_start_ms": 0.377,
+    "warmed_mean_ms": 0.3,
+    "warmed_median_ms": 0.295,
+    "warmed_min_ms": 0.05,
+    "warmed_max_ms": 0.837,
+    "warmed_p95_ms": 0.434,
     "warmed_stdev_ms": 0.095,
     "total_profiling_samples": 345
   },
