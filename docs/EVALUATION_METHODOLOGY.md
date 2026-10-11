@@ -1,150 +1,170 @@
-# Phase 6: Ground-Truth Dataset and Rigorous Evaluation Methodology
+# Phase 6 & 6.1: Ground-Truth Dataset, Independent Evaluation Audit, and Defect Investigation
 
 ## 1. Executive Summary
 
-Phase 6 establishes a reproducible, scientifically rigorous, and independently labeled evaluation benchmark to measure **Direct and Indirect GraphQL Broken Object Level Authorization (BOLA)** detection across three distinct architectural paradigms:
-1. **Method 1: Existing Gateway Alone** (Dynamic runtime ownership enforcement without taint analysis).
-2. **Method 2: Static Taint Analysis Alone** (AST-driven context-sensitive taint propagation without runtime authentication context).
-3. **Method 3: Correlated Defense** (Context-sensitive AST taint analysis correlated with dynamic runtime gateway policies).
+This document establishes the independent audit, evaluation methodology, and comparative benchmarking framework for **Direct and Indirect GraphQL Broken Object Level Authorization (BOLA)** vulnerabilities in the GraphQL Shield gateway.
 
-The evaluation is conducted on an independently labeled benchmark corpus of **115 test cases** spanning direct attacks, nested collection traversals, aliases, variables, named fragments, inline fragments, multi-root queries, public fields, admin overrides, boundary values, and syntax errors.
+### 1.1. Core Audit Findings
+1. **Benchmark Corpus Scope:** A standardized, version-controlled dataset of **115 test cases** was constructed and validated at `data/ground_truth_corpus.json`.
+2. **Label Independence:** Security ground truth (`VULNERABLE`, `BENIGN`, `MALFORMED`) was assigned independently based on formal access-control policies (ownership and role rules), not from tool predictions.
+3. **Investigation of `CORPUS-018` Defect:** The audit confirmed a genuine authorization bypass defect in `app/security/object_extractor.py`: when GraphQL operations declared variable default values in the query header (e.g., `query GetDoc($target: Int = 102)` with empty variables `{}`), the extractor failed to inspect AST `VariableDefinitionNode.default_value`, returning empty objects and allowing Alice to access Bob's document (HTTP 200).
+4. **Targeted Fix & Verification:** The defect was reproduced with a dedicated regression suite (`tests/test_variable_defaults_regression.py`), safely resolved by merging AST default values into effective variables, and verified across all 147 test cases with zero regressions.
+5. **Rigorous Method Clarification:** We explicitly clarify the semantic distinction between **Request Authorization Enforcement** (Methods 1 & 3) and **Static Vulnerability Detection** (Method 2).
+6. **Honest Novelty Assessment:** With the extractor defect resolved, Correlated Defense and Gateway Alone both achieve **100.0% binary request recall** on this corpus. The research value of Correlated Defense lies in **explainable source-to-sink path attribution**, **formal boundary modeling**, and **structured auditability**, not in higher binary block rates on this schema.
 
 ---
 
-## 2. Threat Model and Labeling Methodology
+## 2. Threat Model and Independent Ground-Truth Formulation
 
 ### 2.1. Threat Model
-- **Adversary Capability:** An authenticated adversary (`user_id = 101` or `102`) issues arbitrary, valid or malformed GraphQL queries over HTTP POST `/graphql`. The attacker may introduce arbitrary GraphQL syntactic constructs (aliases, nested spreads, variables with default values, multiple root fields) to bypass edge inspection.
-- **Security Objective:** Ensure that principals can only access objects they legitimately own (or have explicit administrative rights to access), whether accessed directly via root fields (e.g. `Query.resource(id)`) or indirectly through graph navigation (e.g. `Query.user(id).resources` or `Query.resource(id).children`).
+- **Adversary Capability:** Authenticated users (`alice: 101`, `bob: 102`) submit arbitrary GraphQL queries over HTTP POST `/graphql`. The attacker attempts to view objects belonging to other users or administrators by manipulating object IDs, traversing navigation fields, utilizing aliases, declaring variable defaults, or spreading fragments.
+- **Security Axiom:** An object access request is authorized if and only if:
+  $$\text{Authorized}(u, o) \iff (u.\text{id} == o.\text{owner\_id}) \lor (u.\text{role} == \text{'admin'}) \lor (\text{IsPublic}(o))$$
 
-### 2.2. Independent Ground-Truth Definition
-Ground-truth security labels are established strictly according to the **formal access control specification**, completely decoupled from the predictions of any static analyzer or gateway tool:
-
-- **`VULNERABLE`:** A request where the authenticated principal attempts to access, traverse, or probe an object or collection not owned by that principal (e.g., Alice requesting Bob's document `102`, or Alice querying Bob's `user(id: 102).resources`).
-- **`BENIGN`:** An authorized request where the principal is the legitimate owner (`user_id == owner_id`), holds an administrative override role (`role == 'admin'`), or accesses an unrestricted public field (`Query.health`, schema introspection).
-- **`MALFORMED`:** Syntactically invalid GraphQL documents that violate the GraphQL specification (e.g., unclosed delimiters, unknown schema fields, missing arguments).
-
-**Critical Principle:** No case is labeled vulnerable merely because the static analyzer flags it. Legitimate owner queries parameterized by input arguments (e.g., Alice requesting her own document `101`) are classified as `BENIGN` in the ground truth, even though static taint analysis identifies client input flowing to a sensitive sink.
+### 2.2. Ground-Truth Categorization
+- **`VULNERABLE` (52 cases):** An unauthorized request where the authenticated principal lacks ownership or administrative privilege over the requested entity or collection.
+- **`BENIGN` (53 cases):** An authorized request where the principal is the legitimate owner, an administrator with override rights, or queries a public unrestricted field (`health`, introspection).
+- **`MALFORMED` (10 cases):** Syntactically invalid GraphQL documents that violate the GraphQL specification.
 
 ---
 
-## 3. Benchmark Dataset Composition
+## 3. Dataset Distribution (115 Cases)
 
-The dataset is version-controlled at `data/ground_truth_corpus.json` and comprises **115 distinct test cases**:
-
-| Scenario Category | Count | Ground-Truth Distribution | Syntactic Characteristics |
-| :--- | :---: | :--- | :--- |
-| **Direct BOLA (Unauthorized)** | 22 | 22 Vulnerable | Single-hop root lookups on victim documents, user profiles, folders, and admin logs. Includes aliases, variables, fragments, and unowned ID probes. |
-| **Indirect BOLA (Unauthorized)** | 22 | 22 Vulnerable | Nested collection traversals (`User.resources`), nested parameterized fields (`User.resource(id)`), folder hierarchies (`Resource.children`), and nested alias/fragment spreads. |
-| **Legitimate Owner Access** | 25 | 25 Benign | Direct lookups, collections, nested relationships, and multi-field queries on owned resources (`101`, `201`, `202`, `203`) by Alice or Bob. |
-| **Admin Privileged Access** | 10 | 10 Benign | Administrative inspection by Charlie (`103`) across Alice and Bob objects, verifying authorized cross-tenant overrides. |
-| **Public & Introspection** | 10 | 10 Benign | Unparameterized public health pings, root `__typename`, schema introspection, and type queries. |
-| **Multi-Root Field Selections** | 10 | 5 Vulnerable, 5 Benign | Queries containing dual or triple root selections (e.g., bundling legitimate own objects with unauthorized victim objects or health checks). |
-| **Syntax Errors & Malformed Queries** | 10 | 10 Malformed | Unclosed braces, undefined fields, invalid string literals, missing mandatory arguments, wrong scalar types, and empty bodies. |
-| **Edge Cases & Boundary Conditions** | 6 | 3 Vulnerable, 3 Benign | Boundary IDs (`0`, `-1`), deep multi-hop hierarchies, multi-fragment reuse, and multi-variable binding. |
-| **Total** | **115** | **52 Vulnerable, 53 Benign, 10 Malformed** | Comprehensive coverage across all GraphQL syntactic and operational dimensions. |
+```
+=================================================================
+  GROUND-TRUTH BENCHMARK CORPUS COMPOSITION
+=================================================================
+Total Test Cases Generated : 115
+  Vulnerable (Attack Cases): 52
+    - Direct BOLA Attacks  : 29
+    - Indirect BOLA Attacks: 23
+  Benign (Authorized Cases): 53
+    - Legitimate Owners    : 25
+    - Admin Overrides      : 10
+    - Public / Schema      : 10
+    - Multi-Root Legitimate:  8
+  Malformed (Syntax Errors): 10
+=================================================================
+```
 
 ---
 
-## 4. Multi-Method Comparative Evaluation
+## 4. Method Clarification: What Does Each Method Predict?
 
-### 4.1. Unit of Evaluation
-The unit of evaluation is **one complete GraphQL operation request** evaluated under a specific authenticated principal.
+| Evaluation Method | Input Analyzed | Output / Prediction Meaning | Target Ground-Truth Metric |
+| :--- | :--- | :--- | :--- |
+| **Method 1: Gateway Alone** (Runtime Baseline) | Extracted objects from query + runtime JWT user + SQLite database state. | **Runtime Authorization Decision:** Predicts `VULNERABLE` if the gateway issues an HTTP 403 `DENY`; `BENIGN` if it issues HTTP 200 `ALLOW`. | Request-Level Authorization Enforcement. |
+| **Method 2: Static Taint Alone** (AST Propagation Engine) | Query AST document + variable names/types (zero runtime identity). | **Static Vulnerability Candidate:** Predicts `VULNERABLE` if untrusted input flows into a sensitive sink without verifiable boundary; `BENIGN` if no flow. | Static Threat Detection / Candidate Screening. |
+| **Method 3: Correlated Defense** (Taint + Gateway Boundary) | Query AST + Taint Propagation + Runtime Boundary Evaluation. | **Correlated Authorization Block:** Predicts `VULNERABLE` if a static candidate is confirmed blocked by runtime boundary (`TRUE_POSITIVE_BLOCKED`); `BENIGN` if verified authorized (`RUNTIME_PROTECTED_ALLOWED`). | Explainable Request-Level Defense. |
 
-### 4.2. Comparative Results Summary
+---
 
-| Metric | Method 1: Gateway Alone (Runtime Baseline) | Method 2: Static Taint Alone (AST Analyzer) | Method 3: Correlated Defense (Taint + Gateway) |
+## 5. Investigation and Resolution of `CORPUS-018`
+
+### 5.1. Defect Description
+In `CORPUS-018`:
+```graphql
+query GetDoc($target: Int = 102) {
+  resource(id: $target) {
+    name
+  }
+}
+```
+HTTP Payload: `{"query": "...", "variables": {}}`.
+
+### 5.2. Root Cause Analysis
+1. The GraphQL specification (Section 5.8.3) defines that when a variable is omitted from the request variables dictionary, execution falls back to the declared `default_value` in `VariableDefinitionNode`.
+2. Strawberry GraphQL faithfully followed this specification: when `$target` was omitted, it resolved `id = 102` (Bob's financial record).
+3. However, `app/security/object_extractor.py` only inspected `variables.get("target")`. Because the HTTP JSON dictionary was empty, `variables.get("target")` returned `None`.
+4. As a result, `normalize_query` returned `{"operation": "query", "objects": []}`, causing the gateway to skip authorization checks and allow Alice to view Bob's data (HTTP 200).
+
+### 5.3. Corrective Implementation
+In `app/security/object_extractor.py`:
+```python
+# Resolve effective variable values: explicit variables override AST default values
+effective_vars = dict(variables) if variables else {}
+if definition.variable_definitions:
+    for var_def in definition.variable_definitions:
+        var_name = var_def.variable.name.value
+        if var_name not in effective_vars and var_def.default_value is not None:
+            if isinstance(var_def.default_value, (IntValueNode, StringValueNode)):
+                effective_vars[var_name] = var_def.default_value.value
+```
+
+### 5.4. Regression Verification
+A dedicated test suite was implemented in `tests/test_variable_defaults_regression.py` (4 tests), verifying:
+1. `normalize_query` correctly resolves default values when variables map is empty.
+2. Explicit variables correctly override default values when supplied.
+3. Gateway drops Alice's unauthorized request with HTTP 403.
+4. Gateway allows Alice's request when accessing her own document default with HTTP 200.
+
+---
+
+## 6. Multi-Method Comparative Performance Results
+
+### 6.1. Post-Resolution Performance Table (105 Valid Security Cases)
+
+| Metric | Method 1: Gateway Alone | Method 2: Static Taint Alone | Method 3: Correlated Defense |
 | :--- | :---: | :---: | :---: |
-| **Evaluated Valid Cases** | 105 | 105 | 105 |
-| **True Positives (TP)** | 51 | 52 | 51 |
+| **Evaluated Security Cases** | 105 | 105 | 105 |
+| **True Positives (TP)** | 52 | 52 | 52 |
 | **False Positives (FP)** | 0 | 43 | 0 |
 | **True Negatives (TN)** | 53 | 10 | 53 |
-| **False Negatives (FN)** | 1 | 0 | 1 |
-| **Precision** | **100.0%** | **54.7%** | **100.0%** |
-| **Recall** | **98.1%** | **100.0%** | **98.1%** |
-| **F1-Score** | **0.990** | **0.708** | **0.990** |
-| **Overall Accuracy** | **99.1%** | **59.1%** | **99.1%** |
-| **Legitimate Denial Rate (FP Rate)** | **0.0%** | **81.1%** | **0.0%** |
-| **Direct BOLA Detection Recall** | **96.5%** (28/29) | **100.0%** (29/29) | **96.5%** (28/29) |
+| **False Negatives (FN)** | 0 | 0 | 0 |
+| **Precision** | **100.0%** (52/52) | **54.7%** (52/95) | **100.0%** (52/52) |
+| **Recall** | **100.0%** (52/52) | **100.0%** (52/52) | **100.0%** (52/52) |
+| **F1-Score** | **1.000** | **0.708** | **1.000** |
+| **Overall Accuracy** | **100.0%** (105/105) | **59.1%** (62/105) | **100.0%** (105/105) |
+| **Legitimate Denial Rate (FP Rate)** | **0.0%** (0/53) | **81.1%** (43/53) | **0.0%** (0/53) |
+| **Direct BOLA Detection Recall** | **100.0%** (29/29) | **100.0%** (29/29) | **100.0%** (29/29) |
 | **Indirect BOLA Detection Recall** | **100.0%** (23/23) | **100.0%** (23/23) | **100.0%** (23/23) |
 
----
-
-## 5. Scientific Analysis of Comparative Findings
-
-### 5.1. Method 2 (Static Taint Alone): The "Semantic Blindness" Problem
-- **Strengths:** Achieved **100.0% Recall** across both direct and indirect BOLA cases, successfully identifying all 52 attack scenarios including variable-driven attacks, complex fragment spreads, and nested collection navigations.
-- **Weakness:** Suffered from **43 False Positives**, resulting in a precision of only **54.7%** and a prohibitive **81.1% legitimate denial rate**.
-- **Root Cause:** Pure static analysis operates strictly on the GraphQL query document. Without authenticated JWT runtime context, static taint propagation cannot determine *who* is issuing the request (Alice vs. Bob). It correctly identifies that an untrusted argument flows into a sensitive sink, but cannot determine whether the caller is the legitimate owner.
-
-### 5.2. Method 1 (Gateway Alone): The "AST Default Value" Blind Spot
-- **Strengths:** Achieved **100.0% Precision** and zero false alarms on legitimate owner requests.
-- **Weakness:** Missed **1 vulnerability** (`CORPUS-018`: *Variable with default value direct BOLA*), yielding 98.1% recall.
-- **Root Cause:** The runtime object extractor (`app/security/object_extractor.py`) inspected incoming variable key-value pairs from the HTTP JSON body (`variables.get(var_name)`). When an attacker relied on a variable default value declared in the query header (`query GetDoc($target: Int = 102)` with empty variables `{}`), the runtime extractor found no bound variable, resulting in an authorization bypass.
-- **Insight:** Static AST taint analysis caught this attack because it parses `VariableDefinitionNode.default_value`, highlighting the necessity of AST-aware analysis.
-
-### 5.3. Method 3 (Correlated Defense): The Optimal Production Balance
-- By correlating static taint candidates with dynamic runtime boundary evaluations:
-  - Eliminates all 43 false positives exhibited by static analysis (`RUNTIME_PROTECTED_ALLOWED` distinguishes authorized owners).
-  - Maintains **100.0% Precision**, **0.0% False Alarm Rate**, and **0.990 F1-Score**.
-  - Provides explainable audit evidence logging for security operations.
+### 6.2. Mathematical Verification of Confusion Matrix
+- Ground Truth Positives ($P = 52$):
+  - Method 1: $\text{TP} = 52, \text{FN} = 0 \implies \text{Recall} = 52/52 = 1.000$.
+  - Method 2: $\text{TP} = 52, \text{FN} = 0 \implies \text{Recall} = 52/52 = 1.000$.
+  - Method 3: $\text{TP} = 52, \text{FN} = 0 \implies \text{Recall} = 52/52 = 1.000$.
+- Ground Truth Negatives ($N = 53$):
+  - Method 1: $\text{TN} = 53, \text{FP} = 0 \implies \text{Precision} = 52/(52+0) = 1.000$.
+  - Method 2: $\text{TN} = 10, \text{FP} = 43 \implies \text{Precision} = 52/(52+43) = 0.5474$.
+  - Method 3: $\text{TN} = 53, \text{FP} = 0 \implies \text{Precision} = 52/(52+0) = 1.000$.
 
 ---
 
-## 6. Execution Latency Profiling
+## 7. Honest Novelty & Research Value Assessment
 
-Latency profiling was performed over 3 repeated iterations across all 115 corpus queries on Windows (Python 3.14):
+With the extractor defect resolved, **Correlated Defense does NOT improve binary recall or precision over the Gateway Alone** on this test corpus. Both achieve 100.0% precision and 100.0% recall on the 115 benchmark cases.
 
-| Latency Metric | Timing (ms) | Notes |
-| :--- | :---: | :--- |
-| **Cold-Start Latency (1st Query)** | **0.362 ms** | One-time compilation of schema graph $G = (V, E)$ cached in memory. |
-| **Warmed-Up Median Latency** | **0.293 ms** | Sub-millisecond AST propagation per query. |
-| **Warmed-Up Mean Latency** | **0.308 ms** | Consistent execution time across varied queries. |
-| **Warmed-Up P95 Latency** | **0.419 ms** | 95% of queries analyze in under 0.42 ms. |
-| **Warmed-Up Minimum / Maximum** | **0.047 ms / 4.613 ms** | Min on unparameterized health; max on deep multi-fragment spreads. |
+### Genuine Verified Benefits of Correlated Defense:
+1. **Explainable Path Attribution:** The Gateway Alone only logs a scalar rejection (`object_id=102, reason=OWNERSHIP_MISMATCH`). Correlated Defense produces a complete AST path trace (`Query.user(id).resources -> sink:ResourceType`) documenting exactly where taint entered, what variables or aliases were used, and why the boundary was breached.
+2. **Authorization Boundary Modeling:** Correlated Defense classifies boundaries by evidence (`principal_bound`, `target_bound`, `mandatory_on_path`, `covers_operation`), distinguishing authorized owner access (`RUNTIME_PROTECTED_ALLOWED`) from benign non-sensitive operations (`BENIGN_AUTHORIZED`).
+3. **Proactive Security Graph Visibility:** Enables static pre-execution analysis of prospective query patterns before database queries are initiated, providing valuable auditing for Security Operations Centers (SOC).
 
 ---
 
-## 7. Performance by GraphQL Syntax Category
+## 8. Latency Profiling
 
-| Syntax Category | Valid Cases | Gateway Recall | Static Recall | Correlated Recall | Static FP | Correlated FP |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| `BASIC` | 39 | 100.0% | 100.0% | 100.0% | 18 | 0 |
-| `ALIAS` | 7 | 100.0% | 100.0% | 100.0% | 3 | 0 |
-| `VARIABLE` | 10 | 80.0% | 100.0% | 80.0% | 5 | 0 |
-| `FRAGMENT` | 6 | 100.0% | 100.0% | 100.0% | 3 | 0 |
-| `INLINE_FRAGMENT`| 3 | 100.0% | 100.0% | 100.0% | 1 | 0 |
-| `MULTI_ROOT` | 10 | 100.0% | 100.0% | 100.0% | 5 | 0 |
-| `RELATIONSHIP` | 2 | 100.0% | 100.0% | 100.0% | 1 | 0 |
-| `NESTED_PARAM` | 6 | 100.0% | 100.0% | 100.0% | 2 | 0 |
-| `PUBLIC` | 6 | N/A (Benign) | N/A (Benign) | N/A (Benign) | 0 | 0 |
-| `INTROSPECTION` | 4 | N/A (Benign) | N/A (Benign) | N/A (Benign) | 0 | 0 |
-| `BOUNDARY_ID` | 2 | 100.0% | 100.0% | 100.0% | 0 | 0 |
-| `DEEP_TRAVERSAL` | 2 | 100.0% | 100.0% | 100.0% | 1 | 0 |
+Across 3 repeated profiling runs on all 115 test cases (Windows, Python 3.14):
+- **Cold-Start (Initial Query):** **0.362 ms** (Security graph initialization cached in memory).
+- **Warmed-Up Median Latency:** **0.275 ms**.
+- **Warmed-Up Mean Latency:** **0.294 ms**.
+- **Warmed-Up P95 Latency:** **0.404 ms**.
+- **Warmed-Up Range:** **0.046 ms** (public health query) to **4.272 ms** (complex multi-fragment query).
 
 ---
 
-## 8. Reproducibility Instructions
+## 9. Reproduction Instructions
 
-### 8.1. Rebuilding Ground-Truth Corpus
 ```bash
-python scripts/build_ground_truth_corpus.py
-```
+# 1. Run all regression tests
+python -m pytest tests/test_variable_defaults_regression.py -v
 
-### 8.2. Executing Full Multi-Method Evaluation
-```bash
-python scripts/evaluate_taint_corpus.py --corpus data/ground_truth_corpus.json --output docs/EVALUATION_REPORT.json
-```
-
-### 8.3. Running Evaluation Test Suite
-```bash
+# 2. Run evaluation framework tests
 python -m pytest tests/test_evaluation_framework.py -v
+
+# 3. Execute full multi-method evaluation and update JSON report
+python scripts/evaluate_taint_corpus.py --corpus data/ground_truth_corpus.json --output docs/EVALUATION_REPORT.json
+
+# 4. Run full repository test suite (147 tests)
+python -m pytest tests/
 ```
-
----
-
-## 9. Limitations & Research Scope
-
-1. **Schema Scope:** The evaluated dataset is constructed around the current Strawberry GraphQL schema (`User`, `Resource`, `HealthCheck`) and its relational SQLite database backend. While structurally diverse, performance on multi-megabyte enterprise schemas with hundreds of types may exhibit different graph traversal scaling characteristics.
-2. **Synthetic Identities:** Test cases utilize synthetic user identities (`alice: 101`, `bob: 102`, `charlie: 103`) in isolated databases. No production or personal data was utilized.
-3. **AST Parser Boundary:** The static analyzer assumes valid GraphQL AST input. Malformed queries fast-fail to GraphQL execution errors rather than security decisions.

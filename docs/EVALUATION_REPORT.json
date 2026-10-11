@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "evaluation_timestamp": "2026-10-11T11:31:40Z",
+    "evaluation_timestamp": "2026-10-11T11:38:38Z",
     "corpus_file": "data/ground_truth_corpus.json",
     "total_corpus_cases": 115,
     "valid_security_cases": 105,
@@ -11,16 +11,16 @@
     "method_1_gateway_alone": {
       "method_name": "Method 1: Gateway Alone (Runtime Baseline)",
       "total_evaluated": 105,
-      "true_positives": 51,
+      "true_positives": 52,
       "false_positives": 0,
       "true_negatives": 53,
-      "false_negatives": 1,
+      "false_negatives": 0,
       "precision": 1.0,
-      "recall": 0.9808,
-      "f1_score": 0.9903,
-      "accuracy": 0.9905,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "accuracy": 1.0,
       "legitimate_denial_rate": 0.0,
-      "direct_bola_recall": 0.9655,
+      "direct_bola_recall": 1.0,
       "indirect_bola_recall": 1.0
     },
     "method_2_static_taint_alone": {
@@ -41,27 +41,27 @@
     "method_3_correlated_defense": {
       "method_name": "Method 3: Correlated Defense (Taint + Gateway)",
       "total_evaluated": 105,
-      "true_positives": 51,
+      "true_positives": 52,
       "false_positives": 0,
       "true_negatives": 53,
-      "false_negatives": 1,
+      "false_negatives": 0,
       "precision": 1.0,
-      "recall": 0.9808,
-      "f1_score": 0.9903,
-      "accuracy": 0.9905,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "accuracy": 1.0,
       "legitimate_denial_rate": 0.0,
-      "direct_bola_recall": 0.9655,
+      "direct_bola_recall": 1.0,
       "indirect_bola_recall": 1.0
     }
   },
   "latency_profile": {
     "cold_start_ms": 0.362,
-    "warmed_mean_ms": 0.308,
-    "warmed_median_ms": 0.293,
-    "warmed_min_ms": 0.047,
-    "warmed_max_ms": 4.613,
-    "warmed_p95_ms": 0.419,
-    "warmed_stdev_ms": 0.254,
+    "warmed_mean_ms": 0.294,
+    "warmed_median_ms": 0.275,
+    "warmed_min_ms": 0.046,
+    "warmed_max_ms": 4.272,
+    "warmed_p95_ms": 0.404,
+    "warmed_stdev_ms": 0.235,
     "iterations": 3
   },
   "syntax_category_breakdown": {
@@ -299,9 +299,9 @@
       "total_cases": 10,
       "vulnerable_count": 5,
       "benign_count": 5,
-      "m1_gateway_detection_rate": 0.8,
+      "m1_gateway_detection_rate": 1.0,
       "m2_static_detection_rate": 1.0,
-      "m3_correlated_detection_rate": 0.8,
+      "m3_correlated_detection_rate": 1.0,
       "m2_static_false_positives": 5,
       "m3_correlated_false_positives": 0
     }
@@ -961,10 +961,10 @@
       "ground_truth_security": "VULNERABLE",
       "ground_truth_attack_type": "DIRECT_BOLA",
       "method_1_gateway": {
-        "prediction": "BENIGN",
-        "attack_type": "NONE",
-        "decision": "ALLOW",
-        "reason": "NO_OBJECTS"
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "decision": "DENY",
+        "reason": "OWNERSHIP_MISMATCH"
       },
       "method_2_static_taint": {
         "prediction": "VULNERABLE",
@@ -974,9 +974,21 @@
         "error": null
       },
       "method_3_correlated": {
-        "prediction": "BENIGN",
-        "attack_type": "NONE",
-        "correlations": []
+        "prediction": "VULNERABLE",
+        "attack_type": "DIRECT_BOLA",
+        "correlations": [
+          {
+            "path": "resource",
+            "object_type": "Resource",
+            "object_id": 102,
+            "runtime_decision": "DENY",
+            "runtime_reason": "OWNERSHIP_MISMATCH",
+            "risk_level": "HIGH",
+            "static_candidate_kind": "DIRECT_BOLA_CANDIDATE",
+            "status": "TRUE_POSITIVE_BLOCKED",
+            "rationale": "Static candidate DIRECT_BOLA_CANDIDATE flagged untrusted path; runtime policy confirmed authorization failure (OWNERSHIP_MISMATCH) and blocked."
+          }
+        ]
       }
     },
     {

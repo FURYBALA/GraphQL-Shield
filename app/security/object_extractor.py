@@ -40,6 +40,15 @@ def normalize_query(query: str, variables: dict = None) -> dict | None:
         if isinstance(definition, OperationDefinitionNode):
             result["operation"] = definition.operation.value
             
+            # Resolve effective variable values: explicit variables override AST default values
+            effective_vars = dict(variables) if variables else {}
+            if definition.variable_definitions:
+                for var_def in definition.variable_definitions:
+                    var_name = var_def.variable.name.value
+                    if var_name not in effective_vars and var_def.default_value is not None:
+                        if isinstance(var_def.default_value, (IntValueNode, StringValueNode)):
+                            effective_vars[var_name] = var_def.default_value.value
+
             def visit(node, current_path):
                 if isinstance(node, FieldNode):
                     field_name = node.name.value
@@ -50,7 +59,7 @@ def normalize_query(query: str, variables: dict = None) -> dict | None:
                         if arg.name.value == "id":
                             if isinstance(arg.value, VariableNode):
                                 var_name = arg.value.name.value
-                                obj_id = variables.get(var_name)
+                                obj_id = effective_vars.get(var_name)
                             elif isinstance(arg.value, (IntValueNode, StringValueNode)):
                                 obj_id = arg.value.value
                                 
