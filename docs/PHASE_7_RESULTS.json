@@ -2,7 +2,7 @@
   "metadata": {
     "evaluation_phase": "Phase 7",
     "research_question": "Does context-sensitive AST-driven taint analysis correlated with runtime authorization evidence provide more useful source-to-sink explanations and authorization-boundary evidence than the existing gateway alone, without changing existing authorization outcomes?",
-    "timestamp": "2026-10-11T12:07:12Z",
+    "timestamp": "2026-10-11T12:15:30Z",
     "corpus_file": "data/ground_truth_corpus.json",
     "total_corpus_cases": 115,
     "valid_security_cases": 105,
@@ -95,41 +95,49 @@
     "m1_gateway_alone": {
       "method_name": "Method 1: Gateway Alone",
       "total_cases": 105,
-      "structured_criteria_reported": 0,
+      "criteria_represented_in_report": 0,
+      "criteria_verified_in_program": 0,
+      "representation_rate": 0.0,
+      "verification_rate": 0.0,
       "principal_binding_tracked": 0,
       "target_binding_tracked": 0,
       "mandatory_path_tracked": 0,
       "operation_coverage_tracked": 0,
       "explicit_uncertainties_stated": 0,
-      "structured_evidence_rate": 0.0,
       "uncertainty_transparency_rate": 0.0
     },
     "m2_static_taint_alone": {
       "method_name": "Method 2: Static Taint Alone",
       "total_cases": 105,
-      "structured_criteria_reported": 105,
+      "criteria_represented_in_report": 105,
+      "criteria_verified_in_program": 0,
+      "representation_rate": 1.0,
+      "verification_rate": 0.0,
       "principal_binding_tracked": 105,
       "target_binding_tracked": 105,
       "mandatory_path_tracked": 105,
       "operation_coverage_tracked": 105,
       "explicit_uncertainties_stated": 105,
-      "structured_evidence_rate": 1.0,
       "uncertainty_transparency_rate": 1.0
     },
     "m3_correlated_defense": {
       "method_name": "Method 3: Correlated Defense",
       "total_cases": 105,
-      "structured_criteria_reported": 105,
+      "criteria_represented_in_report": 105,
+      "criteria_verified_in_program": 105,
+      "representation_rate": 1.0,
+      "verification_rate": 1.0,
       "principal_binding_tracked": 105,
       "target_binding_tracked": 105,
       "mandatory_path_tracked": 105,
       "operation_coverage_tracked": 105,
       "explicit_uncertainties_stated": 105,
-      "structured_evidence_rate": 1.0,
       "uncertainty_transparency_rate": 1.0
     }
   },
-  "dimension_4_explanation_quality": {
+  "dimension_4_illustrative_explanation_rubric": {
+    "evaluation_type": "illustrative_capability_rubric",
+    "methodology_note": "Evaluates architectural evidence capabilities across 12 query archetypes using a 4-criterion specification (Path Correctness, Authorization Rationale, Boundary Evidence, and Candidate vs Confirmed Distinction). Designated as illustrative capability scores; does not represent independent human review.",
     "rubric_max_score": 8,
     "m1_mean_score": 3.33,
     "m2_mean_score": 5.75,
@@ -465,13 +473,13 @@
     ]
   },
   "dimension_5_runtime_overhead": {
-    "cold_start_ms": 0.441,
-    "warmed_mean_ms": 0.285,
-    "warmed_median_ms": 0.276,
-    "warmed_min_ms": 0.048,
-    "warmed_max_ms": 0.78,
-    "warmed_p95_ms": 0.44,
-    "warmed_stdev_ms": 0.092,
+    "cold_start_ms": 0.341,
+    "warmed_mean_ms": 0.29,
+    "warmed_median_ms": 0.283,
+    "warmed_min_ms": 0.049,
+    "warmed_max_ms": 0.806,
+    "warmed_p95_ms": 0.409,
+    "warmed_stdev_ms": 0.095,
     "total_profiling_samples": 345
   },
   "dimension_6_behavioral_compatibility": {

@@ -105,36 +105,50 @@ Boundary evidence measures whether the system explicitly tracks and validates th
 3. `mandatory_on_path`: Is the check guaranteed to execute before access?
 4. `covers_operation`: Does the check cover query read vs mutation write operations?
 
+To ensure scientific honesty, the evaluation strictly distinguishes between:
+- **Criteria Represented in the Report:** Whether the boundary model formally exposes these criteria and explicit uncertainties to analysts.
+- **Criteria Verified in the Program:** Whether the criteria are dynamically verified and confirmed through runtime execution and identity binding.
+
 | Evidence Dimension | Method 1: Gateway Alone | Method 2: Static Alone | Method 3: Correlated Defense |
 | :--- | :---: | :---: | :---: |
-| **Structured Criteria Reported** | **0.0%** (0 / 105) | **100.0%** (105 / 105) | **100.0%** (105 / 105) |
+| **Criteria Represented in Report** | **0.0%** (0 / 105) | **100.0%** (105 / 105) | **100.0%** (105 / 105) |
+| **Criteria Verified in Program** | **0.0%** (0 / 105)* | **0.0%** (0 / 105) | **100.0%** (105 / 105) |
 | **Principal Binding Tracked** | 0 / 105 | 105 / 105 | 105 / 105 |
 | **Target Binding Tracked** | 0 / 105 | 105 / 105 | 105 / 105 |
 | **Mandatory Path Tracked** | 0 / 105 | 105 / 105 | 105 / 105 |
 | **Operation Coverage Tracked** | 0 / 105 | 105 / 105 | 105 / 105 |
-| **Explicit Uncertainties Stated**| **0.0%** (0 / 105) | **100.0%** (105 / 105) | **100.0%** (105 / 105) |
+| **Explicit Uncertainties Disclosed**| **0.0%** (0 / 105) | **100.0%** (105 / 105) | **100.0%** (105 / 105) |
+
+*\*Note: Gateway Alone executes an implicit SQL ownership query during request handling, but does not represent or verify a formal, query-wide boundary model in its outputs or reports.*
 
 #### Empirical Finding:
-Gateway Alone operates as an opaque binary gate: it outputs only string tokens (`OWNERSHIP_MISMATCH` or `OWNER_MATCH`) without articulating why the boundary applies, whether it is mandatory, or what assumptions remain unverified. Static and Correlated Defense model structured boundary evidence with explicit uncertainty reasons (e.g., *"Runtime database ownership match required to verify boundary"*).
+1. **Static Taint Alone (Method 2)** achieves **100.0% criteria representation**, but **0.0% verification in the program**. Because static analysis cannot access caller JWT tokens or live database ownership records, it appropriately marks boundaries as unverified and explicitly discloses uncertainties.
+2. **Correlated Defense (Method 3)** achieves both **100.0% criteria representation** AND **100.0% verification in the program**, linking static boundary structure with runtime policy evaluation.
+3. **Gateway Alone (Method 1)** provides **0.0% structured representation**, emitting only binary ALLOW/DENY decisions and opaque string reasons without formal boundary evidence.
 
 ---
 
-### Dimension 4: Explanation Quality Rubric (12 Representative Archetypes)
+### Dimension 4: Illustrative Capability-Based Rubric Scores (12 Representative Archetypes)
 
-To quantify explainability, 12 representative cases covering all required query archetypes were evaluated using a strict 4-criterion rubric (0 to 2 points per criterion, maximum 8 points):
+To illustrate explanatory differences across architectural models, 12 representative cases covering key query archetypes were evaluated using a 4-criterion specification (0 to 2 points per criterion, maximum 8 points):
 - **C1: Path Correctness (0-2):** 0 = missing/wrong, 1 = partial/alias-confused, 2 = exact canonical schema & response paths.
 - **C2: Authorization Rationale (0-2):** 0 = none/wrong, 1 = opaque code only, 2 = complete principal, target, owner, and role rationale.
 - **C3: Boundary Evidence & Uncertainty (0-2):** 0 = absent, 1 = partial/implicit, 2 = explicit criteria with uncertainty disclosure.
 - **C4: Candidate vs Confirmed Distinction (0-2):** 0 = conflated, 1 = candidate-only or block-only, 2 = formally distinguishes candidate flow from confirmed runtime violation.
 
-#### Aggregate Rubric Scores:
+#### Methodological Clarification:
+> [!IMPORTANT]
+> **Illustrative Rubric Designation:**
+> These rubric scores evaluate the *architectural evidence capabilities* of each method rather than dynamic natural-language scoring or an independent third-party human trial. They illustrate what information each architecture can structurally produce. Independent proof of explanation quality would require an external human subject study, which was not conducted.
+
+#### Aggregate Illustrative Scores:
 - **Method 1 (Gateway Alone):** Mean = **3.33 / 8** (**41.6%**)
 - **Method 2 (Static Taint Alone):** Mean = **5.75 / 8** (**71.9%**)
 - **Method 3 (Correlated Defense):** Mean = **7.83 / 8** (**97.9%**)
 
 #### Case-by-Case Breakdown:
 
-| Case ID | Archetype Description | M1 Gateway (Max 8) | M2 Static (Max 8) | M3 Correlated (Max 8) | Key Distinction |
+| Case ID | Archetype Description | M1 Gateway (Max 8) | M2 Static (Max 8) | M3 Correlated (Max 8) | Key Architectural Distinction |
 | :--- | :--- | :---: | :---: | :---: | :--- |
 | `CORPUS-001` | Direct BOLA (Alice $\to$ Bob doc) | 4 | 6 | **8** | M3 explains caller, owner, path, and boundary violation. |
 | `CORPUS-011` | Direct BOLA with Variable | 4 | 6 | **8** | M3 links `$resId` to schema field `resource(id:)`. |
@@ -148,10 +162,6 @@ To quantify explainability, 12 representative cases covering all required query 
 | `CORPUS-051` | Admin Privileged Override | 4 | 5 | **8** | M3 documents administrative role override rationale. |
 | `CORPUS-060` | Public Health Query | 1 | 6 | **6** | Public infrastructure path requires no BOLA check. |
 | `CORPUS-106` | Malformed Syntax Query | 3 | 4 | **6** | Graceful syntax error rejection documented. |
-
-> [!NOTE]
-> **Independent Reviewer Limitation:**
-> In accordance with instructions, because an independent external third-party human panel was not available, scores were evaluated deterministically using the standardized algorithmic rubric documented in [`scripts/evaluate_phase_7.py`](file:///c:/Users/balan/Downloads/CCNS%20Project/scripts/evaluate_phase_7.py). Complete sanitized explanation outputs for all 12 cases are persisted in [`data/representative_explanations.json`](file:///c:/Users/balan/Downloads/CCNS%20Project/data/representative_explanations.json).
 
 ---
 
