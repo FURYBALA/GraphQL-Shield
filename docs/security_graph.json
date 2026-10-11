@@ -1,0 +1,759 @@
+{
+  "edges": [
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "message",
+      "metadata": {},
+      "source_id": "field:HealthCheckType.message",
+      "target_id": "type:String"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "status",
+      "metadata": {},
+      "source_id": "field:HealthCheckType.status",
+      "target_id": "type:String"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "health",
+      "metadata": {},
+      "source_id": "field:Query.health",
+      "target_id": "type:HealthCheckType"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "resource",
+      "metadata": {},
+      "source_id": "field:Query.resource",
+      "target_id": "type:ResourceType"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "user",
+      "metadata": {},
+      "source_id": "field:Query.user",
+      "target_id": "type:UserType"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "children",
+      "metadata": {},
+      "source_id": "field:ResourceType.children",
+      "target_id": "type:ResourceType"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "id",
+      "metadata": {},
+      "source_id": "field:ResourceType.id",
+      "target_id": "type:Int"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "name",
+      "metadata": {},
+      "source_id": "field:ResourceType.name",
+      "target_id": "type:String"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "objectType",
+      "metadata": {},
+      "source_id": "field:ResourceType.objectType",
+      "target_id": "type:String"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "ownerId",
+      "metadata": {},
+      "source_id": "field:ResourceType.ownerId",
+      "target_id": "type:Int"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "parentId",
+      "metadata": {},
+      "source_id": "field:ResourceType.parentId",
+      "target_id": "type:Int"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "id",
+      "metadata": {},
+      "source_id": "field:UserType.id",
+      "target_id": "type:Int"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "resource",
+      "metadata": {},
+      "source_id": "field:UserType.resource",
+      "target_id": "type:ResourceType"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "resources",
+      "metadata": {},
+      "source_id": "field:UserType.resources",
+      "target_id": "type:ResourceType"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "role",
+      "metadata": {},
+      "source_id": "field:UserType.role",
+      "target_id": "type:String"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "RETURNS_TYPE",
+      "field_name": "username",
+      "metadata": {},
+      "source_id": "field:UserType.username",
+      "target_id": "type:String"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "message",
+      "metadata": {},
+      "source_id": "type:HealthCheckType",
+      "target_id": "field:HealthCheckType.message"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "status",
+      "metadata": {},
+      "source_id": "type:HealthCheckType",
+      "target_id": "field:HealthCheckType.status"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "health",
+      "metadata": {},
+      "source_id": "type:Query",
+      "target_id": "field:Query.health"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "resource",
+      "metadata": {},
+      "source_id": "type:Query",
+      "target_id": "field:Query.resource"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "user",
+      "metadata": {},
+      "source_id": "type:Query",
+      "target_id": "field:Query.user"
+    },
+    {
+      "cardinality": "ONE_TO_ONE",
+      "edge_type": "NAVIGATES_TO",
+      "field_name": "health",
+      "metadata": {
+        "has_id_argument": false,
+        "is_collection": false,
+        "raw_type": "HealthCheckType!",
+        "requires_arguments": false,
+        "via_field": "field:Query.health"
+      },
+      "source_id": "type:Query",
+      "target_id": "type:HealthCheckType"
+    },
+    {
+      "cardinality": "ONE_TO_ONE",
+      "edge_type": "NAVIGATES_TO",
+      "field_name": "resource",
+      "metadata": {
+        "has_id_argument": true,
+        "is_collection": false,
+        "raw_type": "ResourceType",
+        "requires_arguments": true,
+        "via_field": "field:Query.resource"
+      },
+      "source_id": "type:Query",
+      "target_id": "type:ResourceType"
+    },
+    {
+      "cardinality": "ONE_TO_ONE",
+      "edge_type": "NAVIGATES_TO",
+      "field_name": "user",
+      "metadata": {
+        "has_id_argument": true,
+        "is_collection": false,
+        "raw_type": "UserType",
+        "requires_arguments": true,
+        "via_field": "field:Query.user"
+      },
+      "source_id": "type:Query",
+      "target_id": "type:UserType"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "children",
+      "metadata": {},
+      "source_id": "type:ResourceType",
+      "target_id": "field:ResourceType.children"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "id",
+      "metadata": {},
+      "source_id": "type:ResourceType",
+      "target_id": "field:ResourceType.id"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "name",
+      "metadata": {},
+      "source_id": "type:ResourceType",
+      "target_id": "field:ResourceType.name"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "objectType",
+      "metadata": {},
+      "source_id": "type:ResourceType",
+      "target_id": "field:ResourceType.objectType"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "ownerId",
+      "metadata": {},
+      "source_id": "type:ResourceType",
+      "target_id": "field:ResourceType.ownerId"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "parentId",
+      "metadata": {},
+      "source_id": "type:ResourceType",
+      "target_id": "field:ResourceType.parentId"
+    },
+    {
+      "cardinality": "ONE_TO_MANY",
+      "edge_type": "NAVIGATES_TO",
+      "field_name": "children",
+      "metadata": {
+        "has_id_argument": false,
+        "is_collection": true,
+        "raw_type": "[ResourceType!]!",
+        "requires_arguments": false,
+        "via_field": "field:ResourceType.children"
+      },
+      "source_id": "type:ResourceType",
+      "target_id": "type:ResourceType"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "id",
+      "metadata": {},
+      "source_id": "type:UserType",
+      "target_id": "field:UserType.id"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "resource",
+      "metadata": {},
+      "source_id": "type:UserType",
+      "target_id": "field:UserType.resource"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "resources",
+      "metadata": {},
+      "source_id": "type:UserType",
+      "target_id": "field:UserType.resources"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "role",
+      "metadata": {},
+      "source_id": "type:UserType",
+      "target_id": "field:UserType.role"
+    },
+    {
+      "cardinality": "NONE",
+      "edge_type": "DEFINES_FIELD",
+      "field_name": "username",
+      "metadata": {},
+      "source_id": "type:UserType",
+      "target_id": "field:UserType.username"
+    },
+    {
+      "cardinality": "ONE_TO_ONE",
+      "edge_type": "NAVIGATES_TO",
+      "field_name": "resource",
+      "metadata": {
+        "has_id_argument": true,
+        "is_collection": false,
+        "raw_type": "ResourceType",
+        "requires_arguments": true,
+        "via_field": "field:UserType.resource"
+      },
+      "source_id": "type:UserType",
+      "target_id": "type:ResourceType"
+    },
+    {
+      "cardinality": "ONE_TO_MANY",
+      "edge_type": "NAVIGATES_TO",
+      "field_name": "resources",
+      "metadata": {
+        "has_id_argument": false,
+        "is_collection": true,
+        "raw_type": "[ResourceType!]!",
+        "requires_arguments": false,
+        "via_field": "field:UserType.resources"
+      },
+      "source_id": "type:UserType",
+      "target_id": "type:ResourceType"
+    }
+  ],
+  "fields": {
+    "field:HealthCheckType.message": {
+      "arguments": {},
+      "base_kind": "SCALAR",
+      "base_type": "String",
+      "description": null,
+      "has_id_argument": false,
+      "id": "field:HealthCheckType.message",
+      "is_base_non_null": false,
+      "is_identifier_candidate": false,
+      "is_list": false,
+      "is_non_null": true,
+      "list_depth": 0,
+      "name": "message",
+      "parent_type": "HealthCheckType",
+      "raw_type": "String!"
+    },
+    "field:HealthCheckType.status": {
+      "arguments": {},
+      "base_kind": "SCALAR",
+      "base_type": "String",
+      "description": null,
+      "has_id_argument": false,
+      "id": "field:HealthCheckType.status",
+      "is_base_non_null": false,
+      "is_identifier_candidate": false,
+      "is_list": false,
+      "is_non_null": true,
+      "list_depth": 0,
+      "name": "status",
+      "parent_type": "HealthCheckType",
+      "raw_type": "String!"
+    },
+    "field:Query.health": {
+      "arguments": {},
+      "base_kind": "OBJECT",
+      "base_type": "HealthCheckType",
+      "description": null,
+      "has_id_argument": false,
+      "id": "field:Query.health",
+      "is_base_non_null": false,
+      "is_identifier_candidate": false,
+      "is_list": false,
+      "is_non_null": true,
+      "list_depth": 0,
+      "name": "health",
+      "parent_type": "Query",
+      "raw_type": "HealthCheckType!"
+    },
+    "field:Query.resource": {
+      "arguments": {
+        "id": {
+          "base_type": "Int",
+          "default_value": "Undefined",
+          "is_identifier_candidate": true,
+          "is_list": false,
+          "is_required": true,
+          "name": "id",
+          "raw_type": "Int!"
+        }
+      },
+      "base_kind": "OBJECT",
+      "base_type": "ResourceType",
+      "description": null,
+      "has_id_argument": true,
+      "id": "field:Query.resource",
+      "is_base_non_null": false,
+      "is_identifier_candidate": false,
+      "is_list": false,
+      "is_non_null": false,
+      "list_depth": 0,
+      "name": "resource",
+      "parent_type": "Query",
+      "raw_type": "ResourceType"
+    },
+    "field:Query.user": {
+      "arguments": {
+        "id": {
+          "base_type": "Int",
+          "default_value": "Undefined",
+          "is_identifier_candidate": true,
+          "is_list": false,
+          "is_required": true,
+          "name": "id",
+          "raw_type": "Int!"
+        }
+      },
+      "base_kind": "OBJECT",
+      "base_type": "UserType",
+      "description": null,
+      "has_id_argument": true,
+      "id": "field:Query.user",
+      "is_base_non_null": false,
+      "is_identifier_candidate": false,
+      "is_list": false,
+      "is_non_null": false,
+      "list_depth": 0,
+      "name": "user",
+      "parent_type": "Query",
+      "raw_type": "UserType"
+    },
+    "field:ResourceType.children": {
+      "arguments": {},
+      "base_kind": "OBJECT",
+      "base_type": "ResourceType",
+      "description": null,
+      "has_id_argument": false,
+      "id": "field:ResourceType.children",
+      "is_base_non_null": false,
+      "is_identifier_candidate": false,
+      "is_list": true,
+      "is_non_null": true,
+      "list_depth": 1,
+      "name": "children",
+      "parent_type": "ResourceType",
+      "raw_type": "[ResourceType!]!"
+    },
+    "field:ResourceType.id": {
+      "arguments": {},
+      "base_kind": "SCALAR",
+      "base_type": "Int",
+      "description": null,
+      "has_id_argument": false,
+      "id": "field:ResourceType.id",
+      "is_base_non_null": false,
+      "is_identifier_candidate": true,
+      "is_list": false,
+      "is_non_null": true,
+      "list_depth": 0,
+      "name": "id",
+      "parent_type": "ResourceType",
+      "raw_type": "Int!"
+    },
+    "field:ResourceType.name": {
+      "arguments": {},
+      "base_kind": "SCALAR",
+      "base_type": "String",
+      "description": null,
+      "has_id_argument": false,
+      "id": "field:ResourceType.name",
+      "is_base_non_null": false,
+      "is_identifier_candidate": false,
+      "is_list": false,
+      "is_non_null": true,
+      "list_depth": 0,
+      "name": "name",
+      "parent_type": "ResourceType",
+      "raw_type": "String!"
+    },
+    "field:ResourceType.objectType": {
+      "arguments": {},
+      "base_kind": "SCALAR",
+      "base_type": "String",
+      "description": null,
+      "has_id_argument": false,
+      "id": "field:ResourceType.objectType",
+      "is_base_non_null": false,
+      "is_identifier_candidate": false,
+      "is_list": false,
+      "is_non_null": true,
+      "list_depth": 0,
+      "name": "objectType",
+      "parent_type": "ResourceType",
+      "raw_type": "String!"
+    },
+    "field:ResourceType.ownerId": {
+      "arguments": {},
+      "base_kind": "SCALAR",
+      "base_type": "Int",
+      "description": null,
+      "has_id_argument": false,
+      "id": "field:ResourceType.ownerId",
+      "is_base_non_null": false,
+      "is_identifier_candidate": true,
+      "is_list": false,
+      "is_non_null": true,
+      "list_depth": 0,
+      "name": "ownerId",
+      "parent_type": "ResourceType",
+      "raw_type": "Int!"
+    },
+    "field:ResourceType.parentId": {
+      "arguments": {},
+      "base_kind": "SCALAR",
+      "base_type": "Int",
+      "description": null,
+      "has_id_argument": false,
+      "id": "field:ResourceType.parentId",
+      "is_base_non_null": false,
+      "is_identifier_candidate": true,
+      "is_list": false,
+      "is_non_null": false,
+      "list_depth": 0,
+      "name": "parentId",
+      "parent_type": "ResourceType",
+      "raw_type": "Int"
+    },
+    "field:UserType.id": {
+      "arguments": {},
+      "base_kind": "SCALAR",
+      "base_type": "Int",
+      "description": null,
+      "has_id_argument": false,
+      "id": "field:UserType.id",
+      "is_base_non_null": false,
+      "is_identifier_candidate": true,
+      "is_list": false,
+      "is_non_null": true,
+      "list_depth": 0,
+      "name": "id",
+      "parent_type": "UserType",
+      "raw_type": "Int!"
+    },
+    "field:UserType.resource": {
+      "arguments": {
+        "id": {
+          "base_type": "Int",
+          "default_value": "Undefined",
+          "is_identifier_candidate": true,
+          "is_list": false,
+          "is_required": true,
+          "name": "id",
+          "raw_type": "Int!"
+        }
+      },
+      "base_kind": "OBJECT",
+      "base_type": "ResourceType",
+      "description": null,
+      "has_id_argument": true,
+      "id": "field:UserType.resource",
+      "is_base_non_null": false,
+      "is_identifier_candidate": false,
+      "is_list": false,
+      "is_non_null": false,
+      "list_depth": 0,
+      "name": "resource",
+      "parent_type": "UserType",
+      "raw_type": "ResourceType"
+    },
+    "field:UserType.resources": {
+      "arguments": {},
+      "base_kind": "OBJECT",
+      "base_type": "ResourceType",
+      "description": null,
+      "has_id_argument": false,
+      "id": "field:UserType.resources",
+      "is_base_non_null": false,
+      "is_identifier_candidate": false,
+      "is_list": true,
+      "is_non_null": true,
+      "list_depth": 1,
+      "name": "resources",
+      "parent_type": "UserType",
+      "raw_type": "[ResourceType!]!"
+    },
+    "field:UserType.role": {
+      "arguments": {},
+      "base_kind": "SCALAR",
+      "base_type": "String",
+      "description": null,
+      "has_id_argument": false,
+      "id": "field:UserType.role",
+      "is_base_non_null": false,
+      "is_identifier_candidate": false,
+      "is_list": false,
+      "is_non_null": true,
+      "list_depth": 0,
+      "name": "role",
+      "parent_type": "UserType",
+      "raw_type": "String!"
+    },
+    "field:UserType.username": {
+      "arguments": {},
+      "base_kind": "SCALAR",
+      "base_type": "String",
+      "description": null,
+      "has_id_argument": false,
+      "id": "field:UserType.username",
+      "is_base_non_null": false,
+      "is_identifier_candidate": false,
+      "is_list": false,
+      "is_non_null": true,
+      "list_depth": 0,
+      "name": "username",
+      "parent_type": "UserType",
+      "raw_type": "String!"
+    }
+  },
+  "roots": {
+    "query": "Query"
+  },
+  "summary": {
+    "edges_by_type": {
+      "DEFINES_FIELD": 16,
+      "NAVIGATES_TO": 6,
+      "RETURNS_TYPE": 16
+    },
+    "root_operations": {
+      "query": "Query"
+    },
+    "total_edges": 38,
+    "total_fields": 16,
+    "total_types": 7,
+    "types_by_kind": {
+      "OBJECT": 4,
+      "SCALAR": 3
+    },
+    "unresolved_relationships_count": 0
+  },
+  "types": {
+    "Boolean": {
+      "candidate_id_fields": [],
+      "description": "The `Boolean` scalar type represents `true` or `false`.",
+      "fields": [],
+      "id": "type:Boolean",
+      "interfaces": [],
+      "is_root": false,
+      "kind": "SCALAR",
+      "name": "Boolean",
+      "root_operation": null
+    },
+    "HealthCheckType": {
+      "candidate_id_fields": [],
+      "description": null,
+      "fields": [
+        "message",
+        "status"
+      ],
+      "id": "type:HealthCheckType",
+      "interfaces": [],
+      "is_root": false,
+      "kind": "OBJECT",
+      "name": "HealthCheckType",
+      "root_operation": null
+    },
+    "Int": {
+      "candidate_id_fields": [],
+      "description": "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.",
+      "fields": [],
+      "id": "type:Int",
+      "interfaces": [],
+      "is_root": false,
+      "kind": "SCALAR",
+      "name": "Int",
+      "root_operation": null
+    },
+    "Query": {
+      "candidate_id_fields": [],
+      "description": null,
+      "fields": [
+        "health",
+        "resource",
+        "user"
+      ],
+      "id": "type:Query",
+      "interfaces": [],
+      "is_root": true,
+      "kind": "OBJECT",
+      "name": "Query",
+      "root_operation": "query"
+    },
+    "ResourceType": {
+      "candidate_id_fields": [
+        "id",
+        "ownerId",
+        "parentId"
+      ],
+      "description": null,
+      "fields": [
+        "children",
+        "id",
+        "name",
+        "objectType",
+        "ownerId",
+        "parentId"
+      ],
+      "id": "type:ResourceType",
+      "interfaces": [],
+      "is_root": false,
+      "kind": "OBJECT",
+      "name": "ResourceType",
+      "root_operation": null
+    },
+    "String": {
+      "candidate_id_fields": [],
+      "description": "The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.",
+      "fields": [],
+      "id": "type:String",
+      "interfaces": [],
+      "is_root": false,
+      "kind": "SCALAR",
+      "name": "String",
+      "root_operation": null
+    },
+    "UserType": {
+      "candidate_id_fields": [
+        "id"
+      ],
+      "description": null,
+      "fields": [
+        "id",
+        "resource",
+        "resources",
+        "role",
+        "username"
+      ],
+      "id": "type:UserType",
+      "interfaces": [],
+      "is_root": false,
+      "kind": "OBJECT",
+      "name": "UserType",
+      "root_operation": null
+    }
+  },
+  "unresolved_relationships": []
+}

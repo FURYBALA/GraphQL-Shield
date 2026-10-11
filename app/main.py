@@ -153,6 +153,18 @@ def get_schema_ownership(current_user: dict = Depends(get_current_user)):
     ensure_inference_ready()
     return inference_engine.to_dict()
 
+from app.security.security_graph import get_security_graph
+
+@app.get("/api/v1/security/security-graph")
+def get_security_graph_endpoint(current_user: dict = Depends(get_current_user)):
+    """
+    Inspection endpoint exposing the constructed GraphQL Security Graph G = (V, E).
+    Restricted to ADMIN users.
+    """
+    if current_user.get("role", "").upper() != "ADMIN":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return get_security_graph().to_dict()
+
 # Secure Strawberry GraphQL router protected by the BOLA security gateway
 graphql_app = GraphQLRouter(schema, context_getter=None, dependencies=[Depends(bola_enforcement_middleware)])
 app.include_router(graphql_app, prefix="/graphql")
