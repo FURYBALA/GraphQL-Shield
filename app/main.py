@@ -70,29 +70,46 @@ def login(request: LoginRequest, db: sqlite3.Connection = Depends(get_db)):
 def demo_session(request: Request, db: sqlite3.Connection = Depends(get_db)):
     """
     Local demonstration authentication endpoint.
-    Restricted to non-production environments and loopback requests (127.0.0.1, ::1, localhost, testclient).
+    Restricted to non-production environments and strictly verified loopback requests.
     Issues an ephemeral analyst-level session token without requiring credentials in client-side code.
     """
+    # 1. Feature flag guard
+    if not getattr(settings, "ENABLE_DEMO_SESSION", True):
+        raise HTTPException(
+            status_code=403,
+            detail="Demo session endpoint is disabled by configuration (ENABLE_DEMO_SESSION=False)."
+        )
+
+    # 2. Production environment guard
     if getattr(settings, "ENVIRONMENT", "development").lower() == "production":
         raise HTTPException(
             status_code=403,
-            detail="Demo session endpoint is disabled in production environments."
+            detail="Demo session endpoint is strictly prohibited in production environments."
         )
 
-    # Restrict to local loopback / test client
+    # 3. Direct TCP peer IP guard
     client_host = request.client.host if request.client else "testclient"
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        forwarded_ip = forwarded.split(",")[0].strip()
-        if forwarded_ip not in {"127.0.0.1", "localhost", "::1"}:
-            client_host = forwarded_ip
-
-    allowed_hosts = {"127.0.0.1", "localhost", "::1", "testclient"}
-    if client_host not in allowed_hosts:
+    allowed_loopback = {"127.0.0.1", "localhost", "::1", "testclient"}
+    if client_host not in allowed_loopback:
         raise HTTPException(
             status_code=403,
-            detail=f"Demo session endpoint restricted to local loopback. Access from {client_host} forbidden."
+            detail=f"Demo session endpoint restricted to local loopback. Direct peer {client_host} forbidden."
         )
+
+    # 4. Strict reverse-proxy forwarding header audit
+    # If ANY forwarding header is present, ALL referenced addresses must be loopback.
+    # Presence of ANY non-loopback IP anywhere in X-Forwarded-For, X-Real-IP, or Forwarded immediately blocks the request.
+    for header_name in ("x-forwarded-for", "x-real-ip", "forwarded"):
+        header_val = request.headers.get(header_name)
+        if header_val:
+            tokens = [t.strip() for t in header_val.replace(";", ",").split(",")]
+            for token in tokens:
+                clean_ip = token.split("=")[-1].strip().strip('"').strip("[]")
+                if clean_ip and clean_ip not in allowed_loopback:
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"Demo session endpoint rejected: external address '{clean_ip}' detected in proxy header '{header_name}'."
+                    )
 
     cursor = db.cursor()
     cursor.execute("SELECT id, role FROM users WHERE role = 'admin' LIMIT 1")

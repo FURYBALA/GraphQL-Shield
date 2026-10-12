@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str = "super_secret_dev_key"
     JWT_ALGORITHM: str = "HS256"
     TAINT_ANALYSIS_MODE: str = "audit_only"
+    ENABLE_DEMO_SESSION: bool = True  # Disabled automatically if ENVIRONMENT == "production"
 
     # AI Security Analyst Configuration (Disabled by default)
     AI_EXPLANATION_ENABLED: bool = False

@@ -16,6 +16,8 @@ In this paper, we present **GraphQL Shield + AI Analyst**, a defense-in-depth se
 
 We evaluate our system across a 115-case synthetic benchmark and an independent 12-scenario real-world incident dataset inspired by public disclosures (including the Hoppscotch collection IDOR advisory, GHSA-m5pg-r4jp-qq75 / CVE-2026-28217). Experimental results show: (1) Correlated defense completely eliminates the 81.1% false-alarm rate of pure static taint analysis (dropping to 0.0% FAR on benign requests) while preserving 100.0% precision and 100.0% recall in parity with deterministic gateway enforcement (0 policy divergence across all cases); (2) Dual path canonicalization achieves 89.5% exact path attribution compared to 56.2% for standard gateway logging; (3) On an illustrative 10-dimension architectural capability rubric, the evidence-grounded layer satisfies 100.0% of security metadata dimensions compared to 40.0% for gateway logs and 70.0% for raw correlated JSON; (4) Across deterministic contract fixtures, the grounding verification engine achieves 100.0% citation ID precision (132/132 valid citations), catches 100.0% of synthetically injected hallucinations, contradictions, and misattributions, and structurally isolates adversarial prompt injection payloads from the evaluation pipeline.
 
+**Empirical Scope & Research Limitations Notice:** The reported 100.0% detection metrics apply specifically to our defined benchmark corpus and synthetic evaluation datasets. They do not constitute a generalized guarantee of equivalent accuracy across arbitrary enterprise GraphQL schemas, custom attribute-based access control (ABAC) policies, or unmodeled graph relational structures. Furthermore, the grounding safety metrics validate programmatic software validator contracts on deterministic mock fixtures; live language-model semantic generation was formally marked as unexecuted due to unconfigured API credentials.
+
 ---
 
 ## 1. Introduction & Motivation
@@ -34,7 +36,7 @@ To overcome these challenges, we propose an integrated, evidence-grounded archit
 - A correlation engine that combines static AST taint findings with runtime authorization evidence, eliminating false alarms without altering gateway enforcement.
 - An evidence-grounded AI security analyst that operates out-of-band, indexing verifiable facts ($E_1 \dots E_{11}$) and producing 10-dimensional audit explanations.
 - A formal Grounding and Safety Verification Engine that verifies citation validity, enforces decision consistency, and resists adversarial prompt injection.
-- Comprehensive empirical evaluation on both synthetic benchmarks and real-world vulnerability reproductions demonstrating 100% precision on gateway authorization, 100% contract grounding on deterministic mock fixtures, and sub-millisecond gateway overhead.
+- Comprehensive empirical evaluation on both synthetic benchmarks and real-world vulnerability reproductions demonstrating 100.0% precision on gateway authorization within the evaluated corpus, 100.0% contract grounding on deterministic mock fixtures, and empirical measurement showing that synchronous disk logging constitutes 61.5% of prototype gateway overhead.
 
 ---
 
@@ -254,7 +256,10 @@ We designed our experiments to answer three core research questions:
 - **RQ2 (Audit Completeness & Utility):** Does the evidence-grounded AI layer provide superior explanation completeness across verifiable security dimensions compared to existing baselines?
 - **RQ3 (AI Safety & Grounding):** How reliably does the grounding engine catch hallucinated citations, policy contradictions, and adversarial prompt injections?
 
-### 6.1 Benchmark Datasets
+### 6.1 Benchmark Datasets & Corpus Boundaries
+
+**Constructed Corpus Context & Generalization Boundary:** Both datasets represent constructed academic testbeds designed to systematically isolate BOLA mechanisms, argument taint propagation, and authorization boundaries. While they capture essential structural patterns (direct object ID referencing, relational traversals, alias cloaking, and multi-tenant scoping), they do not represent arbitrary production enterprise GraphQL deployments with hundreds of interconnected types, dynamic role-assignment engines, or legacy database wrappers. The empirical metrics reported herein establish formal correctness over the specified benchmark schemas, rather than an unconstrained claim of universal production readiness.
+
 We evaluate on two independent corpora:
 1. **115-Case CCNS Benchmark:** 105 syntactically valid security cases (52 vulnerable BOLA cases, 53 benign authorized cases) and 10 malformed syntax cases.
 2. **12-Scenario Real-World Dataset:** An independent test suite modeling real-world incident patterns across four enterprise use cases:
@@ -333,7 +338,7 @@ To evaluate the programmatic invariants of our Grounding Engine, we subjected th
 | **Path Misattribution Defense** | Injected Schema Path Mutation | 100.0% Caught | **PASS** |
 | **Pipeline Prompt Isolation** | Injected `"IGNORE ALL INSTRUCTIONS..."` in AST | 100.0% Isolated | **PASS** |
 
-**Scope & Verification Boundary:** Table 3 validates the **deterministic contract of the Grounding Engine**. Prompt isolation tests confirm that untrusted query strings cannot alter the structured evidence container or bypass validator invariants. We do **not** claim complete immunity against arbitrary open-ended LLM jailbreaks; open-ended semantic explanation quality on live models remains an ongoing research direction.
+**Scope & Verification Boundary (Mock Contract vs. Live Model Distinction):** Table 3 validates exclusively the **programmatic software contract of the Grounding Engine and data sanitization pipeline**. These tests prove that evidence serialization prevents untrusted query strings from mutating structured evidence containers, and that deterministic validator rules successfully catch and reject synthetically mutated citation references, decision inversions, and path alterations. These fixture-based results **must not be conflated with empirical proof that live generative language models produce accurate semantic explanations or possess universal prompt injection immunity**. Real LLM evaluation remains formally unexecuted due to unconfigured API credentials in this local research environment, and probabilistic semantic jailbreaking remains an open research challenge.
 
 ---
 
@@ -387,8 +392,8 @@ To avoid ambiguity between algorithmic computational cost and end-to-end I/O lat
    - **Secure Gateway Endpoint (`/graphql`, Full Security Stack):** **16.189 ms**
    - **Net Gateway Decision Overhead:** **8.440 ms**
 
-**Empirical Latency Interpretation:**  
-The empirical micro-profiling demonstrates that synchronous SQLite database commits during audit decision logging account for **5.194 ms (61.5%)** of the net 8.440 ms gateway overhead. In contrast, the AST taint propagation and object normalization algorithms contribute a negligible **0.321 ms combined (3.8% of the overhead)**. In production deployments with asynchronous connection pooling and non-blocking audit write queues (e.g., Redis or Kafka), gateway decision latency will be bounded by the sub-millisecond in-memory AST algorithm (<0.5 ms).
+**Empirical Latency Interpretation & Architectural Scope:**  
+The empirical micro-profiling demonstrates that synchronous SQLite database commits during audit decision logging account for **5.194 ms (61.5%)** of the net 8.440 ms gateway overhead, while database ownership and history queries account for **1.612 ms (19.1%)**. In contrast, the in-memory AST taint propagation and object normalization algorithms contribute only **0.321 ms combined (3.8% of the net overhead)**. While offloading audit logging to an asynchronous messaging queue or non-blocking buffer is an architectural design optimization to eliminate synchronous disk I/O from the critical request path, production queueing architectures introduce serialization, message-broker network hops, thread contention, and backpressure costs. Therefore, achieving sub-millisecond total gateway overhead represents an architectural design expectation and future optimization target under concurrent production loads, rather than an empirically demonstrated measurement in the current prototype.
 
 ---
 
@@ -439,7 +444,7 @@ query GetCollection($id: Int!) {
 
 ## 9. Limitations & Threats to Validity
 
-1. **Benchmark Scope:** Our synthetic benchmark comprises 115 cases, and the real-world dataset contains 12 scenarios. While representative of common BOLA and IDOR patterns, further testing on industrial GraphQL schemas with hundreds of nested types is desirable.
+1. **Constructed Benchmark vs. Arbitrary Enterprise Schemas:** Our synthetic benchmark comprises 115 cases, and the real-world dataset contains 12 scenarios. While carefully constructed to isolate direct, nested, and aliased BOLA patterns, they represent controlled test environments. The 100.0% precision and recall metrics reflect exact modeling within this ground-truth corpus; they do not establish equivalent detection accuracy against arbitrary enterprise GraphQL schemas with complex dynamic RBAC/ABAC rules, undocumented tenancy models, or unmodeled third-party resolvers.
 2. **Ownership Inference Heuristics:** In the absence of explicit database schema foreign keys, ownership inference relies on field naming patterns (e.g., `owner_id`, `user_id`). Highly non-standard schema naming conventions may require explicit configuration.
 3. **Mock Provider vs. Live LLM Evaluation:** The systematic benchmark reported in Section 7.2–7.3 evaluates programmatic schema contracts and validator invariants using deterministic mock fixtures. Section 7.4 defines a pre-registered protocol (`scripts/evaluate_real_llm_explanations.py`) for live OpenAI-compatible models. In evaluation environments where external API credentials are absent, the harness halts cleanly rather than fabricating synthetic data as real LLM performance. Empirical grading of non-deterministic models under human double-blind review remains subject to API availability and cloud latency (400–1200 ms).
 4. **Adversarial Prompt Injection Boundaries:** While structural AST quarantine and post-generation decision guardrails prevent input payloads from overriding gateway decisions, probabilistic LLM components remain susceptible to emerging semantic prompt injection techniques.

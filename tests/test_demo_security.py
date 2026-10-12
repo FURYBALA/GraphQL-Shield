@@ -44,6 +44,18 @@ def test_demo_session_endpoint_success_loopback(client):
         settings.ENVIRONMENT = original_env
 
 
+def test_demo_session_endpoint_rejects_when_feature_disabled(client):
+    """Verifies that when ENABLE_DEMO_SESSION=False, demo session returns 403 Forbidden."""
+    original_flag = settings.ENABLE_DEMO_SESSION
+    try:
+        settings.ENABLE_DEMO_SESSION = False
+        res = client.post("/api/v1/auth/demo-session")
+        assert res.status_code == 403
+        assert "disabled by configuration" in res.json()["detail"].lower()
+    finally:
+        settings.ENABLE_DEMO_SESSION = original_flag
+
+
 def test_demo_session_endpoint_rejects_production(client):
     """Verifies that in production mode, demo session endpoint returns 403 Forbidden."""
     original_env = settings.ENVIRONMENT
@@ -51,21 +63,40 @@ def test_demo_session_endpoint_rejects_production(client):
         settings.ENVIRONMENT = "production"
         res = client.post("/api/v1/auth/demo-session")
         assert res.status_code == 403
-        assert "disabled in production" in res.json()["detail"].lower()
+        assert "strictly prohibited in production" in res.json()["detail"].lower()
     finally:
         settings.ENVIRONMENT = original_env
 
 
-def test_demo_session_endpoint_rejects_external_ip(client):
-    """Verifies that requests from non-loopback IP addresses are rejected with 403."""
-    original_env = settings.ENVIRONMENT
-    try:
-        settings.ENVIRONMENT = "development"
-        res = client.post("/api/v1/auth/demo-session", headers={"x-forwarded-for": "198.51.100.25"})
-        assert res.status_code == 403
-        assert "restricted to local loopback" in res.json()["detail"].lower()
-    finally:
-        settings.ENVIRONMENT = original_env
+def test_demo_session_endpoint_rejects_external_ip_and_proxy_spoofs(client):
+    """Verifies that requests with external IPs in proxy headers are strictly rejected."""
+    # Single external IP
+    res = client.post("/api/v1/auth/demo-session", headers={"x-forwarded-for": "198.51.100.25"})
+    assert res.status_code == 403
+    assert "external address" in res.json()["detail"].lower()
+
+    # Multi-hop proxy chain attempting to sneak past with initial loopback
+    res = client.post("/api/v1/auth/demo-session", headers={"x-forwarded-for": "127.0.0.1, 203.0.113.195"})
+    assert res.status_code == 403
+    assert "203.0.113.195" in res.json()["detail"]
+
+    # X-Real-IP header with external IP
+    res = client.post("/api/v1/auth/demo-session", headers={"x-real-ip": "198.51.100.42"})
+    assert res.status_code == 403
+
+    # RFC 7239 Forwarded header
+    res = client.post("/api/v1/auth/demo-session", headers={"forwarded": "for=198.51.100.99;proto=https"})
+    assert res.status_code == 403
+
+
+def test_demo_session_endpoint_allows_legitimate_internal_loopback_proxy(client):
+    """Verifies that legitimate internal loopback proxy chains are accepted."""
+    res = client.post(
+        "/api/v1/auth/demo-session",
+        headers={"x-forwarded-for": "127.0.0.1, ::1"}
+    )
+    assert res.status_code == 200
+    assert "access_token" in res.json()
 
 
 def test_ai_explanation_requires_authentication(client):
