@@ -352,6 +352,20 @@ async def run_evaluation():
             },
         },
         "per_scenario_results": scenario_evaluations,
+        "phase_10_2_real_llm_evaluation": {
+            "status": "HALTED_PREREQUISITE_ABSENT",
+            "reason": "AI_API_KEY is unset and AI_PROVIDER is set to 'mock'. No live model endpoint available.",
+            "evaluation_paradigm": "pre_registered_controlled_protocol",
+            "protocol_file": "docs/AI_REAL_LLM_EVALUATION_PROTOCOL.json",
+            "pre_registered_subset": [
+                "REAL-HOPP-001",
+                "REAL-HOPP-002",
+                "REAL-NEST-001",
+                "REAL-SAAS-003",
+            ],
+            "independent_ground_truth_policy": "Established independently prior to generation from Gateway PolicyEngine and Security Graph.",
+            "academic_reporting_notes": "In accordance with scientific integrity standards, mock-provider outputs are strictly separated from live LLM benchmarks. When credentials become configured, scripts/evaluate_real_llm_explanations.py executes against this pre-registered protocol.",
+        },
     }
 
     out_file = "docs/AI_EVALUATION_RESULTS.json"

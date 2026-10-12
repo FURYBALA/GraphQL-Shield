@@ -252,7 +252,27 @@ To evaluate the programmatic invariants of our Grounding Engine, we subjected th
 
 ---
 
-### 7.4 Runtime Performance & Latency Overhead
+### 7.4 Controlled Real-LLM Evaluation Protocol & Environmental Status (Phase 10.2)
+To establish a path from deterministic mock contract verification to empirical language model evaluation, we designed and pre-registered an automated evaluation framework (`scripts/evaluate_real_llm_explanations.py`).
+
+**Pre-Registered Archetype Subset:** We select a documented 4-scenario subset representing key structural coordinates:
+1. `REAL-HOPP-001`: Direct BOLA vulnerability (Foreign resource lookup; expected `DENY`, `OWNERSHIP_MISMATCH`).
+2. `REAL-HOPP-002`: Benign authorized owner access (Expected `ALLOW`, `OWNER_MATCH`; tests avoidance of false accusations).
+3. `REAL-NEST-001`: Indirect relational BOLA with GraphQL alias masking (`targetUser.userDocs` vs canonical `Query.user.resources`; expected `DENY`, `OWNERSHIP_MISMATCH`).
+4. `REAL-SAAS-003`: Multi-tenant document retrieval under legitimate tenancy (Expected `ALLOW`, `OWNER_MATCH`).
+
+**Independent Ground Truth & Semantic Verification:** Unlike self-evaluating LLM benchmarks, ground-truth facts are established strictly prior to generation:
+- Gateway decision and policy reasons are fixed by deterministic `PolicyEngine` traces.
+- Schema coordinates are fixed by the AST Security Graph.
+- Grounded citations require referential existence within the evidence container ($E_1 \dots E_{11}$).
+- Semantic fact coverage measures presence of core entities (caller ID, target ID, policy reason, schema coordinate) and flags forbidden contradictions (e.g., claiming ALLOW on a dropped query).
+- A 10-point blinded human rubric evaluates Factual Support (0–3), Metadata Completeness (0–3), Boundary Clarity (0–2), and Remediation Actionability (0–2).
+
+**Environmental Prerequisite Boundary:** In offline academic evaluation environments without configured external API credentials (`AI_API_KEY=""`, `AI_PROVIDER="mock"`), the framework halts cleanly, logs `HALTED_PREREQUISITE_ABSENT`, and writes the formal protocol to `docs/AI_REAL_LLM_EVALUATION_PROTOCOL.json`. In accordance with scientific integrity guidelines, mock-provider outputs are **never** reported as empirical real-model observations.
+
+---
+
+### 7.5 Runtime Performance & Latency Overhead
 System latency was measured on an Intel Core i7 / Windows 11 testbed over 50 consecutive warm executions:
 - **Cold-Start Gateway Latency:** 0.334 ms
 - **Warmed Median Latency:** 0.288 ms
@@ -294,7 +314,7 @@ query GetCollection($id: Int!) {
 
 1. **Benchmark Scope:** Our synthetic benchmark comprises 115 cases, and the real-world dataset contains 12 scenarios. While representative of common BOLA and IDOR patterns, further testing on industrial GraphQL schemas with hundreds of nested types is desirable.
 2. **Ownership Inference Heuristics:** In the absence of explicit database schema foreign keys, ownership inference relies on field naming patterns (e.g., `owner_id`, `user_id`). Highly non-standard schema naming conventions may require explicit configuration.
-3. **Mock Provider vs. Live LLM Evaluation:** The systematic benchmark reported in Section 7 evaluates programmatic schema contracts and validator invariants using deterministic mock fixtures. While the architecture supports live OpenAI-compatible LLMs via `HTTPLLMProvider`, empirical quality assessment of non-deterministic models under human double-blind review remains preliminary and subject to cloud latency (400–1200 ms).
+3. **Mock Provider vs. Live LLM Evaluation:** The systematic benchmark reported in Section 7.2–7.3 evaluates programmatic schema contracts and validator invariants using deterministic mock fixtures. Section 7.4 defines a pre-registered protocol (`scripts/evaluate_real_llm_explanations.py`) for live OpenAI-compatible models. In evaluation environments where external API credentials are absent, the harness halts cleanly rather than fabricating synthetic data as real LLM performance. Empirical grading of non-deterministic models under human double-blind review remains subject to API availability and cloud latency (400–1200 ms).
 4. **Adversarial Prompt Injection Boundaries:** While structural AST quarantine and post-generation decision guardrails prevent input payloads from overriding gateway decisions, probabilistic LLM components remain susceptible to emerging semantic prompt injection techniques.
 
 ---

@@ -1,0 +1,143 @@
+{
+  "protocol_title": "Controlled Real-LLM Evaluation Protocol for GraphQL BOLA Security Analyst",
+  "phase": "Phase 10.2",
+  "timestamp": "2026-10-12T14:32:13Z",
+  "status": "HALTED_PREREQUISITE_ABSENT",
+  "reason": "AI_API_KEY is unset and AI_PROVIDER is set to 'mock'. No live model endpoint available.",
+  "prerequisite_check": {
+    "ai_provider_configured": "mock",
+    "api_key_present": false,
+    "api_base": "",
+    "model_name": "gpt-4o-mini",
+    "instructions_to_enable": "Copy .env.example to .env, set AI_PROVIDER=http and AI_API_KEY=..., then re-run."
+  },
+  "fixed_evaluation_set": [
+    {
+      "scenario_id": "REAL-HOPP-001",
+      "scenario_name": "Hoppscotch Collection IDOR: Unauthorized cross-tenant collection lookup",
+      "selection_rationale": "Core CVE-2026-28217 pattern: Direct BOLA vulnerability on root field lookup with tenancy mismatch.",
+      "expected_gateway_decision": "DENY",
+      "expected_policy_reason": "OWNERSHIP_MISMATCH",
+      "expected_canonical_path": "Query.resource",
+      "expected_client_response_path": "resource",
+      "caller_principal_id": 101,
+      "caller_role": "user",
+      "target_owner_id": 102,
+      "target_object_id": 102,
+      "target_object_type": "Resource",
+      "required_factual_elements": [
+        "Caller user_id=101 lacks ownership of Resource:102",
+        "Target Resource:102 is owned by user_id=102",
+        "Gateway denied the request with OWNERSHIP_MISMATCH (HTTP 403)",
+        "Path refers to canonical query root 'resource'"
+      ],
+      "forbidden_claims": [
+        "Claims request was permitted or authorized",
+        "Claims user 101 is the legitimate owner of resource 102",
+        "Attributes attack to path other than resource"
+      ],
+      "expected_remediation_intent": "Enforce ownership validation in field resolver and reject cross-tenant IDs."
+    },
+    {
+      "scenario_id": "REAL-HOPP-002",
+      "scenario_name": "Hoppscotch Collection IDOR: Legitimate owner collection access",
+      "selection_rationale": "Benign paired counterpart to REAL-HOPP-001: Verifies model does not falsely accuse legitimate owner access.",
+      "expected_gateway_decision": "ALLOW",
+      "expected_policy_reason": "OWNER_MATCH",
+      "expected_canonical_path": "Query.resource",
+      "expected_client_response_path": "resource",
+      "caller_principal_id": 102,
+      "caller_role": "user",
+      "target_owner_id": 102,
+      "target_object_id": 102,
+      "target_object_type": "Resource",
+      "required_factual_elements": [
+        "Caller user_id=102 is the legitimate owner of Resource:102",
+        "Gateway permitted the request under OWNER_MATCH (HTTP 200)",
+        "No adverse security impact occurred"
+      ],
+      "forbidden_claims": [
+        "Claims request was blocked or dropped",
+        "Claims caller committed unauthorized BOLA",
+        "Recommends denying legitimate owner access"
+      ],
+      "expected_remediation_intent": "Preserve existing ownership rule; maintain automated regression tests."
+    },
+    {
+      "scenario_id": "REAL-NEST-001",
+      "scenario_name": "Team Workspace: Indirect BOLA on nested collections with client aliases",
+      "selection_rationale": "Relational complexity with GraphQL alias masking ('targetUser.userDocs' vs canonical 'user.resources').",
+      "expected_gateway_decision": "DENY",
+      "expected_policy_reason": "OWNERSHIP_MISMATCH",
+      "expected_canonical_path": "Query.user.resources",
+      "expected_client_response_path": "targetUser.userDocs",
+      "caller_principal_id": 101,
+      "caller_role": "user",
+      "target_owner_id": 102,
+      "target_object_id": 102,
+      "target_object_type": "User",
+      "required_factual_elements": [
+        "Caller user_id=101 attempted nested traversal on foreign user node 102",
+        "Client response alias 'targetUser.userDocs' masks canonical path 'user.resources'",
+        "Gateway denied execution due to ownership boundary violation"
+      ],
+      "forbidden_claims": [
+        "Confuses client response alias with schema coordinate",
+        "Claims request was authorized"
+      ],
+      "expected_remediation_intent": "Enforce relational authorization across nested collection edges and disambiguate aliases."
+    },
+    {
+      "scenario_id": "REAL-SAAS-003",
+      "scenario_name": "SaaS Multi-Tenant: Legitimate tenant private document retrieval",
+      "selection_rationale": "Multi-tenant boundary verification for legitimate tenant operations under isolation guarantees.",
+      "expected_gateway_decision": "ALLOW",
+      "expected_policy_reason": "OWNER_MATCH",
+      "expected_canonical_path": "Query.resource",
+      "expected_client_response_path": "resource",
+      "caller_principal_id": 101,
+      "caller_role": "user",
+      "target_owner_id": 101,
+      "target_object_id": 101,
+      "target_object_type": "Resource",
+      "required_factual_elements": [
+        "Caller tenant user_id=101 accessed own Resource:101",
+        "Multi-tenant data isolation verified by gateway",
+        "Execution allowed with HTTP 200"
+      ],
+      "forbidden_claims": [
+        "Claims multi-tenant boundary was violated",
+        "Claims request was dropped"
+      ],
+      "expected_remediation_intent": "Preserve tenant-isolated resolver filtering rules."
+    }
+  ],
+  "blinded_evaluation_rubric": {
+    "dimensions": [
+      {
+        "name": "Factual Support & Citation Grounding",
+        "max_points": 3,
+        "description": "3: Every factual assertion is directly supported by evidence items [E1]..[E11]; zero invalid IDs; zero hallucinated CVEs. 2: Minor unsupported assertion not altering security meaning; citations valid. 1: Moderate unsupported claims or at least one missing citation for key entity. 0: Hallucinated evidence IDs, fabricated incidents, or ungrounded assertions."
+      },
+      {
+        "name": "Metadata & Entity Completeness",
+        "max_points": 3,
+        "description": "3: Explicitly identifies caller principal, target object ID/type, database owner, canonical path, and gateway decision. 2: Captures 4 of the 5 core entities. 1: Captures 2-3 of the core entities. 0: Captures 1 or fewer core entities."
+      },
+      {
+        "name": "Policy & Boundary Clarity",
+        "max_points": 2,
+        "description": "2: Explains exact authorization rationale without confusing client aliases with canonical paths or contradicting gateway. 1: Ambiguous rationale or slight confusion of aliases, but correct binary decision. 0: Contradicts gateway decision (e.g. claims ALLOW on DENY) or completely misidentifies boundary."
+      },
+      {
+        "name": "Actionable Remediation Quality",
+        "max_points": 2,
+        "description": "2: Provides specific resolver/gateway code fix and concrete GraphQL test query without weakening security. 1: Generic remediation advice (e.g., 'check permissions') without concrete code or test query. 0: Misleading, insecure, or absent remediation advice."
+      }
+    ],
+    "total_max_points": 10
+  },
+  "independent_ground_truth_policy": "Ground truths are established independently prior to generation. Gateway PolicyEngine decisions (ALLOW/DENY), canonical Security Graph paths, and database tenancy bounds serve as the sole ground truth.",
+  "measured_live_results": null,
+  "academic_reporting_stance": "The research paper explicitly reports that live LLM evaluations require active API credentials or local inference endpoints. Deterministic mock fixture benchmarks are reported in Section 7.3, and the live LLM evaluation protocol is established in Section 7.4 as reproducible methodology."
+}

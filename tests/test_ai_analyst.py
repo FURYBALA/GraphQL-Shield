@@ -266,3 +266,75 @@ def test_ai_analyst_never_alters_gateway_decisions(client, user_token):
     data = resp.json()
     assert data["detail"]["decision"] == "DENY"
     assert data["detail"]["reason"] == "OWNERSHIP_MISMATCH"
+
+
+# -----------------------------------------------------------------------------
+# 6. Real-LLM Controlled Evaluation Protocol Tests (Phase 10.2)
+# -----------------------------------------------------------------------------
+
+def test_fixed_evaluation_set_has_independent_ground_truth():
+    """Verifies the 4-scenario evaluation set defines independent ground truths."""
+    from scripts.evaluate_real_llm_explanations import FIXED_EVALUATION_SET, BLINDED_RUBRIC_SPEC
+
+    assert len(FIXED_EVALUATION_SET) == 4
+    scenario_ids = [gt.scenario_id for gt in FIXED_EVALUATION_SET]
+    assert "REAL-HOPP-001" in scenario_ids
+    assert "REAL-HOPP-002" in scenario_ids
+    assert "REAL-NEST-001" in scenario_ids
+    assert "REAL-SAAS-003" in scenario_ids
+
+    # Verify both ALLOW and DENY are represented
+    decisions = {gt.expected_gateway_decision for gt in FIXED_EVALUATION_SET}
+    assert decisions == {"ALLOW", "DENY"}
+
+    # Verify independent ground-truth fields are complete
+    for gt in FIXED_EVALUATION_SET:
+        assert gt.expected_canonical_path.startswith("Query.")
+        assert len(gt.required_factual_elements) >= 3
+        assert len(gt.forbidden_claims) >= 2
+        assert gt.expected_remediation_intent
+
+    # Verify rubric sums to 10 points
+    total_rubric_points = sum(d["max_points"] for d in BLINDED_RUBRIC_SPEC["dimensions"])
+    assert total_rubric_points == 10
+
+
+@pytest.mark.asyncio
+async def test_evaluate_scenario_explanation_against_ground_truth():
+    """Verifies the evaluation harness correctly measures decision consistency and required facts."""
+    from scripts.evaluate_real_llm_explanations import FIXED_EVALUATION_SET, evaluate_scenario_explanation
+    from app.security.ai_analyst.providers import MockAIProvider
+
+    gt = FIXED_EVALUATION_SET[0]  # REAL-HOPP-001 (DENY)
+    pkg = EvidencePackage.from_scenario_or_finding(
+        finding_id=gt.scenario_id,
+        query="query { resource(id: 102) { id } }",
+        variables={"id": 102},
+        canonical_path="Query.resource",
+        response_path="resource",
+        caller_id=101,
+        caller_role="user",
+        target_type="Resource",
+        target_id=102,
+        owner_id=102,
+        decision="DENY",
+        reason="OWNERSHIP_MISMATCH",
+        risk_score=90,
+        risk_level="HIGH",
+        correlation_status="TRUE_POSITIVE_BLOCKED",
+        candidate_kind="DIRECT_BOLA",
+        taint_source_arg="id",
+        sensitive_sink_type="Resource",
+        boundary_verified=True,
+    )
+
+    mock_provider = MockAIProvider()
+    resp = await mock_provider.generate_explanation(pkg, "sys", "usr")
+    eval_result = await evaluate_scenario_explanation(gt, resp)
+
+    assert eval_result["decision_consistent"] is True
+    assert eval_result["path_correct"] is True
+    assert eval_result["citation_metrics"]["invalid_count"] == 0
+    assert eval_result["required_fact_coverage"]["coverage_rate_pct"] == 100.0
+    assert len(eval_result["contradictions_detected"]) == 0
+

@@ -122,3 +122,48 @@ To reproduce the complete AI Analyst evaluation from a clean shell:
    ```powershell
    python -m pytest tests/test_ai_analyst.py -v
    ```
+
+---
+
+## 6. Phase 10.2: Controlled Real-LLM Evaluation Protocol
+
+To transition from deterministic mock-fixture validation to empirical language-model evaluation, Phase 10.2 establishes a pre-registered protocol implemented in `scripts/evaluate_real_llm_explanations.py`.
+
+### A. Fixed Pre-Registered Scenario Subset (4 Archetypes)
+
+Rather than unconstrained sampling, 4 representative scenarios were pre-registered spanning both authorization decisions and schema structures:
+
+1. **`REAL-HOPP-001` (Direct BOLA, Vulnerable):** Root field `resource(id: 102)` requested by principal 101. Expected: `DENY`, `OWNERSHIP_MISMATCH`.
+2. **`REAL-HOPP-002` (Resource Owner, Benign):** Legitimate owner Bob requests `resource(id: 102)`. Expected: `ALLOW`, `OWNER_MATCH`. Verifies avoidance of false accusations.
+3. **`REAL-NEST-001` (Indirect Nested BOLA, Relational):** Nested traversal `targetUser: user(id: 102) { userDocs: resources }`. Tests client alias disambiguation (`targetUser.userDocs` vs `user.resources`). Expected: `DENY`, `OWNERSHIP_MISMATCH`.
+4. **`REAL-SAAS-003` (Multi-Tenant Document, Benign):** Legitimate tenant retrieval. Expected: `ALLOW`, `OWNER_MATCH`.
+
+### B. Independent Ground Truth Definition Policy
+
+To eliminate model self-validation bias, ground truth is established **strictly prior to generation**:
+- **Gateway Decision & Reason:** Fixed by deterministic `PolicyEngine` evaluation.
+- **Canonical Schema Path:** Fixed by typed AST Security Graph coordinate.
+- **Principal & Tenancy Bounds:** Fixed by database seed truth.
+- **Prohibited Anti-Facts:** Explicitly flagged if the model claims access was allowed on a dropped query or misattributes the path.
+
+### C. Mechanical Reference vs. Semantic Claim Verification
+
+The evaluation rigorously distinguishes:
+- **Mechanical Reference Validation:** Programmatic check that cited IDs (`E1`..`E11`) exist in the `EvidencePackage`. This confirms container referential integrity, NOT natural language truth.
+- **Semantic Claim Verification:** Automated entity presence checking (caller ID, target ID, policy rationale) and contradiction detection (e.g. claiming ALLOW on a 403 response).
+
+### D. 10-Point Blinded Human Evaluation Rubric
+
+For blinded expert review, explanations are graded across 4 standardized criteria:
+1. **Factual Support & Citation Grounding (0–3 pts):** All assertions tied to evidence items; zero hallucinated IDs; zero fabricated CVEs.
+2. **Metadata & Entity Completeness (0–3 pts):** Captures caller principal, target ID/type, database owner, canonical path, and gateway decision.
+3. **Policy & Boundary Clarity (0–2 pts):** Accurately captures authorization rationale without confusing aliases or contradicting gateway.
+4. **Actionable Remediation Quality (0–2 pts):** Suggests resolver/gateway code fix and concrete GraphQL test query without weakening security.
+
+### E. Honest Prerequisite Check & Failure Reporting
+
+If no live API credentials (`AI_API_KEY`) are present in `.env` or environment variables:
+- The script halts cleanly and documents `HALTED_PREREQUISITE_ABSENT` in `docs/AI_REAL_LLM_EVALUATION_PROTOCOL.json`.
+- Mock outputs are **strictly prohibited** from being labeled as real LLM evaluations.
+- When configured, `HTTPLLMProvider` executes with bounded retries (2 attempts, 15s timeout) and logs real latency, token counts, and any API errors.
+
