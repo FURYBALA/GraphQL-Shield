@@ -235,13 +235,13 @@ def get_all_real_world_scenarios() -> List[Dict[str, Any]]:
         # Scenario 1: Hoppscotch-Inspired Collection IDOR
         execute_controlled_scenario(
             scenario_id="SCENARIO-HOPPSCOTCH-IDOR",
-            name="Hoppscotch-Inspired Collection IDOR (GHSA-m5pg-r4jp-qq75)",
+            name="Hoppscotch-Inspired Collection IDOR Pattern (GHSA-m5pg-r4jp-qq75 / CVE-2026-28217)",
             security_objective="Verify that an authenticated user cannot access another tenant's private collection using a direct identifier lookup.",
             real_world_context=(
-                "Models the vulnerability documented in GitHub Advisory GHSA-m5pg-r4jp-qq75 (Hoppscotch versions <= 2026.1.1). "
-                "In the vulnerable Hoppscotch GraphQL API, the userCollection query accepted a collection identifier without "
-                "verifying that the authenticated tenant owned the collection, leaking stored HTTP requests and auth headers. "
-                "In our controlled reproduction, Alice attempts to read Bob's private collection (Resource 102)."
+                "Models the vulnerability pattern documented in GitHub Advisory GHSA-m5pg-r4jp-qq75 / CVE-2026-28217 "
+                "(Hoppscotch backend versions <= 2026.1.1). In the vulnerable Hoppscotch GraphQL API, the userCollection "
+                "query accepted a collection identifier without verifying caller ownership. In our controlled local "
+                "reproduction using our domain schema, Alice attempts to read Bob's private collection (Resource 102)."
             ),
             caller_info={"user_id": 101, "username": "alice", "role": "user"},
             resource_owner_info={"user_id": 102, "username": "bob", "role": "user", "resource_id": 102, "resource_name": "Bob's Financial Record"},
@@ -306,7 +306,7 @@ def get_all_real_world_scenarios() -> List[Dict[str, Any]]:
             security_objective="Verify that legitimate tenant requests succeed seamlessly, and correlation prevents static false alarms.",
             real_world_context=(
                 "Demonstrates that the security gateway allows legitimate tenant operations. Proves that the system "
-                "does NOT treat every tainted identifier as an attack, avoiding the 81.1% false-alarm rate of static taint alone."
+                "does NOT treat every tainted identifier as an attack, avoiding the 81.1% false-alarm rate observed on our benchmark's static-taint baseline."
             ),
             caller_info={"user_id": 101, "username": "alice", "role": "user"},
             resource_owner_info={"user_id": 101, "username": "alice", "role": "user", "resource_id": 101, "resource_name": "Alice's Secret Note"},

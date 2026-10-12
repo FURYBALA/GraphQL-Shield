@@ -174,11 +174,12 @@ def run_demo():
     print("Proof: AST engine normalizes opaque client alias 'stolenDoc' to canonical schema type 'resource'.")
 
     # =========================================================================
-    # STEP 5: REAL-WORLD CASE STUDY: HOPPSCOTCH-INSPIRED COLLECTION IDOR
+    # STEP 5: REAL-WORLD CASE STUDY: HOPPSCOTCH-INSPIRED LOCAL REPRODUCTION
     # =========================================================================
-    print_banner("Step 5: Real-World Case Study (Hoppscotch Advisory GHSA-m5pg-r4jp-qq75 Pattern)")
-    print("Scenario: Controlled reproduction of userCollection IDOR in Hoppscotch <= 2026.1.1.")
+    print_banner("Step 5: Hoppscotch-Inspired Local Reproduction of the Vulnerability Pattern (GHSA-m5pg-r4jp-qq75 / CVE-2026-28217)")
+    print("Scenario: Controlled local reproduction of the userCollection IDOR pattern (Hoppscotch <= 2026.1.1).")
     print("Vulnerability Pattern: Query accepts collection ID without verifying authenticated caller ownership.")
+    print("Note: Modeled in controlled academic schema; production Hoppscotch server was not tested.")
 
     hopp_result = execute_controlled_scenario(
         scenario_id="SCENARIO-HOPPSCOTCH-IDOR",

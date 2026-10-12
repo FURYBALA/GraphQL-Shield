@@ -27,15 +27,15 @@
 >
 > *While BOLA is well-studied in flat REST APIs, it is far more dangerous and difficult to audit in **GraphQL**. In GraphQL, clients can formulate arbitrary, hierarchical queries using **field aliases**, **fragments**, and **nested relationship traversals** (such as `user.resources` or team workspace collections).*
 >
-> *A prominent real-world example is **Hoppscotch GitHub Advisory GHSA-m5pg-r4jp-qq75** (CVE-pending, fixed in v2026.2.0), where an authenticated user could read any user's private collection simply by supplying an arbitrary `userCollectionID` because the GraphQL resolver lacked object-level ownership checks.*
+> *A prominent real-world example is **Hoppscotch GitHub Advisory GHSA-m5pg-r4jp-qq75 / CVE-2026-28217** (fixed in v2026.2.0), where an authenticated user could read any user's private collection simply by supplying an arbitrary `userCollectionID` because the GraphQL resolver lacked object-level ownership checks.*
 >
 > *Current defenses fall into two flawed extremes:*
 > 1. ***Gateway Black-Box Enforcers:*** *They return generic HTTP 403 Forbidden responses without schema coordinates, and they lose track of indirect traversals and client aliases (only 56.2% exact path attribution).*
-> 2. ***Purely Static Taint Analysis (e.g., Lambers et al., LMCS 2026):*** *While Lambers et al. proved that AST taint analysis can discover graph API access control flaws, static analysis alone produces an **81.1% false alarm rate** on benign queries because it cannot inspect runtime JWT credentials or database ownership records.*
+> 2. ***Purely Static Taint Analysis:*** *Foundational literature by Lambers et al. (LMCS 2026) established that static taint tracking on graph APIs can discover access control candidates. However, when we evaluated an isolated static-taint baseline in our gateway setting, it produced an **81.1% false alarm rate on our benchmark's benign queries (43/53)** because static code cannot inspect runtime JWT credentials or database ownership records.*
 >
-> *Our research contribution is **GraphQL Shield**: an AST-driven, context-sensitive taint propagation engine that correlates with runtime authorization evidence in an **audit-only, backward-compatible mode**. It raises exact path attribution from **56.2% to 89.5%**, verifies authorization boundaries for **100% of protected entities**, preserves 100% of gateway decisions with **zero divergence**, and adds **less than 0.3 milliseconds of latency**.*
+> *Our research contribution is **GraphQL Shield**: an AST-driven, context-sensitive taint propagation engine that correlates with runtime authorization evidence in an **audit-only, backward-compatible mode**. It raises exact path attribution from **56.2% to 89.5%**, verifies authorization boundaries for **100% of protected entities**, preserves 100% of gateway decisions with **zero divergence on our benchmark**, and adds **less than 0.3 milliseconds of latency**.*
 >
-> *I will now demonstrate our system live across the 7-step sequence: baseline vulnerability, direct BOLA, indirect nested traversal, alias disambiguation, the Hoppscotch real-world case study, explainability verification in our Scenario Lab, and empirical benchmark proof."*
+> *I will now demonstrate our system live across the 7-step sequence: baseline vulnerability, direct BOLA, indirect nested traversal, alias disambiguation, the Hoppscotch-inspired pattern reproduction, explainability verification in our Scenario Lab, and empirical benchmark proof."*
 
 ---
 
@@ -89,14 +89,11 @@ try {
   [ENFORCEMENT] HTTP 403 Forbidden - Request Dropped.
   ```
 
-**What to tell your professor:**
-> *"The gateway intercepts the request prior to GraphQL resolver execution. It resolved ownership of Resource 102 from the database, detected that Alice (101) does not match Bob (102), assigned a High Risk score of 90/100, and immediately dropped the request with HTTP 403."*
-
 ---
 
 ## 4. Act 3: Indirect BOLA & Nested Relational Traversal (Step 2)
 
-**Objective:** Demonstrate defense against indirect collection traversals where the target has no explicit ID argument.
+**Objective:** Demonstrate defense against indirect collection traversals where child resources lack explicit ID arguments.
 
 **What to do in Terminal 2:**
 ```powershell
@@ -110,9 +107,8 @@ try {
 
 **What happens on screen:**
 - Returns **`HTTP 403 Forbidden`** (`OWNERSHIP_MISMATCH`).
-- In server logs:
-  - Static Taint Engine identifies relationship context: `UserType.resources` (One-to-Many collection sink `SinkKind.RELATIONSHIP_COLLECTION`).
-  - Correlation classification: `TRUE_POSITIVE_BLOCKED`.
+- AST Taint Engine identifies relationship context: `UserType.resources` (One-to-Many collection sink `SinkKind.RELATIONSHIP_COLLECTION`).
+- Correlation classification: `TRUE_POSITIVE_BLOCKED`.
 
 ---
 
@@ -138,7 +134,7 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8000/graphql" -Method Post -Headers @{ 
   ```
 
 **What to tell your professor:**
-> *"Here is the scientific importance of correlation: Static taint analysis flagged argument `id` as untrusted input reaching a sensitive sink. Lambers et al. and static-only scanners would report this as a vulnerability candidate — an 81.1% false alarm rate on our benchmark! But our correlation engine evaluates the runtime JWT against the database, sees `OWNER_MATCH`, and marks it `RUNTIME_PROTECTED_ALLOWED`."*
+> *"Here is the scientific importance of correlation: Static taint analysis flagged argument `id` as untrusted input reaching a sensitive sink. On our benchmark, static analysis alone produced an 81.1% false alarm rate on benign cases. But our correlation engine dynamically checks runtime authorization, sees that Alice owns Resource 101 (`OWNER_MATCH`), and marks it `RUNTIME_PROTECTED_ALLOWED`, preventing a false block."*
 
 ---
 
@@ -157,13 +153,13 @@ try {
 ```
 
 **What to tell your professor:**
-> *"An attacker aliases `resource` to `stolenDoc`. A regex or URL gateway only sees `stolenDoc`. Our AST traverser maps the client response path `stolenDoc` back to the underlying canonical schema path `resource` on `ResourceType`, maintaining full path attribution accuracy."*
+> *"An attacker aliases `resource` to `stolenDoc`. A regex gateway only sees `stolenDoc`. Our AST traverser maps the client response path `stolenDoc` back to the underlying canonical schema path `resource` on `ResourceType`, maintaining full path attribution accuracy."*
 
 ---
 
-## 7. Act 6: Real-World Case Study A (Hoppscotch IDOR Reproduction — Step 5)
+## 7. Act 6: Hoppscotch-Inspired Local Reproduction of the Vulnerability Pattern (Step 5)
 
-**Objective:** Demonstrate reproduction of GitHub Advisory `GHSA-m5pg-r4jp-qq75` in a controlled, academic test environment.
+**Objective:** Demonstrate local controlled reproduction of the vulnerability pattern from GitHub Advisory `GHSA-m5pg-r4jp-qq75` / `CVE-2026-28217`.
 
 **What to do in Terminal 2:**
 ```powershell
@@ -180,7 +176,7 @@ try {
 - Gateway extracts `object_id = 102`, maps to database owner `102` (Bob), and halts execution before any resolver data leakage can occur.
 
 **What to tell your professor:**
-> *"In Hoppscotch prior to v2026.2.0, this exact pattern allowed unauthorized collection harvesting across users. In our gateway, the pre-execution policy engine enforces strict tenant isolation while the AST taint engine captures the exact schema sink and flags a true positive."*
+> *"In Hoppscotch <= 2026.1.1, the `userCollection` resolver skipped caller ownership verification. In our controlled local reproduction using our domain schema, the pre-execution policy engine enforces strict tenant isolation while the AST taint engine captures the exact schema sink and flags a true positive."*
 
 ---
 
@@ -190,9 +186,9 @@ try {
 
 **What to do:**
 1. Switch to your browser tab at **`http://localhost:8000/dashboard`**.
-2. Scroll to the new **Real-World Security Scenario Lab** section.
+2. Scroll to the **Real-World Security Scenario Lab** section.
 3. Click through the 4 scenario tabs:
-   - **Hoppscotch Collection IDOR (`GHSA-m5pg-r4jp-qq75`)**: Shows Alice $\to$ Bob's collection 102, HTTP 403 Forbidden, `TRUE_POSITIVE_BLOCKED`, and boundary evidence verified (`caller_bound=True`, `target_bound=True`, `ownership_checked=True`).
+   - **Hoppscotch-Inspired Collection IDOR (`GHSA-m5pg-r4jp-qq75`)**: Shows Alice $\to$ Bob's collection 102, HTTP 403 Forbidden, `TRUE_POSITIVE_BLOCKED`, and boundary evidence verified (`caller_bound=True`, `target_bound=True`, `ownership_checked=True`).
    - **Aliased Nested Traversal**: Shows client alias `targetUser.userDocs` disambiguated to canonical path `user.resources`.
    - **SaaS Multi-Tenant Isolation**: Shows tenant isolation across enterprise document repositories.
    - **Legitimate Owner Access**: Shows Alice accessing her own document 101, HTTP 200 OK, and `RUNTIME_PROTECTED_ALLOWED` preventing false alarm.
@@ -225,6 +221,12 @@ python scripts/evaluate_phase_7.py
 ```
 *Output: Displays the 6-dimension evaluation matrix across 105 valid cases and 10 syntax edge cases.*
 
+### Part D: Run the Independent Real-World Dataset Evaluation
+```powershell
+python scripts/evaluate_real_world_scenarios.py
+```
+*Output: 12/12 scenarios verified with 100% status, decision, reason, and path matches.*
+
 ---
 
 ## 10. Faculty Q&A Survival Guide (Defending Against Tough Questions)
@@ -233,21 +235,21 @@ python scripts/evaluate_phase_7.py
 > **Answer:**  
 > *"No, Professor, and that is a critical point of scientific integrity in our research report. Both the gateway and our correlated model achieved 100.0% recall on the 52 attack cases in our benchmark. Our research contribution is not claiming increased binary blocking, but solving the **attribution and explainability failure** of existing gateways: our model improves exact path attribution from **56.2% to 89.5%**, uncovers nested collections and field aliases, and verifies boundary proofs for 100% of protected entities."*
 
-### Q2: *"How does your work compare to Lambers et al. (LMCS 2026)?"*
+### Q2: *"How does your work relate to Lambers et al. (LMCS 2026)?"*
 > **Answer:**  
-> *"Lambers et al. presented pioneering work on static taint tracking for Graph APIs to detect broken access control candidates. However, Lambers et al. operates purely statically. In our empirical evaluation, applying static taint alone produces an **81.1% false alarm rate** on benign operations because static code cannot verify runtime JWT identity or database ownership records. Our contribution is the **correlation framework**: combining AST taint analysis with runtime authorization evidence to eliminate false alarms (0.0% false alarm rate) and provide explainable audit proofs."*
+> *"Lambers et al. presented foundational theoretical work using graph transformation rules and Critical Pair Analysis for Graph APIs (evaluated on GitHub GraphQL API). We cite Lambers et al. as the theoretical basis establishing that untrusted graph inputs propagate toward sensitive sinks. However, in our inline gateway setting, evaluating an isolated static-taint baseline produced an **81.1% false alarm rate on our benchmark's benign queries (43/53)** because static code cannot inspect runtime JWT identities or database records. We do not claim a direct empirical comparison with the Lambers implementation itself; our contribution is **correlation**: combining AST taint analysis with runtime authorization policy evidence in an audit-only gateway to eliminate false alarms and provide explainable audit proofs."*
 
 ### Q3: *"Did you test against the live Hoppscotch production server?"*
 > **Answer:**  
-> *"No, out of strict academic ethics and scientific reproducibility, we did not execute unauthorized probes against third-party production infrastructure. Instead, we constructed a faithful, controlled local reproduction of the `GHSA-m5pg-r4jp-qq75` vulnerability pattern (`userCollection` IDOR) using identical schema entities, argument bindings, and authorization contracts, validating our findings through automated unit tests (`tests/test_real_world_scenarios.py`)."*
+> *"No, out of strict academic ethics and scientific reproducibility, we did not execute unauthorized probes against third-party production infrastructure. Instead, we constructed an isolated, controlled local reproduction of the `GHSA-m5pg-r4jp-qq75` / `CVE-2026-28217` vulnerability pattern (`userCollection` IDOR) using our existing `Resource` and `User` domain entities, validating our findings through automated unit tests (`tests/test_real_world_scenarios.py`)."*
 
 ### Q4: *"Why did you integrate taint analysis in audit-only mode instead of inline blocking?"*
 > **Answer:**  
-> *"Because static taint analysis alone has an 81.1% false alarm rate. If we enforced blocking directly on taint findings, legitimate users would be locked out of their own data. Operating in audit-only mode guarantees **zero divergence** from existing gateway decisions (115/115 cases preserved) while enriching audit logs with deep schema coordinates and boundary proofs."*
+> *"Because static taint analysis alone has an 81.1% false alarm rate on benign queries. If we enforced blocking directly on taint findings, legitimate users would be locked out of their own data. Operating in audit-only mode guarantees **zero divergence** on our evaluated benchmark (115/115 cases preserved) while enriching audit logs with deep schema coordinates and boundary proofs."*
 
 ### Q5: *"What is the performance overhead of adding AST taint analysis?"*
 > **Answer:**  
-> *"We profiled the engine across benchmark iterations: cold-start latency is **0.377 ms**, and warmed median latency is **0.295 ms** (P95 is **0.434 ms**). Because the entire gateway request lifecycle takes ~20–25 ms including database I/O, AST analysis adds less than 1.5% overhead."*
+> *"We profiled the engine across benchmark iterations: cold-start latency is **0.381 ms**, and warmed median latency is **0.293 ms** (P95 is **0.443 ms**). Because the entire gateway request lifecycle takes ~20–25 ms including database I/O, AST analysis adds less than 1.5% overhead."*
 
 ---
 
@@ -257,10 +259,12 @@ python scripts/evaluate_phase_7.py
 | :--- | :---: | :---: | :---: |
 | **Detection Recall** | 100.0% (52/52) | 100.0% (52/52) | **100.0% (52/52)** |
 | **Detection Precision** | 100.0% (52/52) | 54.7% (52/95) | **100.0% (52/52)** |
-| **False Alarm Rate** | 0.0% (0/53) | 81.1% (43/53) | **0.0% (0/53)** |
+| **False Alarm Rate** | 0.0% (0/53)* | 81.1% (43/53)* | **0.0% (0/53)* |
 | **Exact Path Attribution** | 56.2% (59/105) | 89.5% (94/105) | **89.5% (94/105)** |
 | **Boundary Criteria Verified** | 0.0% (0/105) | 0.0% (0/105) | **90.5% (95/105)** *(100% of protected entities)* |
 | **Illustrative Rubric Score** | 3.33 / 8.0 (41.6%) | 5.75 / 8.0 (71.9%) | **7.83 / 8.0 (97.9%)** |
-| **Added Latency Overhead** | 0.00 ms (Baseline) | 0.295 ms (Median) | **0.295 ms (Median)** |
-| **Behavioral Compatibility** | 100.0% (Baseline) | N/A (Static) | **100.0% (115/115 Zero Divergence)** |
+| **Added Latency Overhead** | 0.00 ms (Baseline) | 0.293 ms (Median) | **0.293 ms (Median)** |
+| **Behavioral Compatibility** | 100.0% (Baseline) | N/A (Static) | **100.0% (115/115 Zero Divergence on benchmark)** |
 | **Automated Test Suite** | — | — | **167/167 Passing Tests (21 Suites)** |
+
+*\*False Alarm Rate is computed strictly on the 53 evaluated benign test cases in our benchmark corpus.*

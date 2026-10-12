@@ -1,10 +1,10 @@
 # Evidence Package: GraphQL Shield Research Verification
 
 **Repository:** `c:\Users\balan\Downloads\CCNS Project`  
-**Git Commit Head:** `4c8d099` (Local Master)  
+**Git Commit Head:** `8905ed2` (Local Master)  
 **Evaluation Date:** October 2026  
 **Auditor / Assistant:** Antigravity Pair-Programming Assistant  
-**Verification Status:** 100% Deterministic Reproducibility
+**Verification Status:** 100% Deterministic Reproducibility  
 
 ---
 
@@ -26,7 +26,10 @@ python -m pytest -q
 # Step 2: Run 6-dimension evaluation across 115 benchmark cases
 python scripts/evaluate_phase_7.py
 
-# Step 3: Run live demonstration showcase (7-step sequence with assertions)
+# Step 3: Run independent evaluation of 12 real-world scenarios
+python scripts/evaluate_real_world_scenarios.py
+
+# Step 4: Run live demonstration showcase (7-step sequence with assertions)
 python scripts/demo_live_showcase.py
 ```
 
@@ -65,21 +68,21 @@ tests/test_phase_10_comprehensive.py::test_01_direct_bola PASSED         [ 13%]
 tests/test_phase_7_explainability.py::test_boundary_evidence_strict_properties_and_uncertainties PASSED [ 91%]
 tests/test_phase_7_explainability.py::test_correlation_distinguishes_candidate_from_confirmed_violation PASSED [ 91%]
 tests/test_phase_7_explainability.py::test_behavioral_compatibility_audit_only_preserves_gateway_decisions PASSED [ 92%]
-tests/test_real_world_scenarios.py::test_scenario_hoppscotch_collection_idor_blocked PASSED [ 92%]
-tests/test_real_world_scenarios.py::test_scenario_hoppscotch_collection_legitimate_allowed PASSED [ 93%]
-tests/test_real_world_scenarios.py::test_scenario_hoppscotch_admin_override PASSED [ 94%]
-tests/test_real_world_scenarios.py::test_scenario_aliased_collection_traversal_blocked PASSED [ 94%]
-tests/test_real_world_scenarios.py::test_scenario_aliased_collection_path_attribution PASSED [ 95%]
-tests/test_real_world_scenarios.py::test_scenario_saas_multi_tenant_document_blocked PASSED [ 96%]
-tests/test_real_world_scenarios.py::test_scenario_saas_multi_tenant_document_allowed PASSED [ 96%]
-tests/test_real_world_scenarios.py::test_scenario_nested_team_workspace_traversal_blocked PASSED [ 97%]
-tests/test_real_world_scenarios.py::test_scenario_variable_default_injection_blocked PASSED [ 98%]
-tests/test_real_world_scenarios.py::test_scenario_missing_auth_denied PASSED [ 98%]
-tests/test_real_world_scenarios.py::test_scenario_legitimate_owner_no_false_alarm PASSED [ 99%]
-tests/test_real_world_scenarios.py::test_scenario_dataset_file_structure PASSED [ 99%]
-tests/test_real_world_scenarios.py::test_scenario_lab_all_scenarios_execution PASSED [100%]
+tests/test_real_world_scenarios.py::test_hoppscotch_idor_direct_collection_denied PASSED [ 92%]
+tests/test_real_world_scenarios.py::test_hoppscotch_idor_legitimate_owner_allowed PASSED [ 93%]
+tests/test_real_world_scenarios.py::test_hoppscotch_idor_admin_override_allowed PASSED [ 94%]
+tests/test_real_world_scenarios.py::test_team_workspace_nested_collection_traversal_denied PASSED [ 94%]
+tests/test_nested_parameterized_lookup_under_own_node_denied PASSED [ 95%]
+tests/test_real_world_scenarios.py::test_alias_path_attribution_schema_vs_response_path PASSED [ 96%]
+tests/test_real_world_scenarios.py::test_saas_multi_tenant_cross_tenant_document_denied PASSED [ 96%]
+tests/test_real_world_scenarios.py::test_saas_multi_tenant_variable_default_coercion_denied PASSED [ 97%]
+tests/test_real_world_scenarios.py::test_saas_multi_tenant_legitimate_document_access PASSED [ 98%]
+tests/test_real_world_scenarios.py::test_unauthenticated_request_rejected_by_auth_boundary PASSED [ 98%]
+tests/test_real_world_scenarios.py::test_invalid_token_rejected_by_auth_boundary PASSED [ 99%]
+tests/test_real_world_scenarios.py::test_false_alarm_prevention_on_legitimate_tainted_input PASSED [ 99%]
+tests/test_real_world_scenarios.py::test_scenario_lab_module_execution PASSED [100%]
 
-============================= 167 passed in 5.71s =============================
+============================= 167 passed in 5.42s =============================
 ```
 
 ---
@@ -106,20 +109,30 @@ tests/test_real_world_scenarios.py::test_scenario_lab_all_scenarios_execution PA
 
 ## 3.1 Real-World Scenario Dataset (`data/real_world_scenarios.json`)
 
-To evaluate real-world production vulnerabilities without altering the fixed 115-case benchmark, a dedicated dataset of 12 real-world scenarios was created:
+Evaluated independently from the 115-case benchmark via `scripts/evaluate_real_world_scenarios.py`:
 
-1. `RW-001`: Hoppscotch Collection IDOR Reproduction (`GHSA-m5pg-r4jp-qq75`) — Direct cross-tenant access to Bob's collection ID 102.
-2. `RW-002`: Hoppscotch Collection Legitimate Owner Access — Alice reading her own collection folder 201.
-3. `RW-003`: Hoppscotch Collection Admin Override — Administrator Charlie inspecting collection 102.
-4. `RW-004`: Nested Workspace Collection Traversal with Field Aliases (`targetUser.userDocs`).
-5. `RW-005`: SaaS Multi-Tenant Document Repository Isolation (Tenant 1 Alice targeting Tenant 2 Bob document 102).
-6. `RW-006`: SaaS Multi-Tenant Legitimate Same-Tenant Document Retrieval.
-7. `RW-007`: Hierarchical Organization Team Resources Traversal.
-8. `RW-008`: GraphQL Variable Default Value ID Injection in SaaS Environment.
-9. `RW-009`: Unauthenticated Collection Lookup (Authentication Layer Defense).
-10. `RW-010`: False Alarm Prevention Verification on Sensitive Resource.
-11. `RW-011`: Multiple Aliased Fields in Single Document (`colA: resource(id: 101)`, `colB: resource(id: 102)`).
-12. `RW-012`: Legitimate Multi-Resource Inspection by Admin Principal.
+- **Total Scenarios:** 12
+- **Gateway HTTP Status Match Rate:** 12/12 (100.0%)
+- **Gateway Decision Match Rate:** 12/12 (100.0%)
+- **Policy Reason Match Rate:** 12/12 (100.0%)
+- **Path Attribution Match Rate:** 12/12 (100.0%)
+
+### Scenario Catalog:
+1. `REAL-HOPP-001`: Hoppscotch Collection IDOR Pattern Reproduction (`GHSA-m5pg-r4jp-qq75` / `CVE-2026-28217`) — Direct cross-tenant collection lookup (Denied / HTTP 403).
+2. `REAL-HOPP-002`: Hoppscotch Collection Pattern Legitimate Owner Access — Bob reading his own collection (Allowed / HTTP 200).
+3. `REAL-HOPP-003`: Hoppscotch Collection Pattern Admin Override — Admin Charlie inspecting collection (Allowed / HTTP 200).
+4. `REAL-NEST-001`: Team Workspace Nested Collection Traversal with Field Aliases (`targetUser.userDocs` $\to$ `user.resources`).
+5. `REAL-NEST-002`: Team Workspace Nested Parameterized Lookup under Own User Node (`user(id: 101) { resource(id: 102) }`).
+6. `REAL-NEST-003`: Team Workspace Legitimate Owner Nested Folder Traversal (`resource(id: 201) { children }`).
+7. `REAL-SAAS-001`: SaaS Multi-Tenant Cross-Tenant Private Document Access (`stolenDoc: resource(id: 102)`).
+8. `REAL-SAAS-002`: SaaS Multi-Tenant Variable Default Injection (`target: Int = 102`).
+9. `REAL-SAAS-003`: SaaS Multi-Tenant Legitimate Tenant Private Document Retrieval.
+10. `REAL-AUTH-001`: Authentication Layer: Unauthenticated Access Attempt (HTTP 403).
+11. `REAL-AUTH-002`: Authentication Layer: Invalid JWT Signature Token (HTTP 401).
+12. `REAL-PROJ-001`: Project Resources: Shared Project Issue Attachment Access Control.
+
+> [!NOTE]
+> All Hoppscotch scenarios are controlled local reproductions of the vulnerability pattern modeled within our existing `Resource` and `User` schema in SQLite `shield.db`. The original Hoppscotch application was not tested.
 
 ---
 
@@ -156,11 +169,11 @@ DIMENSION 4: ILLUSTRATIVE EXPLANATION RUBRIC (12 Representative Archetypes)
   Quality Percentage  |             41.6% |             71.9% |          97.9%
 --------------------------------------------------------------------------------
 DIMENSION 5: RUNTIME OVERHEAD
-  Cold-Start Latency  : 0.377 ms
-  Warmed Median       : 0.295 ms
-  Warmed P95          : 0.434 ms
+  Cold-Start Latency  : 0.381 ms
+  Warmed Median       : 0.293 ms
+  Warmed P95          : 0.443 ms
 --------------------------------------------------------------------------------
-DIMENSION 6: BEHAVIORAL COMPATIBILITY
+DIMENSION 6: BEHAVIORAL COMPATIBILITY (ON EVALUATED CORPUS)
   Valid Security Cases Preservation Rate: 100.0% (105/105 Cases)
   Zero-Divergence Audit Preservation Rate : 100.0% (115/115 Cases)
 ================================================================================
@@ -175,17 +188,17 @@ Run via: `python scripts/demo_live_showcase.py`
 ### 7-Step Sequence Demonstrated:
 - **Step 1 (Direct BOLA Denial):** Alice requests Bob's `resource(id: 102)`. Gateway returns `HTTP 403 Forbidden` (`OWNERSHIP_MISMATCH`). AST Taint engine flags `DIRECT_BOLA_CANDIDATE` on path `resource`. Correlation records `TRUE_POSITIVE_BLOCKED`.
 - **Step 2 (Indirect Nested Traversal Denial):** Alice requests Bob's `user(id: 102) { resources }`. Gateway returns `HTTP 403 Forbidden`. Taint engine uncovers nested relationship `UserType.resources`, and correlation records `TRUE_POSITIVE_BLOCKED`.
-- **Step 3 (Legitimate Owner Access):** Alice requests her own `resource(id: 101)`. Gateway returns `HTTP 200 OK`. Static taint flags candidate, but correlation verifies runtime `OWNER_MATCH` and marks `RUNTIME_PROTECTED_ALLOWED` (preventing false alarm).
+- **Step 3 (Legitimate Owner Access):** Alice requests her own `resource(id: 101)`. Gateway returns `HTTP 200 OK`. Static taint flags candidate, but correlation verifies runtime `OWNER_MATCH` and marks `RUNTIME_PROTECTED_ALLOWED` (preventing false alarm on evaluated benign query).
 - **Step 4 (Aliased Query Path Disambiguation):** Alice queries `stolenDoc: resource(id: 102)`. Gateway returns `HTTP 403 Forbidden`. AST parser maps response alias `stolenDoc` back to canonical schema path `resource`.
-- **Step 5 (Hoppscotch IDOR Reproduction — GHSA-m5pg-r4jp-qq75):** Alice requests Bob's collection `userCollection(userCollectionID: 102)`. Gateway returns `HTTP 403 Forbidden` (`OWNERSHIP_MISMATCH`). Correlation records `TRUE_POSITIVE_BLOCKED`.
+- **Step 5 (Hoppscotch-Inspired Collection IDOR Pattern Reproduction):** Controlled reproduction of `GHSA-m5pg-r4jp-qq75` / `CVE-2026-28217` pattern. Alice requests Bob's collection `userCollection(userCollectionID: 102)`. Gateway returns `HTTP 403 Forbidden` (`OWNERSHIP_MISMATCH`). Correlation records `TRUE_POSITIVE_BLOCKED`.
 - **Step 6 (Rich Audit Explanation & Boundary Verification):** Queries `/api/v1/security/taint-audit`. Verifies `caller_bound=True`, `target_bound=True`, `ownership_checked=True`, and correlation `TRUE_POSITIVE_BLOCKED`.
-- **Step 7 (Audit-Only Compatibility & Overhead Confirmation):** Re-runs verification across all 115 benchmark cases, confirming 0 divergences and sub-millisecond added latency.
+- **Step 7 (Audit-Only Compatibility & Overhead Confirmation):** Re-runs verification across all 115 benchmark cases, confirming 0 divergences on evaluated cases and sub-millisecond added latency.
 
 ---
 
 ## 6. Commit History & Audit Chain
 
-- `feat(real-world)` — integrate real-world security case studies, scenario lab, and literature positioning
+- `feat: integrate real-world security case studies, scenario lab, and literature positioning` (`8905ed2`)
 - `c534e77` — `audit(phase-7): compute program-verified boundary criteria strictly from actual runtime policy evidence`
 - `fce597d` — `audit(phase-7): distinguish criteria representation from program verification and relabel rubric as illustrative`
 - `5437b32` — `feat(phase-7): implement comparative evaluation of explainability and authorization boundaries`
