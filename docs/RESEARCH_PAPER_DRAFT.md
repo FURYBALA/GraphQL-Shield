@@ -3,7 +3,8 @@
 **Authors:** CCNS Project Research Group  
 **Target Venue:** IEEE Transactions on Information Forensics and Security / IEEE S&P Workshop on Graph and API Security  
 **Date:** October 2026  
-**Artifact Repository:** Local Git Repository (Commit-tracked evaluation package)
+**Artifact Repository:** Local Git Repository (Commit-tracked evaluation package)  
+**Manuscript Format Note:** This document represents the submission-ready academic preprint drafted in Markdown. Two-column camera-ready rendering (e.g., IEEEtran LaTeX template) will be compiled upon formal submission using the verified metrics, formulas, tables, and bibliography preserved herein.
 
 ---
 
@@ -319,6 +320,7 @@ query GetCollection($id: Int!) {
 2. **Ownership Inference Heuristics:** In the absence of explicit database schema foreign keys, ownership inference relies on field naming patterns (e.g., `owner_id`, `user_id`). Highly non-standard schema naming conventions may require explicit configuration.
 3. **Mock Provider vs. Live LLM Evaluation:** The systematic benchmark reported in Section 7.2–7.3 evaluates programmatic schema contracts and validator invariants using deterministic mock fixtures. Section 7.4 defines a pre-registered protocol (`scripts/evaluate_real_llm_explanations.py`) for live OpenAI-compatible models. In evaluation environments where external API credentials are absent, the harness halts cleanly rather than fabricating synthetic data as real LLM performance. Empirical grading of non-deterministic models under human double-blind review remains subject to API availability and cloud latency (400–1200 ms).
 4. **Adversarial Prompt Injection Boundaries:** While structural AST quarantine and post-generation decision guardrails prevent input payloads from overriding gateway decisions, probabilistic LLM components remain susceptible to emerging semantic prompt injection techniques.
+5. **Ethical Considerations & Responsible Disclosure:** All real-world vulnerability reproductions (including the Hoppscotch CVE-2026-28217 pattern) were implemented exclusively within an isolated local synthetic laboratory schema. No active probes, unauthorized queries, or testing were directed against external systems, production servers, or third-party user data. The vulnerability pattern was reconstructed strictly from publicly disclosed advisory documentation for academic replication. Furthermore, the AI analyst component is architected as an out-of-band advisory auditor with zero runtime enforcement authority, ensuring that automated explanations cannot degrade service availability or compromise access control decisions.
 
 ---
 
