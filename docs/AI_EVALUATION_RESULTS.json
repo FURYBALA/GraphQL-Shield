@@ -9,7 +9,7 @@
     "prompt_injection_scope": "pipeline_isolation_and_guardrail_verification_only",
     "gateway_enforcement_authority": "Gateway PolicyEngine exclusively (Zero AI Enforcement Authority)"
   },
-  "timestamp": "2026-10-12T14:39:00Z",
+  "timestamp": "2026-10-12T15:01:03Z",
   "evaluation_duration_seconds": 0.004,
   "scenarios_evaluated": 12,
   "rq2_comparative_completeness": {

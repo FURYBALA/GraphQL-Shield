@@ -19,6 +19,7 @@ class AIExplanationRequest(BaseModel):
     variables: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Query variables")
     evidence_package: Optional[EvidencePackage] = Field(None, description="Pre-assembled evidence package if available")
     user_context_notes: Optional[str] = Field(None, description="Optional security analyst notes")
+    force_execution: bool = Field(False, description="Allow offline advisory research demonstration")
 
 
 class GroundingValidationResult(BaseModel):

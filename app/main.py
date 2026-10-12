@@ -233,6 +233,7 @@ async def generate_ai_explanation_endpoint(
     return await ai_analyst_service.generate_explanation(
         request=request,
         current_user=current_user,
+        force_execution=request.force_execution,
     )
 
 # Secure Strawberry GraphQL router protected by the BOLA security gateway

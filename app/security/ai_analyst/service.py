@@ -89,37 +89,42 @@ class AIAnalystService:
         if request.finding_id:
             for sc in get_all_real_world_scenarios():
                 if sc.get("scenario_id") == request.finding_id or sc.get("name") == request.finding_id:
-                    evals = sc.get("runtime_evaluations", [])
-                    first_eval = evals[0] if evals else {}
-                    first_obj = first_eval.get("object", {})
-                    first_res = first_eval.get("evaluation", {})
-                    first_own = first_eval.get("ownership", {})
-                    corr_list = sc.get("correlation_results", [])
-                    first_corr = corr_list[0] if corr_list else {}
-
                     op = sc.get("operation", {})
                     sc_query = op.get("query") or sc.get("query") or "query { resource { id } }"
                     sc_vars = op.get("variables") or sc.get("variables") or {}
+
+                    caller_dict = sc.get("simulated_caller") or sc.get("caller") or {}
+                    owner_dict = sc.get("resource_owner") or {}
+                    gw_dict = sc.get("gateway_enforcement") or {}
+                    path_dict = sc.get("path_attribution") or {}
+                    corr_dict = sc.get("correlation") or {}
+                    taint_dict = sc.get("taint_analysis") or {}
+                    findings = taint_dict.get("findings") or []
+                    first_finding = findings[0] if findings else {}
+
+                    decision = gw_dict.get("decision", "DENY")
+                    reason = gw_dict.get("reason", "OWNERSHIP_MISMATCH")
+                    is_deny = decision == "DENY"
 
                     return EvidencePackage.from_scenario_or_finding(
                         finding_id=sc.get("scenario_id"),
                         query=sc_query,
                         variables=sc_vars,
-                        canonical_path=first_corr.get("schema_path") or sc.get("canonical_schema_path") or "Query.resource",
-                        response_path=first_corr.get("response_path") or "resource",
-                        caller_id=sc.get("caller", {}).get("user_id", caller_id),
-                        caller_role=sc.get("caller", {}).get("role", caller_role),
-                        target_type=first_obj.get("type", "Resource"),
-                        target_id=first_obj.get("id", 1),
-                        owner_id=first_own.get("owner_id"),
-                        decision=sc.get("actual_gateway_decision", "DENY"),
-                        reason=first_res.get("reason", "OWNERSHIP_MISMATCH"),
-                        risk_score=sc.get("risk_assessment", {}).get("risk_score", 85),
-                        risk_level=sc.get("risk_assessment", {}).get("risk_level", "HIGH"),
-                        correlation_status=first_corr.get("status", "TRUE_POSITIVE_BLOCKED"),
-                        candidate_kind=first_corr.get("candidate_kind", "DIRECT_BOLA"),
-                        taint_source_arg="id",
-                        sensitive_sink_type=first_obj.get("type", "Resource"),
+                        canonical_path=path_dict.get("primary_schema_path") or "Query.resource",
+                        response_path=path_dict.get("primary_response_path") or "resource",
+                        caller_id=caller_dict.get("user_id", caller_id),
+                        caller_role=caller_dict.get("role", caller_role),
+                        target_type="Resource" if "resource" in sc_query.lower() else "User",
+                        target_id=owner_dict.get("resource_id") or owner_dict.get("user_id") or 101,
+                        owner_id=owner_dict.get("user_id"),
+                        decision=decision,
+                        reason=reason,
+                        risk_score=90 if is_deny else 10,
+                        risk_level="HIGH" if is_deny else "LOW",
+                        correlation_status=corr_dict.get("status", "TRUE_POSITIVE_BLOCKED" if is_deny else "RUNTIME_PROTECTED_ALLOWED"),
+                        candidate_kind=first_finding.get("candidate_kind", "DIRECT_BOLA"),
+                        taint_source_arg=first_finding.get("taint_source") or "id",
+                        sensitive_sink_type=first_finding.get("sensitive_sink") or "Resource",
                         boundary_verified=True,
                     )
 
