@@ -2,7 +2,9 @@ from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from strawberry.fastapi import GraphQLRouter
 from pydantic import BaseModel
+from typing import Optional, Dict, Any
 import sqlite3
+import time
 
 from app.config import settings
 from app.database import init_db, get_db
@@ -303,6 +305,123 @@ async def generate_ai_explanation_endpoint(
         current_user=current_user,
         force_execution=request.force_execution,
     )
+
+
+# -----------------------------------------------------------------------------
+# GraphQL Authorization Differential Testing Engine Endpoints
+# -----------------------------------------------------------------------------
+
+from app.security.differential_testing import (
+    discover_schema_paths,
+    generate_differential_suite,
+    minimize_query,
+    DifferentialTestExecutor,
+    run_differential_testing_suite,
+    DifferentialTestCase,
+)
+
+class RunDifferentialRequest(BaseModel):
+    sample_limit: Optional[int] = None
+
+class CustomDifferentialRequest(BaseModel):
+    query: str
+    variables: Dict[str, Any] = {}
+    caller_id: Optional[int] = 101
+    caller_role: str = "user"
+    target_object_id: Optional[int] = None
+
+class MinimizeQueryRequest(BaseModel):
+    query: str
+    target_object_id: Optional[int] = None
+
+@app.get("/api/v1/differential-testing/paths")
+def get_discovered_paths_endpoint():
+    """Returns all discovered object-returning schema paths and sensitive sinks."""
+    paths = discover_schema_paths()
+    return {"paths": [p.model_dump() if hasattr(p, "model_dump") else p.dict() for p in paths]}
+
+@app.post("/api/v1/differential-testing/run")
+def run_differential_suite_endpoint(request: RunDifferentialRequest = RunDifferentialRequest()):
+    """Executes the automated differential test suite and returns the research evaluation report."""
+    report = run_differential_testing_suite(app, sample_limit=request.sample_limit)
+    return report.model_dump() if hasattr(report, "model_dump") else report.dict()
+
+@app.post("/api/v1/differential-testing/execute-custom")
+def execute_custom_differential_endpoint(request: CustomDifferentialRequest):
+    """Executes a user-supplied interactive GraphQL query through the differential engine."""
+    from app.security.object_extractor import normalize_query
+    from app.security.ownership import resolve_ownership
+
+    executor = DifferentialTestExecutor(app)
+    try:
+        extracted = normalize_query(request.query)
+        target_obj = (extracted.get("objects") or [{}])[0]
+    except Exception:
+        target_obj = {}
+
+    target_id = request.target_object_id or target_obj.get("id") or 101
+    target_type = target_obj.get("type") or "Resource"
+    schema_path = target_obj.get("path") or "resource"
+    is_nested = "." in schema_path
+
+    owner_res = resolve_ownership(target_type, target_id)
+    target_owner = owner_res.owner_id if owner_res else None
+
+    # Derive expected outcome from least-privilege policy oracle
+    if request.caller_id is None or request.caller_role == "anonymous":
+        expected_decision, expected_reason, expected_status = "DENY", "INVALID_CONTEXT", 401
+    elif request.caller_role.upper() == "ADMIN":
+        expected_decision, expected_reason, expected_status = "ALLOW", "ADMIN_OVERRIDE", 200
+    elif target_owner is not None and str(request.caller_id) == str(target_owner):
+        expected_decision, expected_reason, expected_status = "ALLOW", "OWNER_MATCH", 200
+    elif is_nested:
+        expected_decision, expected_reason, expected_status = "DENY", "NESTED_AUTHORIZATION_VIOLATION", 403
+    else:
+        expected_decision, expected_reason, expected_status = "DENY", "OWNERSHIP_MISMATCH", 403
+
+    tc = DifferentialTestCase(
+        test_id="CUSTOM-" + str(int(time.time() * 1000))[-6:],
+        name=f"Interactive Test: {schema_path} by Caller {request.caller_id}",
+        category="CUSTOM_INTERACTIVE",
+        query=request.query,
+        variables=request.variables,
+        caller_id=request.caller_id,
+        caller_role=request.caller_role,
+        target_object_type=target_type,
+        target_object_id=target_id,
+        target_owner_id=target_owner,
+        schema_path=schema_path,
+        response_path=schema_path,
+        is_nested=is_nested,
+        expected_decision=expected_decision,
+        expected_reason=expected_reason,
+        expected_http_status=expected_status,
+        oracle_rationale=f"Expected {expected_decision} for principal {request.caller_id} accessing {target_type}:{target_id} owned by {target_owner}.",
+    )
+    result = executor.execute_test(tc)
+    return result.model_dump() if hasattr(result, "model_dump") else result.dict()
+
+@app.post("/api/v1/differential-testing/minimize")
+def minimize_query_endpoint(request: MinimizeQueryRequest):
+    """Minimizes a GraphQL query into a minimal reproducible PoC using delta debugging."""
+    minimized = minimize_query(request.query, target_object_id=request.target_object_id)
+    return {"original": request.query, "minimized": minimized}
+
+@app.get("/api/v1/differential-testing/metrics")
+def get_differential_metrics_endpoint():
+    """Returns aggregated research metrics comparing differential testing vs manual baseline."""
+    report = run_differential_testing_suite(app)
+    return {
+        "summary": {
+            "total_test_cases": report.total_test_cases,
+            "schema_path_coverage_pct": report.schema_path_coverage_pct,
+            "vulnerability_prevention_rate_pct": report.vulnerability_prevention_rate_pct,
+            "path_inconsistencies_detected": report.path_inconsistencies_detected,
+            "reproducibility_rate_pct": report.reproducibility_rate_pct,
+            "mean_latency_per_test_ms": report.mean_latency_per_test_ms,
+        },
+        "baseline_comparison": report.baseline_comparison,
+    }
 
 # Secure Strawberry GraphQL router protected by the BOLA security gateway
 graphql_app = GraphQLRouter(schema, context_getter=None, dependencies=[Depends(bola_enforcement_middleware)])
