@@ -10,10 +10,11 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     TAINT_ANALYSIS_MODE: str = "audit_only"
     ENABLE_DEMO_SESSION: bool = True  # Disabled automatically if ENVIRONMENT == "production"
+    ASYNC_AUDIT_LOGGING: bool = False  # Set to True for non-blocking asynchronous queue persistence
 
     # AI Security Analyst Configuration (Disabled by default)
     AI_EXPLANATION_ENABLED: bool = False
-    AI_PROVIDER: str = "mock"  # "mock", "openai", "http_generic"
+    AI_PROVIDER: str = "mock"  # "mock", "openai", "http_generic", "ollama"
     AI_MODEL: str = "gpt-4o-mini"
     AI_API_KEY: str = ""
     AI_API_BASE: str = ""

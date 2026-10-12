@@ -6,8 +6,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from app.database import get_db_connection, init_db
 from app.config import settings
+from app.security.ownership import clear_ownership_cache
 
 def seed_database():
+    clear_ownership_cache()
     db_file = settings.DATABASE_URL.replace("sqlite:///", "")
     # Start fresh for development
     if os.path.exists(db_file):

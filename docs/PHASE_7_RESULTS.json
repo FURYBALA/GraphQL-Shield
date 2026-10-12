@@ -2,7 +2,7 @@
   "metadata": {
     "evaluation_phase": "Phase 7",
     "research_question": "Does context-sensitive AST-driven taint analysis correlated with runtime authorization evidence provide more useful source-to-sink explanations and authorization-boundary evidence than the existing gateway alone, without changing existing authorization outcomes?",
-    "timestamp": "2026-10-12T15:25:41Z",
+    "timestamp": "2026-10-12T15:58:37Z",
     "corpus_file": "data/ground_truth_corpus.json",
     "total_corpus_cases": 115,
     "valid_security_cases": 105,
@@ -473,13 +473,13 @@
     ]
   },
   "dimension_5_runtime_overhead": {
-    "cold_start_ms": 0.357,
-    "warmed_mean_ms": 0.283,
-    "warmed_median_ms": 0.278,
-    "warmed_min_ms": 0.049,
-    "warmed_max_ms": 0.848,
-    "warmed_p95_ms": 0.404,
-    "warmed_stdev_ms": 0.093,
+    "cold_start_ms": 0.331,
+    "warmed_mean_ms": 0.302,
+    "warmed_median_ms": 0.291,
+    "warmed_min_ms": 0.05,
+    "warmed_max_ms": 0.913,
+    "warmed_p95_ms": 0.459,
+    "warmed_stdev_ms": 0.104,
     "total_profiling_samples": 345
   },
   "dimension_6_behavioral_compatibility": {

@@ -140,6 +140,8 @@ def protected_route(current_user: dict = Depends(get_current_user)):
         "user": current_user
     }
 
+from app.security.audit import flush_audit_logs
+
 @app.get("/api/v1/audit-logs")
 def get_audit_logs(db: sqlite3.Connection = Depends(get_db), current_user: dict = Depends(get_current_user)):
     """
@@ -148,6 +150,7 @@ def get_audit_logs(db: sqlite3.Connection = Depends(get_db), current_user: dict 
     if current_user.get("role", "").upper() != "ADMIN":
         raise HTTPException(status_code=403, detail="Admin access required")
         
+    flush_audit_logs()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT 50")
     logs = [dict(row) for row in cursor.fetchall()]
@@ -166,6 +169,7 @@ def get_dashboard_stats(db: sqlite3.Connection = Depends(get_db)):
     """
     Open endpoint serving stats for the static dashboard purely for demonstration.
     """
+    flush_audit_logs()
     cursor = db.cursor()
     
     cursor.execute("SELECT COUNT(*) FROM audit_logs")

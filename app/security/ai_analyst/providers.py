@@ -334,3 +334,81 @@ class HTTPLLMProvider(BaseAIProvider):
                 fallback_resp.uncertainties.append(f"External LLM call failed ({str(e)}). Fallback explanation generated.")
                 fallback_resp.validate_grounding(package)
                 return fallback_resp
+
+
+class OllamaLLMProvider(BaseAIProvider):
+    """
+    Local Ollama LLM provider for zero-cost, private offline evaluation (e.g. llama3.1:8b, mistral).
+    Connects to local daemon (default http://127.0.0.1:11434/api/chat).
+    """
+
+    def __init__(
+        self,
+        api_base: str = "http://127.0.0.1:11434",
+        model: str = "llama3.1:8b",
+        timeout_seconds: float = 30.0,
+    ):
+        self.api_base = api_base.rstrip("/")
+        self.model = model
+        self.timeout_seconds = timeout_seconds
+
+    async def generate_explanation(
+        self,
+        package: EvidencePackage,
+        system_prompt: str,
+        user_prompt: str,
+    ) -> AIExplanationResponse:
+        start_time = time.perf_counter()
+        url = f"{self.api_base}/api/chat"
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            "format": "json",
+            "stream": False,
+            "options": {
+                "temperature": 0.1,
+            },
+        }
+
+        async with httpx.AsyncClient(timeout=self.timeout_seconds) as client:
+            try:
+                response = await client.post(url, json=payload)
+                response.raise_for_status()
+                data = response.json()
+                content = data.get("message", {}).get("content", "{}")
+                parsed_json = json.loads(content)
+                duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
+
+                resp = AIExplanationResponse(
+                    summary=parsed_json.get("summary", "No summary provided"),
+                    attack_pattern=parsed_json.get("attack_pattern", "Unknown"),
+                    observed_facts=parsed_json.get("observed_facts", []),
+                    security_interpretation=parsed_json.get("security_interpretation", ""),
+                    canonical_path=parsed_json.get("canonical_path", package.canonical_schema_path),
+                    authorization_explanation=parsed_json.get("authorization_explanation", ""),
+                    impact_assessment=parsed_json.get("impact_assessment", ""),
+                    root_cause=parsed_json.get("root_cause", ""),
+                    recommended_remediation=parsed_json.get("recommended_remediation", ""),
+                    suggested_regression_tests=parsed_json.get("suggested_regression_tests", []),
+                    evidence_references=parsed_json.get("evidence_references", []),
+                    uncertainties=parsed_json.get("uncertainties", []),
+                    model_metadata={
+                        "provider": "ollama",
+                        "model": self.model,
+                        "latency_ms": duration_ms,
+                    },
+                )
+                resp.validate_grounding(package)
+                return resp
+            except Exception as e:
+                # Safe fallback to mock if Ollama daemon is offline or model missing
+                fallback_mock = MockAIProvider(model_name=f"fallback-ollama-{self.model}")
+                fallback_resp = await fallback_mock.generate_explanation(package, system_prompt, user_prompt)
+                fallback_resp.model_metadata["ollama_error"] = str(e)
+                fallback_resp.uncertainties.append(f"Local Ollama provider failed ({str(e)}). Fallback explanation generated.")
+                fallback_resp.validate_grounding(package)
+                return fallback_resp
+

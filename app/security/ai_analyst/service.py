@@ -18,6 +18,7 @@ from app.security.ai_analyst.providers import (
     FlawedMockAIProvider,
     HTTPLLMProvider,
     MockAIProvider,
+    OllamaLLMProvider,
 )
 from app.security.ai_analyst.schema import (
     AIExplanationRequest,
@@ -58,8 +59,8 @@ class AIAnalystService:
             return self._provider
         
         provider_type = getattr(settings, "AI_PROVIDER", "mock").lower()
-        if provider_type == "http":
-            api_base = getattr(settings, "AI_API_BASE", "https://api.openai.com/v1")
+        if provider_type in ("http", "openai", "http_generic"):
+            api_base = getattr(settings, "AI_API_BASE", "https://api.openai.com/v1") or "https://api.openai.com/v1"
             api_key = getattr(settings, "AI_API_KEY", "")
             model = getattr(settings, "AI_MODEL", "gpt-4o-mini")
             timeout = getattr(settings, "AI_TIMEOUT_SECONDS", 15.0)
@@ -70,6 +71,15 @@ class AIAnalystService:
                 model=model,
                 timeout_seconds=timeout,
                 max_tokens=max_tokens,
+            )
+        elif provider_type == "ollama":
+            api_base = getattr(settings, "AI_API_BASE", "http://127.0.0.1:11434") or "http://127.0.0.1:11434"
+            model = getattr(settings, "AI_MODEL", "llama3.1:8b")
+            timeout = getattr(settings, "AI_TIMEOUT_SECONDS", 30.0)
+            return OllamaLLMProvider(
+                api_base=api_base,
+                model=model,
+                timeout_seconds=timeout,
             )
         return MockAIProvider(model_name=getattr(settings, "AI_MODEL", "mock-grounded-analyst"))
 

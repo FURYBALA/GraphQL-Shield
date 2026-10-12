@@ -1,10 +1,21 @@
-from graphql import FieldNode, VariableNode, IntValueNode, StringValueNode, OperationDefinitionNode, FragmentSpreadNode, FragmentDefinitionNode
+from graphql import (
+    FieldNode,
+    VariableNode,
+    IntValueNode,
+    StringValueNode,
+    OperationDefinitionNode,
+    FragmentSpreadNode,
+    FragmentDefinitionNode,
+    InlineFragmentNode,
+)
 from .graphql_parser import parse_query
+
+MAX_AST_DEPTH = 25
 
 def normalize_query(query: str, variables: dict = None) -> dict | None:
     """
     Analyzes GraphQL queries to identify operation type, fields, object IDs, and paths.
-    Supports variables, nested queries, and basic fragments.
+    Supports variables, nested queries, named fragments with cycle detection, and inline fragments.
     
     Returns a normalized internal representation, e.g.:
     {
@@ -49,7 +60,10 @@ def normalize_query(query: str, variables: dict = None) -> dict | None:
                         if isinstance(var_def.default_value, (IntValueNode, StringValueNode)):
                             effective_vars[var_name] = var_def.default_value.value
 
-            def visit(node, current_path):
+            def visit(node, current_path, visited_fragments=None, depth=0):
+                if depth > MAX_AST_DEPTH:
+                    return
+
                 if isinstance(node, FieldNode):
                     field_name = node.name.value
                     path = f"{current_path}.{field_name}" if current_path else field_name
@@ -80,19 +94,31 @@ def normalize_query(query: str, variables: dict = None) -> dict | None:
                         
                     if node.selection_set:
                         for selection in node.selection_set.selections:
-                            visit(selection, path)
+                            visit(selection, path, visited_fragments, depth + 1)
                             
                 elif isinstance(node, FragmentSpreadNode):
                     frag_name = node.name.value
+                    # Cycle detection: guard against circular fragment definitions
+                    active_fragments = set(visited_fragments or set())
+                    if frag_name in active_fragments:
+                        return
+                    active_fragments.add(frag_name)
+
                     if frag_name in fragments:
                         fragment = fragments[frag_name]
                         if fragment.selection_set:
                             for selection in fragment.selection_set.selections:
-                                visit(selection, current_path)
+                                visit(selection, current_path, active_fragments, depth + 1)
+
+                elif isinstance(node, InlineFragmentNode):
+                    # Handle inline fragments (... on Type { ... })
+                    if node.selection_set:
+                        for selection in node.selection_set.selections:
+                            visit(selection, current_path, visited_fragments, depth + 1)
 
             if definition.selection_set:
                 for selection in definition.selection_set.selections:
-                    visit(selection, "")
+                    visit(selection, "", None, 0)
                     
     return result
 

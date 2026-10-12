@@ -8,11 +8,30 @@ from app.security.ownership_inference import (
 )
 
 
+import time
+
+_OWNERSHIP_CACHE: dict = {}
+_CACHE_TTL_SECONDS: float = 30.0
+
+
+def clear_ownership_cache() -> None:
+    """Clears the in-memory ownership resolution cache."""
+    global _OWNERSHIP_CACHE
+    _OWNERSHIP_CACHE.clear()
+
+
 def get_object_owner(object_type: str, object_id: int) -> int | None:
     """
     Looks up the owner of a given object from the database based on its type.
-    This is the explicit (authoritative) ownership source.
+    Uses an in-memory TTL cache to eliminate redundant SQLite queries on hot paths.
     """
+    cache_key = (object_type.lower(), object_id)
+    now = time.time()
+    if cache_key in _OWNERSHIP_CACHE:
+        owner_id, cached_at = _OWNERSHIP_CACHE[cache_key]
+        if now - cached_at < _CACHE_TTL_SECONDS:
+            return owner_id
+
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -21,17 +40,16 @@ def get_object_owner(object_type: str, object_id: int) -> int | None:
             # A user "owns" their own user record
             cursor.execute("SELECT id FROM users WHERE id = ?", (object_id,))
             row = cursor.fetchone()
-            if row:
-                return row["id"]
-            return None
+            owner_id = row["id"] if row else None
             
         else:
             # Default to resources/objects table
             cursor.execute("SELECT owner_id FROM objects WHERE id = ?", (object_id,))
             row = cursor.fetchone()
-            if row:
-                return row["owner_id"]
-            return None
+            owner_id = row["owner_id"] if row else None
+
+        _OWNERSHIP_CACHE[cache_key] = (owner_id, now)
+        return owner_id
     finally:
         conn.close()
 
