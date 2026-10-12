@@ -15,6 +15,12 @@ from .models import (
 from .generator import discover_schema_paths, generate_differential_suite
 from .minimizer import minimize_query
 from .executor import DifferentialTestExecutor, run_differential_testing_suite
+from .exporters import (
+    export_sarif,
+    export_junit_xml,
+    generate_poc_curl,
+    generate_poc_python,
+)
 
 __all__ = [
     "DifferentialTestCase",
@@ -26,4 +32,8 @@ __all__ = [
     "minimize_query",
     "DifferentialTestExecutor",
     "run_differential_testing_suite",
+    "export_sarif",
+    "export_junit_xml",
+    "generate_poc_curl",
+    "generate_poc_python",
 ]

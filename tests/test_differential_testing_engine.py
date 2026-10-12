@@ -210,3 +210,106 @@ def test_api_differential_metrics(client):
     assert "summary" in data
     assert "baseline_comparison" in data
     assert data["summary"]["vulnerability_prevention_rate_pct"] == 100.0
+
+
+def test_mutation_differential_execution():
+    """Verify state-altering BOLA mutations are prevented by Gateway and baseline executes."""
+    executor = DifferentialTestExecutor(app)
+    suite = generate_differential_suite()
+    mut_test = next(tc for tc in suite if tc.test_id == "DIFF-MUT-001")
+
+    res = executor.execute_test(mut_test)
+    assert res.gateway_http_status == 403
+    assert res.gateway_decision == "DENY"
+    assert res.gateway_reason == "OWNERSHIP_MISMATCH"
+    assert res.insecure_http_status == 200
+    assert res.insecure_leaked_unauthorized_data is True
+    assert res.vulnerability_mitigated_by_gateway is True
+    assert res.verdict == "VULNERABILITY_PREVENTED"
+
+
+def test_field_level_sensitive_data_exposure():
+    """Verify non-owner probing secretKey is prevented by Gateway."""
+    executor = DifferentialTestExecutor(app)
+    suite = generate_differential_suite()
+    fld_test = next(tc for tc in suite if tc.test_id == "DIFF-FLD-001")
+
+    res = executor.execute_test(fld_test)
+    assert res.gateway_http_status == 403
+    assert res.gateway_decision == "DENY"
+    assert res.insecure_http_status == 200
+    assert res.insecure_leaked_unauthorized_data is True
+    assert res.verdict == "VULNERABILITY_PREVENTED"
+
+
+def test_ast_depth_and_complexity_budget(client):
+    """Verify recursive queries exceeding depth or complexity limits are blocked with HTTP 400."""
+    from app.core.security import create_access_token
+    token = create_access_token(user_id=101, role="user")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Deep recursive query exceeding depth 15
+    deep_query = "query Deep {" + " user(id: 101) {" * 18 + " id " + "}" * 18 + "}"
+    resp = client.post("/graphql", json={"query": deep_query}, headers=headers)
+    assert resp.status_code == 400
+    err_data = resp.json()
+    assert "QUERY_BUDGET_EXCEEDED" in str(err_data)
+
+
+def test_sarif_and_junit_export():
+    """Verify SARIF 2.1.0 and JUnit XML export data integrity."""
+    from app.security.differential_testing.exporters import export_sarif, export_junit_xml
+
+    report = run_differential_testing_suite(app, sample_limit=5)
+    sarif = export_sarif(report)
+    assert sarif["version"] == "2.1.0"
+    assert "$schema" in sarif
+    assert len(sarif["runs"]) == 1
+    assert "rules" in sarif["runs"][0]["tool"]["driver"]
+
+    junit_xml = export_junit_xml(report)
+    assert "<?xml" in junit_xml
+    assert "<testsuites" in junit_xml
+    assert "<testcase" in junit_xml
+
+
+def test_poc_exploit_generators():
+    """Verify standalone cURL and Python exploit generation."""
+    from app.security.differential_testing.exporters import generate_poc_curl, generate_poc_python
+
+    suite = generate_differential_suite()
+    sample_tc = suite[0]
+
+    curl_cmd = generate_poc_curl(sample_tc)
+    assert "curl -X POST" in curl_cmd
+    assert "/graphql" in curl_cmd
+
+    python_script = generate_poc_python(sample_tc)
+    assert "import requests" in python_script
+    assert "requests.post" in python_script
+
+
+def test_api_export_endpoints(client):
+    """Verify HTTP API export endpoints for SARIF, JUnit, and exploit scripts."""
+    # 1. SARIF
+    r_sarif = client.get("/api/v1/differential-testing/export/sarif")
+    assert r_sarif.status_code == 200
+    assert r_sarif.json()["version"] == "2.1.0"
+
+    # 2. JUnit
+    r_junit = client.get("/api/v1/differential-testing/export/junit")
+    assert r_junit.status_code == 200
+    assert "application/xml" in r_junit.headers["content-type"]
+    assert "<testsuites" in r_junit.text
+
+    # 3. Generate Exploit
+    r_exploit = client.post(
+        "/api/v1/differential-testing/generate-exploit",
+        json={"query": "query { resource(id: 102) { id } }", "caller_id": 101}
+    )
+    assert r_exploit.status_code == 200
+    data = r_exploit.json()
+    assert "curl" in data
+    assert "python" in data
+    assert "curl -X POST" in data["curl"]
+

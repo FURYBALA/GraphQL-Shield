@@ -115,6 +115,50 @@ def discover_schema_paths() -> List[SchemaPathDescriptor]:
         )
     )
 
+    # 4. State-Altering Mutations
+    paths.append(
+        SchemaPathDescriptor(
+            canonical_path="Mutation.updateResource",
+            path_key="updateResource",
+            root_field="updateResource",
+            field_name="updateResource",
+            parent_type="Mutation",
+            target_type="ResourceType",
+            is_nested=False,
+            arguments=["id", "name"],
+            is_collection=False,
+            is_sensitive_sink=True,
+        )
+    )
+    paths.append(
+        SchemaPathDescriptor(
+            canonical_path="Mutation.deleteResource",
+            path_key="deleteResource",
+            root_field="deleteResource",
+            field_name="deleteResource",
+            parent_type="Mutation",
+            target_type="Boolean",
+            is_nested=False,
+            arguments=["id"],
+            is_collection=False,
+            is_sensitive_sink=True,
+        )
+    )
+    paths.append(
+        SchemaPathDescriptor(
+            canonical_path="Mutation.transferOwnership",
+            path_key="transferOwnership",
+            root_field="transferOwnership",
+            field_name="transferOwnership",
+            parent_type="Mutation",
+            target_type="ResourceType",
+            is_nested=False,
+            arguments=["id", "newOwnerId"],
+            is_collection=False,
+            is_sensitive_sink=True,
+        )
+    )
+
     return paths
 
 
@@ -552,6 +596,132 @@ def generate_differential_suite(sample_limit: Optional[int] = None) -> List[Diff
             expected_reason="PUBLIC_FIELD",
             expected_http_status=200,
             oracle_rationale="Public infrastructure fields do not require entity-level authorization.",
+        )
+    )
+
+    test_cases.append(
+        DifferentialTestCase(
+            test_id="DIFF-MUT-001",
+            name="Mutation BOLA: Cross-tenant updateResource by Alice on Bob's Resource 102",
+            category="MUTATION_BOLA",
+            query='mutation { updateResource(id: 102, name: "Tampered by Alice") { id name ownerId } }',
+            caller_id=101,
+            caller_role="user",
+            target_object_type="Resource",
+            target_object_id=102,
+            target_owner_id=102,
+            schema_path="updateResource",
+            response_path="updateResource",
+            is_nested=False,
+            expected_decision="DENY",
+            expected_reason="OWNERSHIP_MISMATCH",
+            expected_http_status=403,
+            oracle_rationale="Unauthorized mutation modifying resource 102 belonging to Bob must be blocked.",
+        )
+    )
+
+    test_cases.append(
+        DifferentialTestCase(
+            test_id="DIFF-MUT-002",
+            name="Mutation BOLA: Cross-tenant deleteResource by Bob on Alice's Resource 101",
+            category="MUTATION_BOLA",
+            query="mutation { deleteResource(id: 101) }",
+            caller_id=102,
+            caller_role="user",
+            target_object_type="Resource",
+            target_object_id=101,
+            target_owner_id=101,
+            schema_path="deleteResource",
+            response_path="deleteResource",
+            is_nested=False,
+            expected_decision="DENY",
+            expected_reason="OWNERSHIP_MISMATCH",
+            expected_http_status=403,
+            oracle_rationale="Unauthorized mutation deleting resource 101 belonging to Alice must be blocked.",
+        )
+    )
+
+    test_cases.append(
+        DifferentialTestCase(
+            test_id="DIFF-MUT-003",
+            name="Mutation BOLA: Cross-tenant transferOwnership by Alice on Bob's Resource 102",
+            category="MUTATION_BOLA",
+            query="mutation { transferOwnership(id: 102, newOwnerId: 101) { id ownerId } }",
+            caller_id=101,
+            caller_role="user",
+            target_object_type="Resource",
+            target_object_id=102,
+            target_owner_id=102,
+            schema_path="transferOwnership",
+            response_path="transferOwnership",
+            is_nested=False,
+            expected_decision="DENY",
+            expected_reason="OWNERSHIP_MISMATCH",
+            expected_http_status=403,
+            oracle_rationale="Unauthorized ownership re-assignment on resource 102 must be blocked.",
+        )
+    )
+
+    test_cases.append(
+        DifferentialTestCase(
+            test_id="DIFF-MUT-004",
+            name="Benign Mutation: Owner Alice updating her own Resource 101",
+            category="BENIGN_OWNER",
+            query='mutation { updateResource(id: 101, name: "Alice Valid Update") { id name ownerId } }',
+            caller_id=101,
+            caller_role="user",
+            target_object_type="Resource",
+            target_object_id=101,
+            target_owner_id=101,
+            schema_path="updateResource",
+            response_path="updateResource",
+            is_nested=False,
+            expected_decision="ALLOW",
+            expected_reason="OWNER_MATCH",
+            expected_http_status=200,
+            oracle_rationale="Legitimate owner 101 updating her own resource is permitted.",
+        )
+    )
+
+    test_cases.append(
+        DifferentialTestCase(
+            test_id="DIFF-FLD-001",
+            name="Field-Level BOLA: Non-owner Alice probing secretKey on Bob's Resource 102",
+            category="FIELD_LEVEL_BOLA",
+            query="query { resource(id: 102) { id name secretKey } }",
+            caller_id=101,
+            caller_role="user",
+            target_object_type="Resource",
+            target_object_id=102,
+            target_owner_id=102,
+            schema_path="resource",
+            response_path="resource",
+            is_nested=False,
+            expected_decision="DENY",
+            expected_reason="OWNERSHIP_MISMATCH",
+            expected_http_status=403,
+            oracle_rationale="Probing sensitive secretKey on another tenant's resource must be blocked.",
+        )
+    )
+
+    test_cases.append(
+        DifferentialTestCase(
+            test_id="DIFF-FLD-002",
+            name="Field-Level Benign: Owner Alice reading secretKey on her own Resource 101",
+            category="BENIGN_OWNER",
+            query="query { resource(id: 101) { id name secretKey } }",
+            caller_id=101,
+            caller_role="user",
+            target_object_type="Resource",
+            target_object_id=101,
+            target_owner_id=101,
+            schema_path="resource",
+            response_path="resource",
+            is_nested=False,
+            expected_decision="ALLOW",
+            expected_reason="OWNER_MATCH",
+            expected_http_status=200,
+            oracle_rationale="Legitimate owner reading secretKey on her own resource is permitted.",
         )
     )
 

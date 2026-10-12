@@ -36,6 +36,21 @@ async def bola_enforcement_middleware(request: Request, current_user: dict = Dep
     variables = data.get("variables", {})
     operation_name = data.get("operationName")
 
+    # Defense-in-Depth: AST Depth and Complexity Budget Enforcement
+    if isinstance(query, str) and query.strip():
+        from .graphql_parser import validate_query_budget
+        is_budget_ok, budget_err, q_depth, q_complexity = validate_query_budget(query, max_depth=15, max_complexity=150)
+        if not is_budget_ok:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "QUERY_BUDGET_EXCEEDED",
+                    "reason": budget_err,
+                    "depth": q_depth,
+                    "complexity": q_complexity,
+                }
+            )
+
     # Phase 5: AST-Driven Context-Sensitive Taint Analysis (Audit-Only)
     mode = getattr(settings, "TAINT_ANALYSIS_MODE", "audit_only")
     taint_report = None

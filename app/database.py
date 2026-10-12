@@ -4,20 +4,22 @@ from app.config import settings
 
 def get_db_connection():
     """
-    Creates and returns a connection to the SQLite database.
+    Creates and returns a connection to the SQLite database with busy timeout.
     """
     db_file = settings.DATABASE_URL.replace("sqlite:///", "")
-    conn = sqlite3.connect(db_file, check_same_thread=False)
+    conn = sqlite3.connect(db_file, check_same_thread=False, timeout=30.0)
     conn.row_factory = sqlite3.Row
-    # Enable foreign keys
+    # Enable foreign keys and busy timeout for concurrency
     conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute("PRAGMA busy_timeout = 30000")
     return conn
 
 def init_db():
     """
-    Initializes the database schemas.
+    Initializes the database schemas and sets WAL journal mode.
     """
     conn = get_db_connection()
+    conn.execute("PRAGMA journal_mode = WAL")
     cursor = conn.cursor()
     
     # users table

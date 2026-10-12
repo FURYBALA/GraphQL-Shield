@@ -351,7 +351,9 @@
                     Automated Schema Path Discovery • Controlled Authorization Fuzzing • Gateway vs Baseline Oracle Verification
                 </div>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <button class="btn" style="background: #334155; color: #38bdf8; padding: 6px 12px; font-size: 11px; font-weight: 700;" onclick="downloadSarif()">📥 Export SARIF 2.1</button>
+                <button class="btn" style="background: #334155; color: #a78bfa; padding: 6px 12px; font-size: 11px; font-weight: 700;" onclick="downloadJunit()">📋 Export JUnit XML</button>
                 <span class="badge-mode">PROTECTED: /graphql</span>
                 <span class="badge-mode" style="background: #475569;">BASELINE: /graphql-insecure</span>
             </div>
@@ -362,7 +364,7 @@
             <div class="metric-card">
                 <div class="metric-label">Discovered Paths Covered</div>
                 <div class="metric-val blue" id="metric-coverage">100.0%</div>
-                <div class="metric-sub">6 of 6 Schema Paths Audited</div>
+                <div class="metric-sub">9 of 9 Paths Audited (Queries + Mutations)</div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">Vulnerabilities Prevented</div>
@@ -388,6 +390,93 @@
                 <div class="metric-label">Avg Execution Cost</div>
                 <div class="metric-val" id="metric-cost">0.48 ms</div>
                 <div class="metric-sub">In-Memory Engine Latency</div>
+            </div>
+        </div>
+
+        <!-- Interactive Schema Graph & Authorization Boundary Visualizer -->
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">🗺️ Interactive Schema Graph & Authorization Boundary Explorer</h2>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                        Topological map of operations, sensitive entity sinks, and tenant boundaries (Click any node to load into studio)
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <span style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: #3b82f6; border-radius: 2px;"></span> Query</span>
+                    <span style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: #a855f7; border-radius: 2px;"></span> Mutation</span>
+                    <span style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: #10b981; border-radius: 2px;"></span> Principal Alice (101)</span>
+                    <span style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: #ef4444; border-radius: 2px;"></span> Foreign Bob (102)</span>
+                    <span style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: #f59e0b; border-radius: 2px;"></span> Sensitive Sink</span>
+                </div>
+            </div>
+
+            <div style="background: #090d16; border-radius: 8px; border: 1px solid var(--card-border); padding: 14px; position: relative; overflow-x: auto;">
+                <svg id="schema-graph-svg" viewBox="0 0 960 260" style="width: 100%; min-width: 760px; height: auto;">
+                    <defs>
+                        <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
+                        </marker>
+                    </defs>
+
+                    <!-- Tenant Boundaries -->
+                    <rect x="20" y="15" width="460" height="230" rx="10" fill="rgba(16, 185, 129, 0.03)" stroke="#10b981" stroke-dasharray="5,5" stroke-width="1.2" />
+                    <text x="35" y="35" fill="#10b981" font-size="11" font-weight="700" letter-spacing="0.5">LOCAL TENANT REALM: ALICE (#101)</text>
+
+                    <rect x="500" y="15" width="440" height="230" rx="10" fill="rgba(239, 68, 68, 0.03)" stroke="#ef4444" stroke-dasharray="5,5" stroke-width="1.2" />
+                    <text x="515" y="35" fill="#ef4444" font-size="11" font-weight="700" letter-spacing="0.5">FOREIGN TENANT REALM: BOB (#102)</text>
+
+                    <!-- Edges -->
+                    <path id="svg-edge-1" d="M 120 80 L 200 80" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+                    <path id="svg-edge-2" d="M 120 80 Q 240 50 340 80" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+                    <path id="svg-edge-3" d="M 120 80 Q 380 40 580 80" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow)" />
+                    <path id="svg-edge-4" d="M 260 100 Q 420 180 580 90" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow)" />
+                    <path id="svg-edge-5" d="M 120 170 Q 380 230 580 170" stroke="#a855f7" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow)" />
+                    <path id="svg-edge-6" d="M 700 80 L 800 80" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrow)" />
+
+                    <!-- Gateway Shields -->
+                    <g transform="translate(470, 52)"><circle cx="12" cy="12" r="14" fill="#1e293b" stroke="#ef4444" stroke-width="1.5" /><text x="5" y="17" font-size="13">🛡️</text></g>
+                    <g transform="translate(470, 142)"><circle cx="12" cy="12" r="14" fill="#1e293b" stroke="#ef4444" stroke-width="1.5" /><text x="5" y="17" font-size="13">🛡️</text></g>
+
+                    <!-- Nodes -->
+                    <!-- Root Query -->
+                    <g transform="translate(40, 60)" style="cursor: pointer;" onclick="loadGraphTemplate('direct_bola')">
+                        <rect width="90" height="40" rx="8" fill="#1e3a8a" stroke="#3b82f6" stroke-width="2" />
+                        <text x="45" y="25" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">Query</text>
+                    </g>
+                    <!-- Root Mutation -->
+                    <g transform="translate(40, 150)" style="cursor: pointer;" onclick="loadGraphTemplate('mut_update')">
+                        <rect width="90" height="40" rx="8" fill="#581c87" stroke="#a855f7" stroke-width="2" />
+                        <text x="45" y="25" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">Mutation</text>
+                    </g>
+                    <!-- User 101 -->
+                    <g transform="translate(190, 60)" style="cursor: pointer;" onclick="loadGraphTemplate('nested_bola')">
+                        <rect width="110" height="40" rx="8" fill="#064e3b" stroke="#10b981" stroke-width="2" />
+                        <text x="55" y="25" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">User (101)</text>
+                    </g>
+                    <!-- Resource 101 -->
+                    <g transform="translate(330, 60)" style="cursor: pointer;" onclick="loadGraphTemplate('benign_owner')">
+                        <rect width="120" height="40" rx="8" fill="#064e3b" stroke="#10b981" stroke-width="2" />
+                        <text x="60" y="25" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">Resource #101</text>
+                    </g>
+                    <!-- Foreign Resource 102 -->
+                    <g transform="translate(580, 55)" style="cursor: pointer;" onclick="loadGraphTemplate('direct_bola')">
+                        <rect width="130" height="50" rx="8" fill="#7f1d1d" stroke="#ef4444" stroke-width="2" />
+                        <text x="65" y="22" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">Resource #102</text>
+                        <text x="65" y="38" fill="#fca5a5" font-size="10" text-anchor="middle">Owner: Bob (102)</text>
+                    </g>
+                    <!-- Foreign Mutation Target -->
+                    <g transform="translate(580, 145)" style="cursor: pointer;" onclick="loadGraphTemplate('mut_update')">
+                        <rect width="130" height="50" rx="8" fill="#7f1d1d" stroke="#ef4444" stroke-width="2" />
+                        <text x="65" y="22" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">updateResource</text>
+                        <text x="65" y="38" fill="#fca5a5" font-size="10" text-anchor="middle">Target: Bob (#102)</text>
+                    </g>
+                    <!-- Sensitive Sink -->
+                    <g transform="translate(800, 62)" style="cursor: pointer;" onclick="loadGraphTemplate('field_leak')">
+                        <rect width="110" height="36" rx="6" fill="#78350f" stroke="#f59e0b" stroke-width="1.5" />
+                        <text x="55" y="22" fill="#fde68a" font-size="11" font-weight="700" text-anchor="middle">🔑 secretKey</text>
+                    </g>
+                </svg>
             </div>
         </div>
 
@@ -419,6 +508,11 @@
                         <option value="benign_owner">4. Benign Owner Access: Alice accessing her own Resource 101</option>
                         <option value="admin_override">5. Administrative Override: Charlie inspecting Resource 102</option>
                         <option value="unauth_probe">6. Unauthenticated Probe: Protected Resource without credentials</option>
+                        <option value="mut_update">7. Mutation BOLA: Alice updating Bob's Resource 102</option>
+                        <option value="mut_delete">8. Mutation BOLA: Bob deleting Alice's Resource 101</option>
+                        <option value="mut_transfer">9. Mutation BOLA: Alice transferring ownership of Bob's Resource 102</option>
+                        <option value="field_leak">10. Excessive Data Exposure: Alice probing secretKey on Bob's Resource 102</option>
+                        <option value="dos_budget">11. Anti-DoS Budget Violation: Abusive recursive query depth</option>
                     </select>
                 </div>
 
@@ -491,10 +585,16 @@
 
                 <!-- Minimized Reproducible PoC Box -->
                 <div style="margin-top: 14px; background: #0f172a; border: 1px solid var(--card-border); border-radius: 8px; padding: 14px;">
-                    <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #38bdf8; margin-bottom: 6px;">
-                        ✂️ Delta-Debugged Minimal Reproducible PoC (Query Minimizer)
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #38bdf8;">✂️ Reproducible PoC:</span>
+                            <button id="tab-btn-gql" class="btn" style="background: #2563eb; color: #fff; padding: 4px 8px; font-size: 11px;" onclick="switchPocTab('gql')">GraphQL PoC</button>
+                            <button id="tab-btn-curl" class="btn" style="background: #334155; color: #94a3b8; padding: 4px 8px; font-size: 11px;" onclick="switchPocTab('curl')">cURL Command</button>
+                            <button id="tab-btn-py" class="btn" style="background: #334155; color: #94a3b8; padding: 4px 8px; font-size: 11px;" onclick="switchPocTab('py')">Python Exploit</button>
+                        </div>
+                        <button class="btn secondary" style="padding: 4px 10px; font-size: 11px;" onclick="copyPoc()">📋 Copy to Clipboard</button>
                     </div>
-                    <div class="code-snippet" id="poc-box">Loading...</div>
+                    <div class="code-snippet" id="poc-box" style="max-height: 220px; overflow-y: auto;">Loading...</div>
                 </div>
             </div>
         </div>
@@ -510,7 +610,7 @@
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button class="btn purple" onclick="runFullSuite()">
-                        ▶️ Run Full Suite (19 Cases)
+                        ▶️ Run Full Suite (25 Cases)
                     </button>
                 </div>
             </div>
@@ -647,8 +747,31 @@
             unauth_probe: {
                 caller_id: "0",
                 query: "query UnauthenticatedProbe {\n  resource(id: 101) {\n    id\n    name\n  }\n}"
+            },
+            mut_update: {
+                caller_id: "101",
+                query: "mutation CrossTenantUpdate {\n  updateResource(id: 102, name: \"Tampered by Alice\") {\n    id\n    name\n    ownerId\n  }\n}"
+            },
+            mut_delete: {
+                caller_id: "102",
+                query: "mutation CrossTenantDelete {\n  deleteResource(id: 101)\n}"
+            },
+            mut_transfer: {
+                caller_id: "101",
+                query: "mutation CrossTenantTransfer {\n  transferOwnership(id: 102, newOwnerId: 101) {\n    id\n    name\n    ownerId\n  }\n}"
+            },
+            field_leak: {
+                caller_id: "101",
+                query: "query ExcessiveFieldExposure {\n  resource(id: 102) {\n    id\n    name\n    secretKey\n  }\n}"
+            },
+            dos_budget: {
+                caller_id: "101",
+                query: "query AbusiveRecursionDepth {\n  user(id: 101) {\n    resource(id: 101) {\n      children {\n        children {\n          children {\n            id\n          }\n        }\n      }\n    }\n  }\n}"
             }
         };
+
+        let currentResult = null;
+        let currentPocTab = "gql";
 
         function applyTemplate() {
             const key = document.getElementById("select-template").value;
@@ -657,6 +780,87 @@
                 document.getElementById("custom-query-input").value = t.query;
                 document.getElementById("select-caller").value = t.caller_id;
             }
+        }
+
+        function loadGraphTemplate(key) {
+            const sel = document.getElementById("select-template");
+            if (sel) {
+                sel.value = key;
+                applyTemplate();
+                runCustomTest();
+                window.scrollTo({ top: 480, behavior: 'smooth' });
+            }
+        }
+
+        function downloadSarif() {
+            window.location.href = "/api/v1/differential-testing/export/sarif";
+        }
+
+        function downloadJunit() {
+            window.location.href = "/api/v1/differential-testing/export/junit";
+        }
+
+        async function switchPocTab(tab) {
+            currentPocTab = tab;
+            ["gql", "curl", "py"].forEach(t => {
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if (btn) {
+                    if (t === tab) {
+                        btn.style.background = "#2563eb";
+                        btn.style.color = "#fff";
+                    } else {
+                        btn.style.background = "#334155";
+                        btn.style.color = "#94a3b8";
+                    }
+                }
+            });
+
+            const box = document.getElementById("poc-box");
+            if (!currentResult) {
+                box.innerText = "Execute a test to view reproducible proof-of-concept.";
+                return;
+            }
+
+            const query = currentResult.minimized_query || (currentResult.test_case ? currentResult.test_case.query : document.getElementById("custom-query-input").value);
+            const callerId = currentResult.test_case ? currentResult.test_case.caller_id : 101;
+            const callerRole = currentResult.test_case ? currentResult.test_case.caller_role : "user";
+
+            if (tab === "gql") {
+                box.innerText = query;
+            } else if (tab === "curl") {
+                try {
+                    const res = await fetch("/api/v1/differential-testing/generate-exploit", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ query: query, caller_id: callerId, caller_role: callerRole })
+                    });
+                    const d = await res.json();
+                    box.innerText = d.curl;
+                } catch (e) {
+                    box.innerText = "Error generating cURL PoC: " + e;
+                }
+            } else if (tab === "py") {
+                try {
+                    const res = await fetch("/api/v1/differential-testing/generate-exploit", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ query: query, caller_id: callerId, caller_role: callerRole })
+                    });
+                    const d = await res.json();
+                    box.innerText = d.python;
+                } catch (e) {
+                    box.innerText = "Error generating Python PoC: " + e;
+                }
+            }
+        }
+
+        function copyPoc() {
+            const text = document.getElementById("poc-box").innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("PoC copied to clipboard!");
+            }).catch(() => {
+                alert("Could not copy automatically. Please select and copy manually.");
+            });
         }
 
         async function runCustomTest() {
@@ -684,6 +888,7 @@
         }
 
         function renderCustomResult(d) {
+            currentResult = d;
             const outCard = document.getElementById("diff-output-card");
             outCard.style.display = "block";
 
@@ -737,8 +942,8 @@
             inBadge.className = "badge " + (d.insecure_leaked_unauthorized_data ? "deny" : "allow");
             inBadge.innerText = d.insecure_leaked_unauthorized_data ? "VULNERABLE" : "BENIGN";
 
-            // Minimized PoC
-            document.getElementById("poc-box").innerText = d.minimized_query || d.test_case.query;
+            // Render active PoC Tab
+            switchPocTab(currentPocTab);
         }
 
         async function runMinimizer() {

@@ -69,29 +69,64 @@ class DifferentialTestExecutor:
         if test.operation_name:
             payload["operationName"] = test.operation_name
 
-        # 1. Execute against Protected Gateway (/graphql)
-        gw_resp = self.client.post("/graphql", json=payload, headers=headers)
-        gw_status = gw_resp.status_code
-        gw_json = gw_resp.json() if gw_status == 200 else {}
-        gw_data_returned = bool(gw_json.get("data") and not gw_json.get("errors"))
-        gw_err = gw_resp.text if gw_status != 200 else None
+        # Snapshot object row for idempotent mutation testing
+        backup_row = None
+        if test.target_object_id and str(test.target_object_type).lower() not in ("healthcheck", "user"):
+            try:
+                conn = get_db_connection()
+                c = conn.cursor()
+                c.execute("SELECT * FROM objects WHERE id = ?", (test.target_object_id,))
+                r = c.fetchone()
+                if r:
+                    backup_row = dict(r)
+                conn.close()
+            except Exception:
+                pass
 
-        # Fetch latest audit record for gateway decision & policy reason
-        gw_decision, gw_reason, gw_risk_score, gw_risk_level = self._fetch_latest_audit(
-            test.caller_id, gw_status
-        )
+        try:
+            # 1. Execute against Protected Gateway (/graphql)
+            gw_resp = self.client.post("/graphql", json=payload, headers=headers)
+            gw_status = gw_resp.status_code
+            gw_json = gw_resp.json() if gw_status == 200 else {}
+            gw_data_returned = bool(gw_json.get("data") and not gw_json.get("errors"))
+            gw_err = gw_resp.text if gw_status != 200 else None
 
-        # 2. Execute against Insecure Baseline (/graphql-insecure)
-        insecure_resp = self.client.post("/graphql-insecure", json=payload, headers=headers)
-        insecure_status = insecure_resp.status_code
-        insecure_json = insecure_resp.json() if insecure_status == 200 else {}
-        insecure_data = insecure_json.get("data")
-        insecure_data_returned = bool(insecure_data and not insecure_json.get("errors"))
+            # Fetch latest audit record for gateway decision & policy reason
+            gw_decision, gw_reason, gw_risk_score, gw_risk_level = self._fetch_latest_audit(
+                test.caller_id, gw_status
+            )
 
-        # Check if insecure baseline leaked unauthorized data
-        insecure_leaked = False
-        if test.expected_decision == "DENY" and insecure_data_returned:
-            insecure_leaked = True
+            # 2. Execute against Insecure Baseline (/graphql-insecure)
+            insecure_resp = self.client.post("/graphql-insecure", json=payload, headers=headers)
+            insecure_status = insecure_resp.status_code
+            insecure_json = insecure_resp.json() if insecure_status == 200 else {}
+            insecure_data = insecure_json.get("data")
+            insecure_data_returned = bool(insecure_data and not insecure_json.get("errors"))
+
+            # Check if insecure baseline leaked unauthorized data
+            insecure_leaked = False
+            if test.expected_decision == "DENY" and insecure_data_returned:
+                insecure_leaked = True
+        finally:
+            if backup_row:
+                try:
+                    conn = get_db_connection()
+                    c = conn.cursor()
+                    c.execute("SELECT id FROM objects WHERE id = ?", (backup_row["id"],))
+                    if c.fetchone():
+                        c.execute(
+                            "UPDATE objects SET name = ?, owner_id = ?, object_type = ?, parent_id = ? WHERE id = ?",
+                            (backup_row["name"], backup_row["owner_id"], backup_row["object_type"], backup_row["parent_id"], backup_row["id"])
+                        )
+                    else:
+                        c.execute(
+                            "INSERT INTO objects (id, name, owner_id, object_type, parent_id) VALUES (?, ?, ?, ?, ?)",
+                            (backup_row["id"], backup_row["name"], backup_row["owner_id"], backup_row["object_type"], backup_row["parent_id"])
+                        )
+                    conn.commit()
+                    conn.close()
+                except Exception as restore_err:
+                    print(f"[REVERT WARNING] Failed to restore row: {restore_err}")
 
         # 3. Differential Verdict Computation
         is_conforming = (gw_decision == test.expected_decision)

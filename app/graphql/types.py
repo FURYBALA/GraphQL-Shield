@@ -16,6 +16,11 @@ class ResourceType:
     parent_id: Optional[int]
 
     @strawberry.field
+    def secret_key(self) -> str:
+        """Sensitive API secret key associated with the resource. Subject to field-level leakage."""
+        return f"sk_live_token_{self.id}_{self.owner_id}"
+
+    @strawberry.field
     def children(self) -> List["ResourceType"]:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -38,6 +43,11 @@ class UserType:
     username: str
     role: str
     
+    @strawberry.field
+    def secret_token(self) -> str:
+        """Sensitive account credential token for the user. Subject to field-level leakage."""
+        return f"tok_secret_user_{self.id}"
+
     @strawberry.field
     def resources(self) -> List[ResourceType]:
         conn = get_db_connection()

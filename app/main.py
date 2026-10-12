@@ -423,6 +423,47 @@ def get_differential_metrics_endpoint():
         "baseline_comparison": report.baseline_comparison,
     }
 
+from fastapi.responses import Response
+from app.security.differential_testing import export_sarif, export_junit_xml, generate_poc_curl, generate_poc_python
+
+@app.get("/api/v1/differential-testing/export/sarif")
+def export_differential_sarif_endpoint():
+    """Exports differential testing findings in standard SARIF 2.1.0 format."""
+    report = run_differential_testing_suite(app)
+    return export_sarif(report)
+
+@app.get("/api/v1/differential-testing/export/junit")
+def export_differential_junit_endpoint():
+    """Exports differential testing findings in standard JUnit XML format."""
+    report = run_differential_testing_suite(app)
+    xml_str = export_junit_xml(report)
+    return Response(content=xml_str, media_type="application/xml")
+
+class ExploitGenerationRequest(BaseModel):
+    query: str
+    caller_id: Optional[int] = 101
+    caller_role: str = "user"
+    category: str = "CUSTOM_POC"
+    test_id: str = "POC-EXPLOIT"
+
+@app.post("/api/v1/differential-testing/generate-exploit")
+def generate_exploit_scripts_endpoint(request: ExploitGenerationRequest):
+    """Generates ready-to-run cURL commands and Python exploit scripts for a test case."""
+    tc = DifferentialTestCase(
+        test_id=request.test_id,
+        name=f"Interactive PoC for Caller {request.caller_id}",
+        category=request.category,
+        query=request.query,
+        caller_id=request.caller_id,
+        caller_role=request.caller_role,
+        schema_path="custom",
+        response_path="custom",
+    )
+    return {
+        "curl": generate_poc_curl(tc),
+        "python": generate_poc_python(tc)
+    }
+
 # Secure Strawberry GraphQL router protected by the BOLA security gateway
 graphql_app = GraphQLRouter(schema, context_getter=None, dependencies=[Depends(bola_enforcement_middleware)])
 app.include_router(graphql_app, prefix="/graphql")

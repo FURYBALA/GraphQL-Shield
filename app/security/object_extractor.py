@@ -83,13 +83,33 @@ def normalize_query(query: str, variables: dict = None) -> dict | None:
                         except (ValueError, TypeError):
                             pass
                             
-                        # Infer object type directly from field name for this prototype
-                        inferred_type = field_name.capitalize()
-                        
+                        # Infer object type: strip mutation prefixes if present
+                        clean_name = field_name
+                        for prefix in ("update_", "delete_", "transfer_", "update", "delete", "transfer"):
+                            if clean_name.lower().startswith(prefix) and len(clean_name) > len(prefix):
+                                clean_name = clean_name[len(prefix):]
+                                break
+
+                        if clean_name.lower() in ("ownership", "resource", "document", "folder", "object"):
+                            inferred_type = "Resource"
+                        elif clean_name.lower() == "user":
+                            inferred_type = "User"
+                        else:
+                            inferred_type = clean_name.capitalize()
+
+                        has_sensitive_field = False
+                        if node.selection_set:
+                            for sel in node.selection_set.selections:
+                                if isinstance(sel, FieldNode) and sel.name.value in (
+                                    "secret_key", "secretKey", "secret_token", "secretToken", "apiKey", "api_key"
+                                ):
+                                    has_sensitive_field = True
+
                         result["objects"].append({
                             "type": inferred_type,
                             "id": obj_id,
-                            "path": path
+                            "path": path,
+                            "has_sensitive_field": has_sensitive_field,
                         })
                         
                     if node.selection_set:
