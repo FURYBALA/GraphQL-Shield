@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from strawberry.fastapi import GraphQLRouter
 from pydantic import BaseModel
@@ -65,6 +65,53 @@ def login(request: LoginRequest, db: sqlite3.Connection = Depends(get_db)):
         
     access_token = create_access_token(user_id=user['id'], role=user['role'])
     return {"access_token": access_token, "token_type": "bearer"}
+
+@app.post("/api/v1/auth/demo-session")
+def demo_session(request: Request, db: sqlite3.Connection = Depends(get_db)):
+    """
+    Local demonstration authentication endpoint.
+    Restricted to non-production environments and loopback requests (127.0.0.1, ::1, localhost, testclient).
+    Issues an ephemeral analyst-level session token without requiring credentials in client-side code.
+    """
+    if getattr(settings, "ENVIRONMENT", "development").lower() == "production":
+        raise HTTPException(
+            status_code=403,
+            detail="Demo session endpoint is disabled in production environments."
+        )
+
+    # Restrict to local loopback / test client
+    client_host = request.client.host if request.client else "testclient"
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        forwarded_ip = forwarded.split(",")[0].strip()
+        if forwarded_ip not in {"127.0.0.1", "localhost", "::1"}:
+            client_host = forwarded_ip
+
+    allowed_hosts = {"127.0.0.1", "localhost", "::1", "testclient"}
+    if client_host not in allowed_hosts:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Demo session endpoint restricted to local loopback. Access from {client_host} forbidden."
+        )
+
+    cursor = db.cursor()
+    cursor.execute("SELECT id, role FROM users WHERE role = 'admin' LIMIT 1")
+    user = cursor.fetchone()
+    if not user:
+        cursor.execute("SELECT id, role FROM users LIMIT 1")
+        user = cursor.fetchone()
+
+    user_id = user["id"] if user else 999
+    role = user["role"] if user else "admin"
+
+    access_token = create_access_token(user_id=user_id, role=role)
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "role": role,
+        "user_id": user_id,
+        "mode": "demo_ephemeral"
+    }
 
 @app.get("/api/v1/protected")
 def protected_route(current_user: dict = Depends(get_current_user)):

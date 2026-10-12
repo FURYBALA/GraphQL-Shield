@@ -247,12 +247,14 @@ class AIAnalystService:
         Advisory-only: never alters gateway enforcement or DB authorization.
         """
         ai_enabled = getattr(settings, "AI_EXPLANATION_ENABLED", False)
-        if not ai_enabled and not force_execution:
-            raise HTTPException(
-                status_code=403,
-                detail="AI Analyst is disabled by configuration (AI_EXPLANATION_ENABLED=False). "
-                       "Enable in application settings or pass force_execution=True for offline research evaluation.",
-            )
+        env = getattr(settings, "ENVIRONMENT", "development").lower()
+        if not ai_enabled:
+            if not force_execution or env == "production":
+                raise HTTPException(
+                    status_code=403,
+                    detail="AI Analyst is disabled by configuration (AI_EXPLANATION_ENABLED=False). "
+                           "Enable in application settings or pass force_execution=True in non-production environments.",
+                )
 
         package = self.build_evidence_package(request, current_user)
         user_prompt = package.format_for_prompt()
