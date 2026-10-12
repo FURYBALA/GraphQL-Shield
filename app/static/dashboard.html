@@ -56,6 +56,18 @@
         .badge.medium { background: #dd6b20; }
         .badge.verified { background: #2b6cb0; }
         .badge.candidate { background: #805ad5; }
+        .badge.ai-grounded { background: #4c51bf; }
+        .ai-action-bar { margin-top: 15px; grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; }
+        .ai-btn { background: #6b46c1; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(107,70,193,0.3); }
+        .ai-btn:hover { background: #553c9a; transform: translateY(-1px); }
+        .ai-btn:disabled { background: #a0aec0; cursor: not-allowed; }
+        .ai-panel { grid-column: 1 / -1; margin-top: 14px; background: #faf5ff; border: 1px solid #d6bcfa; border-radius: 8px; padding: 18px; }
+        .ai-panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9d8fd; padding-bottom: 10px; margin-bottom: 12px; }
+        .ai-panel-title { font-size: 15px; font-weight: bold; color: #44337a; }
+        .evidence-pill { display: inline-block; background: #e9d8fd; color: #553c9a; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-right: 6px; margin-bottom: 6px; border: 1px solid #d6bcfa; }
+        .ai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; }
+        .ai-subcard { background: #fff; border: 1px solid #e9d8fd; border-radius: 6px; padding: 12px; }
+        .ai-subcard h4 { margin: 0 0 6px 0; font-size: 12px; color: #6b46c1; text-transform: uppercase; letter-spacing: 0.5px; }
         code { background: #edf2f7; padding: 2px 6px; border-radius: 4px; color: #c05621; font-size: 12px; font-family: monospace; }
         .live-indicator { display: inline-block; width: 10px; height: 10px; background-color: #48bb78; border-radius: 50%; animation: pulse 2s infinite; margin-right: 8px; vertical-align: middle; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(72, 187, 120, 0); } 100% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0); } }
@@ -296,9 +308,132 @@
                     <div class="explanation-banner ${decisionClass}">
                         <strong>Security Rationale:</strong> ${s.explanation}
                     </div>
+
+                    <!-- AI Analyst Action Bar -->
+                    <div class="ai-action-bar">
+                        <div>
+                            <button id="btn-gen-ai-${index}" class="ai-btn" onclick="generateAIExplanation(${index})">
+                                🤖 Generate Evidence-Grounded AI Explanation
+                            </button>
+                            <span id="ai-loading-${index}" style="display:none; margin-left: 10px; font-size: 13px; color: #6b46c1;">Synthesizing evidence package...</span>
+                        </div>
+                        <span style="font-size: 12px; color: #718096;">Advisory-only • Grounded in E1..E11</span>
+                    </div>
+
+                    <div id="ai-result-box-${index}" style="grid-column: 1 / -1;"></div>
                 </div>
             `;
             document.getElementById('scenario-details').innerHTML = html;
+        }
+
+        async function getDemoToken() {
+            try {
+                const res = await fetch('/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username: 'admin', password: 'admin123'})
+                });
+                const data = await res.json();
+                return data.access_token;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function generateAIExplanation(index) {
+            const btn = document.getElementById(`btn-gen-ai-${index}`);
+            const loader = document.getElementById(`ai-loading-${index}`);
+            const resultBox = document.getElementById(`ai-result-box-${index}`);
+            if (!cachedScenarios || !cachedScenarios[index]) return;
+            const s = cachedScenarios[index];
+
+            btn.disabled = true;
+            loader.style.display = 'inline-block';
+            resultBox.innerHTML = '';
+
+            try {
+                const token = await getDemoToken();
+                const headers = { 'Content-Type': 'application/json' };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                const res = await fetch('/api/v1/security/ai-analyst/explain', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        finding_id: s.scenario_id,
+                        query: s.operation.query,
+                        variables: s.operation.variables
+                    })
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    resultBox.innerHTML = `<div class="ai-panel" style="background:#fff5f5; border-color:#feb2b2; color:#c53030;"><strong>AI Explanation Notice:</strong> ${err.detail || 'Service unavailable'}</div>`;
+                    return;
+                }
+
+                const ai = await res.json();
+                
+                const pillsHtml = (ai.evidence_references || []).map(ref => `<span class="evidence-pill">${ref}</span>`).join('');
+                const factsHtml = (ai.observed_facts || []).map(f => `<li>${f}</li>`).join('');
+                const warningsHtml = (ai.validation_warnings || []).length > 0 ? 
+                    `<div style="color: #c53030; font-size: 12px; margin-top: 8px;"><strong>Validation Warnings:</strong> ${ai.validation_warnings.join('; ')}</div>` : '';
+
+                resultBox.innerHTML = `
+                    <div class="ai-panel">
+                        <div class="ai-panel-header">
+                            <div>
+                                <span class="ai-panel-title">🤖 AI Security Analyst Audit Explanation</span>
+                                <span class="badge ai-grounded" style="margin-left: 8px;">${ai.attack_pattern}</span>
+                            </div>
+                            <div>
+                                <span class="badge ${ai.is_grounded ? 'verified' : 'deny'}">${ai.is_grounded ? '100% Grounded' : 'Grounding Issues'} (Score: ${Math.round((ai.grounding_score || 1) * 100)}%)</span>
+                            </div>
+                        </div>
+
+                        <div style="font-size: 14px; color: #2d3748; margin-bottom: 10px; line-height: 1.5;">
+                            <strong>Summary:</strong> ${ai.summary}
+                        </div>
+
+                        <div>
+                            <strong style="font-size: 12px; color: #4a5568;">Cited Evidence Items:</strong>
+                            <div style="margin-top: 5px;">${pillsHtml}</div>
+                        </div>
+
+                        <div class="ai-grid">
+                            <div class="ai-subcard">
+                                <h4>Observed Verifiable Facts</h4>
+                                <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #4a5568;">${factsHtml}</ul>
+                            </div>
+                            <div class="ai-subcard">
+                                <h4>Authorization Analysis</h4>
+                                <p style="margin: 0; font-size: 12px; color: #4a5568;">${ai.authorization_explanation}</p>
+                                <div style="margin-top: 8px; font-size: 11px; color: #718096;"><strong>Canonical Path:</strong> <code>${ai.canonical_path}</code></div>
+                            </div>
+                            <div class="ai-subcard">
+                                <h4>Root Cause & Impact</h4>
+                                <p style="margin: 0; font-size: 12px; color: #4a5568;"><strong>Cause:</strong> ${ai.root_cause}</p>
+                                <p style="margin: 6px 0 0 0; font-size: 12px; color: #4a5568;"><strong>Impact:</strong> ${ai.impact_assessment}</p>
+                            </div>
+                            <div class="ai-subcard">
+                                <h4>Actionable Remediation</h4>
+                                <p style="margin: 0; font-size: 12px; color: #2b6cb0;">${ai.recommended_remediation}</p>
+                            </div>
+                        </div>
+
+                        ${warningsHtml}
+
+                        <div style="margin-top: 10px; font-size: 11px; color: #a0aec0; text-align: right;">
+                            Model: ${ai.model_metadata.model || 'mock'} | Latency: ${ai.model_metadata.latency_ms || 0}ms | Tokens: ${ai.model_metadata.tokens_used || 0}
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                resultBox.innerHTML = `<div class="ai-panel" style="background:#fff5f5; border-color:#feb2b2; color:#c53030;"><strong>Error:</strong> ${e.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                loader.style.display = 'none';
+            }
         }
 
         // Initialize dashboard

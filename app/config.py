@@ -9,6 +9,15 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     TAINT_ANALYSIS_MODE: str = "audit_only"
 
+    # AI Security Analyst Configuration (Disabled by default)
+    AI_EXPLANATION_ENABLED: bool = False
+    AI_PROVIDER: str = "mock"  # "mock", "openai", "http_generic"
+    AI_MODEL: str = "gpt-4o-mini"
+    AI_API_KEY: str = ""
+    AI_API_BASE: str = ""
+    AI_TIMEOUT_SECONDS: float = 15.0
+    AI_MAX_TOKENS: int = 1500
+
     class Config:
         env_file = ".env"
 

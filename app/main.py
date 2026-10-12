@@ -194,6 +194,47 @@ def get_scenario_lab_endpoint():
         "scenarios": get_all_real_world_scenarios()
     }
 
+from app.security.ai_analyst import (
+    AIExplanationRequest,
+    AIExplanationResponse,
+    ai_analyst_service,
+)
+
+@app.get("/api/v1/security/ai-analyst/status")
+def get_ai_analyst_status(current_user: dict = Depends(get_current_user)):
+    """
+    Inspection endpoint reporting AI Analyst configuration and readiness.
+    Never exposes API keys or secrets.
+    """
+    return {
+        "enabled": getattr(settings, "AI_EXPLANATION_ENABLED", False),
+        "provider": getattr(settings, "AI_PROVIDER", "mock"),
+        "model": getattr(settings, "AI_MODEL", "mock-grounded-analyst"),
+        "api_base": getattr(settings, "AI_API_BASE", None) if getattr(settings, "AI_PROVIDER", "mock") != "mock" else None,
+        "api_key_configured": bool(getattr(settings, "AI_API_KEY", "")),
+        "timeout_seconds": getattr(settings, "AI_TIMEOUT_SECONDS", 15.0),
+        "max_tokens": getattr(settings, "AI_MAX_TOKENS", 1500),
+        "advisory_only": True,
+        "separation_guarantee": (
+            "Evidence-grounded AI explanations run strictly out-of-band for audit assistance. "
+            "The AI layer has zero authority to grant or deny access, override policy, or alter database state."
+        ),
+    }
+
+@app.post("/api/v1/security/ai-analyst/explain", response_model=AIExplanationResponse)
+async def generate_ai_explanation_endpoint(
+    request: AIExplanationRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Generates an evidence-grounded AI security explanation for a GraphQL BOLA audit event.
+    Advisory-only. Strictly validates citations and guards against policy contradictions.
+    """
+    return await ai_analyst_service.generate_explanation(
+        request=request,
+        current_user=current_user,
+    )
+
 # Secure Strawberry GraphQL router protected by the BOLA security gateway
 graphql_app = GraphQLRouter(schema, context_getter=None, dependencies=[Depends(bola_enforcement_middleware)])
 app.include_router(graphql_app, prefix="/graphql")

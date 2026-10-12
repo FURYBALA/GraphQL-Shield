@@ -193,11 +193,24 @@ Run via: `python scripts/demo_live_showcase.py`
 - **Step 5 (Hoppscotch-Inspired Collection IDOR Pattern Reproduction):** Controlled reproduction of `GHSA-m5pg-r4jp-qq75` / `CVE-2026-28217` pattern. Alice requests Bob's collection `userCollection(userCollectionID: 102)`. Gateway returns `HTTP 403 Forbidden` (`OWNERSHIP_MISMATCH`). Correlation records `TRUE_POSITIVE_BLOCKED`.
 - **Step 6 (Rich Audit Explanation & Boundary Verification):** Queries `/api/v1/security/taint-audit`. Verifies `caller_bound=True`, `target_bound=True`, `ownership_checked=True`, and correlation `TRUE_POSITIVE_BLOCKED`.
 - **Step 7 (Audit-Only Compatibility & Overhead Confirmation):** Re-runs verification across all 115 benchmark cases, confirming 0 divergences on evaluated cases and sub-millisecond added latency.
+- **Step 8 (Evidence-Grounded AI Security Analyst & Grounding Verification):** Synthesizes verifiable facts into an indexed package ($E_1 \dots E_{11}$). Evaluates Grounding Engine safety invariants, citation precision (100%), and rejects injected hallucinations and prompt injections.
 
 ---
 
-## 6. Commit History & Audit Chain
+## 6. Phase 10 Research Deliverables & Evidence Artifacts
 
+- **Draft Research Paper:** `docs/RESEARCH_PAPER_DRAFT.md` (20-section IEEE/ACM style paper: *"Evidence-Grounded AI Explanations for GraphQL BOLA Auditing"*)
+- **Technical Feature Design:** `docs/AI_FEATURE_DESIGN.md` (Architecture, invariants, and grounding validation rules)
+- **Evaluation Methodology:** `docs/AI_EVALUATION_METHODOLOGY.md` (Experimental protocol, baselines, and scoring rubric)
+- **Evaluation Report:** `docs/AI_EVALUATION_REPORT.md` (Empirical findings across 12 scenarios and safety stress tests)
+- **Reproducibility & Limitations:** `docs/REPRODUCIBILITY_AND_LIMITATIONS.md` (Honest scientific claims, execution protocol, and boundaries)
+- **Evaluation JSON Artifact:** `docs/AI_EVALUATION_RESULTS.json` (Machine-readable benchmark results)
+
+---
+
+## 7. Commit History & Audit Chain
+
+- `feat: implement Phase 10 evidence-grounded AI security analyst, grounding engine, and research paper deliverables`
 - `feat: integrate real-world security case studies, scenario lab, and literature positioning` (`8905ed2`)
 - `c534e77` — `audit(phase-7): compute program-verified boundary criteria strictly from actual runtime policy evidence`
 - `fce597d` — `audit(phase-7): distinguish criteria representation from program verification and relabel rubric as illustrative`

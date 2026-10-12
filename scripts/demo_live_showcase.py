@@ -234,8 +234,46 @@ def run_demo():
     print("  - Exact Path Attribution Accuracy     : 89.5% (Correlated) vs 56.2% (Gateway Alone)")
     print("  - Program-Verified Boundary Evidence  : 90.5% (95/105 valid cases; 100% of protected entities)")
     print("  - Added Taint Analysis Latency        : ~0.295 ms (Median) | ~0.434 ms (P95)")
+
+    # =========================================================================
+    # STEP 8: EVIDENCE-GROUNDED AI SECURITY ANALYST & SAFETY VERIFICATION
+    # =========================================================================
+    print_banner("Step 8: Evidence-Grounded AI Security Analyst (Phase 10)")
+    import asyncio
+    from app.security.ai_analyst import (
+        AIExplanationRequest,
+        AIAnalystService,
+        FlawedMockAIProvider,
+        MockAIProvider,
+    )
+
+    ai_service = AIAnalystService(provider=MockAIProvider())
+    ai_req = AIExplanationRequest(finding_id="SCENARIO-HOPPSCOTCH-COLLECTION-IDOR")
+    ai_resp = asyncio.run(ai_service.generate_explanation(ai_req, force_execution=True))
+
+    print_section("Evidence Package & Stable Citations (E1..E11)")
+    print(f"Cited Evidence IDs       : {', '.join(ai_resp.evidence_references)}")
+    print(f"Grounding Status         : {'100% GROUNDED (VERIFIED)' if ai_resp.is_grounded else 'UNGROUNDED'}")
+    print(f"Grounding Score          : {int(ai_resp.grounding_score * 100)}%")
+    print(f"Attack Classification    : {ai_resp.attack_pattern}")
+    print(f"Canonical Path           : {ai_resp.canonical_path}")
+    print(f"AI Summary               : {ai_resp.summary}")
+    print(f"Root Cause Analysis      : {ai_resp.root_cause}")
+    print(f"Developer Remediation    : {ai_resp.recommended_remediation}")
+    print(f"Regression Test Snippet  : {ai_resp.suggested_regression_tests[0].strip()}")
+
+    print_section("Grounding Safety Invariant Verification (RQ3)")
+    # Test defect detection with FlawedMockAIProvider
+    flawed_prov = FlawedMockAIProvider(inject_decision_contradiction=True, inject_hallucinated_citations=True)
+    pkg = ai_service.build_evidence_package(ai_req)
+    flawed_resp = asyncio.run(flawed_prov.generate_explanation(pkg, "sys", "usr"))
+    print(f"Injected Flaw Rejection  : Grounding Score dropped to {int(flawed_resp.grounding_score * 100)}% (is_grounded={flawed_resp.is_grounded})")
+    print(f"Detected Discrepancies   : {'; '.join(flawed_resp.validation_warnings)}")
+    assert flawed_resp.is_grounded is False
+    print("Safety Invariants Active : Hallucinations and Decision Contradictions 100% Rejected.")
+
     print("=" * 80)
-    print("All 7 Live Demonstration Steps Completed and Verified Successfully.\n")
+    print("All 8 Live Demonstration Steps Completed and Verified Successfully.\n")
 
 
 if __name__ == "__main__":

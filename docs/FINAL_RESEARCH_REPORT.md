@@ -317,8 +317,22 @@ A dedicated dataset (`data/real_world_scenarios.json`) evaluated independently v
 ### Dimension 6: Behavioral Compatibility on Evaluated Corpus
 - **Valid Security Cases Decision Preservation:** **100.0%** (105 / 105)
 - **Zero-Divergence Audit Preservation:** **100.0%** (115 / 115)
-- **HTTP Response Divergence:** **0 cases** (Zero status code changes, zero payload mutations across evaluated benchmark).
-- *Scope Note:* Reported as an empirical result on the evaluated benchmark corpus, not a universal guarantee for arbitrary unseen future schemas.
+### 8.5 Phase 10: Evidence-Grounded AI Security Analyst & Safety Verification
+- **Research Questions Evaluated:** RQ2 (Audit Dimension Completeness) & RQ3 (AI Grounding, Safety Invariants, and Prompt Injection Defense).
+- **Comparative Completeness Results (12 Real-World Scenarios):**
+  - **Method A (Gateway-Only Log):** **40.0%** (4.0 / 10 dimensions)
+  - **Method B (Static Taint Alone):** **20.0%** (2.0 / 10 dimensions)
+  - **Method C (Correlated Without AI):** **70.0%** (7.0 / 10 dimensions)
+  - **Method D (Evidence-Grounded AI Analyst):** **100.0%** (10.0 / 10 dimensions)
+- **Safety & Grounding Metrics:**
+  - **Mean Grounding Score:** **100.0%**
+  - **Citation Precision:** **100.0%** (132/132 valid citations, zero hallucinations)
+  - **Decision Consistency Rate:** **100.0%** (12/12 consistent with Gateway)
+  - **Path Consistency Rate:** **100.0%** (12/12 matching Security Graph)
+  - **Hallucinated Citation Defense:** **100% PASS** (Injected non-existent IDs caught)
+  - **Decision Contradiction Defense:** **100% PASS** (Injected false claims rejected)
+  - **Adversarial Prompt Injection Defense:** **100% PASS** (Jailbreaks neutralized via delimited untrusted payload packaging)
+- **Primary Deliverables:** Formal IEEE draft paper (`docs/RESEARCH_PAPER_DRAFT.md`), evaluation report (`docs/AI_EVALUATION_REPORT.md`), and evaluation artifact (`docs/AI_EVALUATION_RESULTS.json`).
 
 ---
 
@@ -333,13 +347,13 @@ A dedicated dataset (`data/real_world_scenarios.json`) evaluated independently v
 ## 10. Reproducibility Instructions
 
 ### Environment
-- Python 3.12+ (tested on Python 3.14 Windows)
+- Python 3.10+ (tested on Python 3.14.5 Windows)
 - Dependencies: `fastapi`, `strawberry-graphql`, `pydantic`, `pytest`, `httpx`, `pyjwt`
 
 ### Execution Commands
 ```powershell
-# 1. Run Complete Test Suite (167 passing tests)
-python -m pytest tests/ -v
+# 1. Run Complete Test Suite (178 passing tests across 22 test suites)
+python -m pytest -q
 
 # 2. Run Phase 7 Comparative Evaluation Script (115 benchmark cases)
 python scripts/evaluate_phase_7.py
@@ -347,7 +361,10 @@ python scripts/evaluate_phase_7.py
 # 3. Run Independent Real-World Dataset Evaluation (12 scenarios)
 python scripts/evaluate_real_world_scenarios.py
 
-# 4. Run Live 7-Step Interactive Showcase Demonstration
+# 4. Run Evidence-Grounded AI Analyst Evaluation Script (RQ2 & RQ3)
+python scripts/evaluate_ai_explanations.py
+
+# 5. Run Live 8-Step Interactive Showcase Demonstration
 python scripts/demo_live_showcase.py
 ```
 

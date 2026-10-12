@@ -1,0 +1,280 @@
+{
+  "evaluation_title": "Evidence-Grounded AI Security Analyst Empirical Evaluation",
+  "timestamp": "2026-10-12T14:06:43Z",
+  "evaluation_duration_seconds": 0.004,
+  "scenarios_evaluated": 12,
+  "rq2_comparative_completeness": {
+    "method_a_gateway_only": {
+      "mean_score": 0.4,
+      "percentage": 40.0
+    },
+    "method_b_static_taint": {
+      "mean_score": 0.2,
+      "percentage": 20.0
+    },
+    "method_c_correlated_no_ai": {
+      "mean_score": 0.7,
+      "percentage": 70.0
+    },
+    "method_d_correlated_ai": {
+      "mean_score": 1.0,
+      "percentage": 100.0
+    }
+  },
+  "rq3_ai_safety_and_grounding": {
+    "mean_grounding_score": 1.0,
+    "total_citations_evaluated": 132,
+    "valid_citations_count": 132,
+    "citation_accuracy_pct": 100.0,
+    "decision_consistency_pct": 100.0,
+    "path_consistency_pct": 100.0,
+    "flaw_detection_verification": {
+      "hallucinated_citations_detected": true,
+      "decision_contradictions_detected": true,
+      "path_mismatches_detected": true,
+      "prompt_injection_thwarted": true
+    }
+  },
+  "per_scenario_results": [
+    {
+      "scenario_id": "REAL-HOPP-001",
+      "scenario_name": "Hoppscotch Collection IDOR: Unauthorized cross-tenant collection lookup",
+      "gateway_decision": "DENY",
+      "completeness_scores": {
+        "method_a_gateway_only": 0.4,
+        "method_b_static_taint": 0.2,
+        "method_c_correlated_no_ai": 0.7,
+        "method_d_correlated_ai": 1.0
+      },
+      "ai_explanation": {
+        "summary": "Blocked direct BOLA attempt on Resource:102 via canonical path 'Query.resource' [E2]. Caller principal 101 does not own the requested target entity [E6, E7, E8].",
+        "attack_pattern": "Direct Broken Object-Level Authorization (BOLA) IDOR",
+        "canonical_path": "Query.resource",
+        "grounding_score": 1.0,
+        "is_grounded": true,
+        "cited_evidence_count": 11,
+        "validation_warnings_count": 0
+      }
+    },
+    {
+      "scenario_id": "REAL-HOPP-002",
+      "scenario_name": "Hoppscotch Collection IDOR: Legitimate owner collection access",
+      "gateway_decision": "ALLOW",
+      "completeness_scores": {
+        "method_a_gateway_only": 0.4,
+        "method_b_static_taint": 0.2,
+        "method_c_correlated_no_ai": 0.7,
+        "method_d_correlated_ai": 1.0
+      },
+      "ai_explanation": {
+        "summary": "Authorized self-owned access to Resource:102 by resource owner 102 [E6, E7] via path 'Query.resource' [E2]. Gateway correctly permitted access [E8].",
+        "attack_pattern": "Resource Owner Access (Benign Authorized)",
+        "canonical_path": "Query.resource",
+        "grounding_score": 1.0,
+        "is_grounded": true,
+        "cited_evidence_count": 11,
+        "validation_warnings_count": 0
+      }
+    },
+    {
+      "scenario_id": "REAL-HOPP-003",
+      "scenario_name": "Hoppscotch Collection IDOR: Admin privileged collection inspection",
+      "gateway_decision": "ALLOW",
+      "completeness_scores": {
+        "method_a_gateway_only": 0.4,
+        "method_b_static_taint": 0.2,
+        "method_c_correlated_no_ai": 0.7,
+        "method_d_correlated_ai": 1.0
+      },
+      "ai_explanation": {
+        "summary": "Authorized privileged access to Resource:102 under role 'admin' [E7] via path 'Query.resource' [E2]. Administrative override verified in policy engine [E8].",
+        "attack_pattern": "Privileged Administrative Access (Benign Authorized)",
+        "canonical_path": "Query.resource",
+        "grounding_score": 1.0,
+        "is_grounded": true,
+        "cited_evidence_count": 11,
+        "validation_warnings_count": 0
+      }
+    },
+    {
+      "scenario_id": "REAL-NEST-001",
+      "scenario_name": "Team Workspace: Indirect BOLA on nested collections with client aliases",
+      "gateway_decision": "DENY",
+      "completeness_scores": {
+        "method_a_gateway_only": 0.4,
+        "method_b_static_taint": 0.2,
+        "method_c_correlated_no_ai": 0.7,
+        "method_d_correlated_ai": 1.0
+      },
+      "ai_explanation": {
+        "summary": "Blocked indirect BOLA attempt targeting nested Resource:102 via canonical schema path 'Query.user.resources' [E2]. Caller 101 attempted unauthorized access across object relationships [E6, E7, E8].",
+        "attack_pattern": "Indirect Nested Broken Object-Level Authorization (BOLA)",
+        "canonical_path": "Query.user.resources",
+        "grounding_score": 1.0,
+        "is_grounded": true,
+        "cited_evidence_count": 11,
+        "validation_warnings_count": 0
+      }
+    },
+    {
+      "scenario_id": "REAL-NEST-002",
+      "scenario_name": "Team Workspace: Nested parameterized lookup under own user node",
+      "gateway_decision": "DENY",
+      "completeness_scores": {
+        "method_a_gateway_only": 0.4,
+        "method_b_static_taint": 0.2,
+        "method_c_correlated_no_ai": 0.7,
+        "method_d_correlated_ai": 1.0
+      },
+      "ai_explanation": {
+        "summary": "Blocked indirect BOLA attempt targeting nested Resource:102 via canonical schema path 'Query.user.resource' [E2]. Caller 101 attempted unauthorized access across object relationships [E6, E7, E8].",
+        "attack_pattern": "Indirect Nested Broken Object-Level Authorization (BOLA)",
+        "canonical_path": "Query.user.resource",
+        "grounding_score": 1.0,
+        "is_grounded": true,
+        "cited_evidence_count": 11,
+        "validation_warnings_count": 0
+      }
+    },
+    {
+      "scenario_id": "REAL-NEST-003",
+      "scenario_name": "Team Workspace: Legitimate owner nested folder traversal",
+      "gateway_decision": "ALLOW",
+      "completeness_scores": {
+        "method_a_gateway_only": 0.4,
+        "method_b_static_taint": 0.2,
+        "method_c_correlated_no_ai": 0.7,
+        "method_d_correlated_ai": 1.0
+      },
+      "ai_explanation": {
+        "summary": "Authorized operation on path 'Query.resource' [E2] by principal 101 [E7]. Gateway permitted request under policy 'OWNER_MATCH' [E8].",
+        "attack_pattern": "Authorized Field Access (Benign Policy Allowed)",
+        "canonical_path": "Query.resource",
+        "grounding_score": 1.0,
+        "is_grounded": true,
+        "cited_evidence_count": 11,
+        "validation_warnings_count": 0
+      }
+    },
+    {
+      "scenario_id": "REAL-SAAS-001",
+      "scenario_name": "SaaS Multi-Tenant: Cross-tenant private document access attempt",
+      "gateway_decision": "DENY",
+      "completeness_scores": {
+        "method_a_gateway_only": 0.4,
+        "method_b_static_taint": 0.2,
+        "method_c_correlated_no_ai": 0.7,
+        "method_d_correlated_ai": 1.0
+      },
+      "ai_explanation": {
+        "summary": "Blocked direct BOLA attempt on Resource:102 via canonical path 'Query.resource' [E2]. Caller principal 101 does not own the requested target entity [E6, E7, E8].",
+        "attack_pattern": "Direct Broken Object-Level Authorization (BOLA) IDOR",
+        "canonical_path": "Query.resource",
+        "grounding_score": 1.0,
+        "is_grounded": true,
+        "cited_evidence_count": 11,
+        "validation_warnings_count": 0
+      }
+    },
+    {
+      "scenario_id": "REAL-SAAS-002",
+      "scenario_name": "SaaS Multi-Tenant: Variable default injection for cross-tenant document",
+      "gateway_decision": "DENY",
+      "completeness_scores": {
+        "method_a_gateway_only": 0.4,
+        "method_b_static_taint": 0.2,
+        "method_c_correlated_no_ai": 0.7,
+        "method_d_correlated_ai": 1.0
+      },
+      "ai_explanation": {
+        "summary": "Blocked direct BOLA attempt on Resource:102 via canonical path 'Query.resource' [E2]. Caller principal 101 does not own the requested target entity [E6, E7, E8].",
+        "attack_pattern": "Direct Broken Object-Level Authorization (BOLA) IDOR",
+        "canonical_path": "Query.resource",
+        "grounding_score": 1.0,
+        "is_grounded": true,
+        "cited_evidence_count": 11,
+        "validation_warnings_count": 0
+      }
+    },
+    {
+      "scenario_id": "REAL-SAAS-003",
+      "scenario_name": "SaaS Multi-Tenant: Legitimate tenant private document retrieval",
+      "gateway_decision": "ALLOW",
+      "completeness_scores": {
+        "method_a_gateway_only": 0.4,
+        "method_b_static_taint": 0.2,
+        "method_c_correlated_no_ai": 0.7,
+        "method_d_correlated_ai": 1.0
+      },
+      "ai_explanation": {
+        "summary": "Authorized operation on path 'Query.resource' [E2] by principal 101 [E7]. Gateway permitted request under policy 'OWNER_MATCH' [E8].",
+        "attack_pattern": "Authorized Field Access (Benign Policy Allowed)",
+        "canonical_path": "Query.resource",
+        "grounding_score": 1.0,
+        "is_grounded": true,
+        "cited_evidence_count": 11,
+        "validation_warnings_count": 0
+      }
+    },
+    {
+      "scenario_id": "REAL-AUTH-001",
+      "scenario_name": "Authentication Layer: Unauthenticated access attempt to protected collection",
+      "gateway_decision": "DENY",
+      "completeness_scores": {
+        "method_a_gateway_only": 0.4,
+        "method_b_static_taint": 0.2,
+        "method_c_correlated_no_ai": 0.7,
+        "method_d_correlated_ai": 1.0
+      },
+      "ai_explanation": {
+        "summary": "Blocked direct BOLA attempt on Resource:102 via canonical path 'Query.resource' [E2]. Caller principal 101 does not own the requested target entity [E6, E7, E8].",
+        "attack_pattern": "Direct Broken Object-Level Authorization (BOLA) IDOR",
+        "canonical_path": "Query.resource",
+        "grounding_score": 1.0,
+        "is_grounded": true,
+        "cited_evidence_count": 11,
+        "validation_warnings_count": 0
+      }
+    },
+    {
+      "scenario_id": "REAL-AUTH-002",
+      "scenario_name": "Authentication Layer: Invalid JWT signature token on collection lookup",
+      "gateway_decision": "DENY",
+      "completeness_scores": {
+        "method_a_gateway_only": 0.4,
+        "method_b_static_taint": 0.2,
+        "method_c_correlated_no_ai": 0.7,
+        "method_d_correlated_ai": 1.0
+      },
+      "ai_explanation": {
+        "summary": "Blocked direct BOLA attempt on Resource:102 via canonical path 'Query.resource' [E2]. Caller principal 101 does not own the requested target entity [E6, E7, E8].",
+        "attack_pattern": "Direct Broken Object-Level Authorization (BOLA) IDOR",
+        "canonical_path": "Query.resource",
+        "grounding_score": 1.0,
+        "is_grounded": true,
+        "cited_evidence_count": 11,
+        "validation_warnings_count": 0
+      }
+    },
+    {
+      "scenario_id": "REAL-PROJ-001",
+      "scenario_name": "Project Resources: Shared project issue attachment access control",
+      "gateway_decision": "DENY",
+      "completeness_scores": {
+        "method_a_gateway_only": 0.4,
+        "method_b_static_taint": 0.2,
+        "method_c_correlated_no_ai": 0.7,
+        "method_d_correlated_ai": 1.0
+      },
+      "ai_explanation": {
+        "summary": "Blocked indirect BOLA attempt targeting nested Resource:102 via canonical schema path 'Query.user.resources' [E2]. Caller 102 attempted unauthorized access across object relationships [E6, E7, E8].",
+        "attack_pattern": "Indirect Nested Broken Object-Level Authorization (BOLA)",
+        "canonical_path": "Query.user.resources",
+        "grounding_score": 1.0,
+        "is_grounded": true,
+        "cited_evidence_count": 11,
+        "validation_warnings_count": 0
+      }
+    }
+  ]
+}

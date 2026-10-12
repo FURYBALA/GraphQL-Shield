@@ -192,28 +192,32 @@ try {
    - **Aliased Nested Traversal**: Shows client alias `targetUser.userDocs` disambiguated to canonical path `user.resources`.
    - **SaaS Multi-Tenant Isolation**: Shows tenant isolation across enterprise document repositories.
    - **Legitimate Owner Access**: Shows Alice accessing her own document 101, HTTP 200 OK, and `RUNTIME_PROTECTED_ALLOWED` preventing false alarm.
-4. Show the live JSON scenario API in Terminal 2:
+4. **Live AI Explanation Feature:** Click the purple button **`🤖 Generate Evidence-Grounded AI Explanation`**.
+   - Watch the dashboard asynchronously synthesize the verifiable evidence package ($E_1 \dots E_{11}$).
+   - Point out the purple **Evidence Citation Pills** (`[E1]`, `[E2]`, `[E6]`, `[E7]`, `[E8]`).
+   - Show the **100% Grounded** verification badge, the architectural root-cause diagnosis, and the concrete developer remediation code snippet.
+5. Show the live JSON scenario API in Terminal 2:
 ```powershell
 Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/security/scenario-lab" -Method Get | ConvertTo-Json -Depth 3
 ```
 
 ---
 
-## 9. Act 8: Automated Live Showcase & Benchmark Proof (Step 7)
+## 9. Act 8: Automated Live Showcase & Benchmark Proof (Step 7 & 8)
 
 **Objective:** Give the faculty mathematical certainty that all claims are reproducible and rigorously evaluated.
 
-### Part A: Run the Live Showcase Script (7-Step Sequence)
+### Part A: Run the Live Showcase Script (8-Step Sequence)
 ```powershell
 python scripts/demo_live_showcase.py
 ```
-*This executes all 7 steps automatically with colored status banners, live HTTP calls, AST taint inspections, and programmatic assertions.*
+*This executes all 8 steps automatically with colored status banners, live HTTP calls, AST taint inspections, AI Analyst evidence synthesis, and grounding verification assertions.*
 
-### Part B: Run the 167-Test Automated Suite
+### Part B: Run the 178-Test Automated Suite
 ```powershell
 python -m pytest -q
 ```
-*Output: `167 passed in ~5 seconds` across 21 test files (including 13 dedicated real-world scenario tests).*
+*Output: `178 passed in ~5.5 seconds` across 22 test files (including 11 dedicated AI Analyst tests).*
 
 ### Part C: Run the 115-Case Benchmark Evaluation
 ```powershell
@@ -227,9 +231,19 @@ python scripts/evaluate_real_world_scenarios.py
 ```
 *Output: 12/12 scenarios verified with 100% status, decision, reason, and path matches.*
 
+### Part E: Run the Evidence-Grounded AI Analyst Evaluation (RQ2 & RQ3)
+```powershell
+python scripts/evaluate_ai_explanations.py
+```
+*Output: Displays RQ2 10-dimension completeness comparison (Method A: 40.0%, Method B: 20.0%, Method C: 70.0%, Method D: 100.0%) and RQ3 safety verification (100% citation accuracy, 100% defect detection, 100% prompt injection defense).*
+
 ---
 
 ## 10. Faculty Q&A Survival Guide (Defending Against Tough Questions)
+
+### Q0: *"Does your AI make access control decisions or could it hallucinate?"*
+> **Answer:**  
+> *"No, Professor. The AI layer is strictly **advisory and out-of-band**. It has zero enforcement authority: access control is exclusively executed by the gateway's deterministic `PolicyEngine`. Furthermore, our Grounding Engine evaluates every AI response against our 11 indexed evidence items ($E_1 \dots E_{11}$) and catches 100% of hallucinations and decision contradictions before displaying them."*
 
 ### Q1: *"Did your taint analysis detect more attacks than the baseline gateway?"*
 > **Answer:**  
