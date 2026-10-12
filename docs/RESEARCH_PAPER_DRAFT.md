@@ -33,7 +33,7 @@ To overcome these challenges, we propose an integrated, evidence-grounded archit
 - A correlation engine that combines static AST taint findings with runtime authorization evidence, eliminating false alarms without altering gateway enforcement.
 - An evidence-grounded AI security analyst that operates out-of-band, indexing verifiable facts ($E_1 \dots E_{11}$) and producing 10-dimensional audit explanations.
 - A formal Grounding and Safety Verification Engine that verifies citation validity, enforces decision consistency, and resists adversarial prompt injection.
-- Comprehensive empirical evaluation on both synthetic benchmarks and real-world vulnerability reproductions demonstrating 100% precision, 100% grounding, and sub-millisecond gateway overhead.
+- Comprehensive empirical evaluation on both synthetic benchmarks and real-world vulnerability reproductions demonstrating 100% precision on gateway authorization, 100% contract grounding on deterministic mock fixtures, and sub-millisecond gateway overhead.
 
 ---
 
@@ -57,10 +57,10 @@ We establish the following non-negotiable architectural boundaries:
 ## 3. Related Work
 
 ### 3.1 GraphQL Access Control & Taint Analysis
-Authorization in GraphQL is notoriously difficult because queries allow arbitrary graph traversal. Prior literature by Lambers et al. (*"Taint Analysis for Graph APIs Focusing on Broken Access Control"*, LMCS 2024) demonstrated the viability of static taint propagation over GraphQL schemas to detect unauthorized data flows. However, as Lambers et al. acknowledged and our empirical results confirm, pure static taint analysis lacks access to the dynamic runtime tenancy context (e.g., database ownership mappings and caller session state). In our benchmark, this absence causes static taint analysis to suffer an 81.1% false-alarm rate on legitimate requests by authorized resource owners.
+Authorization in GraphQL is notoriously difficult because queries allow arbitrary graph traversal. Prior literature by Lambers et al. (*"Taint Analysis for Graph APIs Focusing on Broken Access Control"*, LMCS 2026) demonstrated the viability of static taint propagation over GraphQL schemas to detect unauthorized data flows. However, as Lambers et al. acknowledged and our empirical results confirm, pure static taint analysis lacks access to the dynamic runtime tenancy context (e.g., database ownership mappings and caller session state). In our benchmark, this absence causes static taint analysis to suffer an 81.1% false-alarm rate on legitimate requests by authorized resource owners.
 
 ### 3.2 Real-World Incident: Hoppscotch IDOR (GHSA-m5pg-r4jp-qq75)
-In June 2024, security researchers identified a high-severity Broken Object-Level Authorization vulnerability in Hoppscotch (an open-source API development ecosystem). Under CVE-2024-38370 / GHSA-m5pg-r4jp-qq75, the backend GraphQL resolver for user collections failed to verify whether the requesting user belonged to the workspace owning the specified collection ID. An authenticated user could inspect foreign private collections simply by supplying a foreign collection ID. Our project models this exact architectural failure in a controlled local reproduction (`REAL-HOPP-001` to `REAL-HOPP-003`).
+In February 2026, security researchers identified a high-severity Broken Object-Level Authorization vulnerability in Hoppscotch (an open-source API development ecosystem). Under CVE-2026-28217 / GHSA-m5pg-r4jp-qq75, the backend GraphQL resolver for user collections failed to verify whether the requesting user belonged to the workspace owning the specified collection ID. An authenticated user could inspect foreign private collections simply by supplying a foreign collection ID. Our project models this exact architectural failure in a controlled local reproduction (`REAL-HOPP-001` to `REAL-HOPP-003`).
 
 ### 3.3 LLMs in Security Operations & Grounding Verification
 Recent work has explored LLMs for security log summarization, incident triaging, and vulnerability explanation. However, ungrounded LLMs frequently suffer from confabulation and prompt injection. Techniques such as Retrieval-Augmented Generation (RAG) mitigate factual errors but lack formal verification mechanisms. Our work introduces a deterministic post-generation validation layer that treats the LLM output as untrusted and verifies all claims against structured program evidence.
@@ -142,7 +142,7 @@ Standard gateways record the response field `customAlias`, obscuring the underly
 When $P_{\text{resp}} \neq P_{\text{schema}}$, the analyzer flags active alias masking ($\text{is\_alias\_masked} = \text{True}$), resolving the exact canonical field for policy auditing.
 
 ### 5.3 Evidence Package Model ($E_1 \dots E_{11}$)
-To eliminate hallucination, the AI Analyst receives only verifiable program evidence packaged as structured items:
+To anchor model explanations to verified facts and mitigate ungrounded claims, the AI Analyst receives only verifiable program evidence packaged as structured items:
 - **$E_1$ (Operation):** Operation type, length, and sanitized structure.
 - **$E_2$ (Schema Path):** Canonical schema path attributed in Security Graph.
 - **$E_3$ (Response Path):** Client response path and alias masking state.
@@ -268,7 +268,10 @@ To establish a path from deterministic mock contract verification to empirical l
 - Semantic fact coverage measures presence of core entities (caller ID, target ID, policy reason, schema coordinate) and flags forbidden contradictions (e.g., claiming ALLOW on a dropped query).
 - A 10-point blinded human rubric evaluates Factual Support (0–3), Metadata Completeness (0–3), Boundary Clarity (0–2), and Remediation Actionability (0–2).
 
-**Environmental Prerequisite Boundary:** In offline academic evaluation environments without configured external API credentials (`AI_API_KEY=""`, `AI_PROVIDER="mock"`), the framework halts cleanly, logs `HALTED_PREREQUISITE_ABSENT`, and writes the formal protocol to `docs/AI_REAL_LLM_EVALUATION_PROTOCOL.json`. In accordance with scientific integrity guidelines, mock-provider outputs are **never** reported as empirical real-model observations.
+**Environmental Prerequisite Boundary & Formal Closure:** In offline academic evaluation environments without configured external API credentials (`AI_API_KEY=""`, `AI_PROVIDER="mock"`), the framework halts cleanly, logs `HALTED_PREREQUISITE_ABSENT`, and writes the formal protocol to `docs/AI_REAL_LLM_EVALUATION_PROTOCOL.json`. Because no live credentials or authorized local models were present, the real-LLM experiment was **formally marked as unexecuted rather than retrying with a mock and disguising it as a live evaluation**. The manuscript's empirical claims rest exclusively on:
+1. The 105-case deterministic gateway and AST taint correlation benchmark (Table 1: 100% precision, 100% recall, 0.0% false-alarm rate, 89.5% path attribution, 0 divergence).
+2. The deterministic Grounding Engine contract tests on synthetic fixtures (Table 3: 132 valid citation IDs, 100% flaw rejection).
+3. The pre-registered real-LLM evaluation protocol, which remains ready for replication without claiming unverified live model results.
 
 ---
 

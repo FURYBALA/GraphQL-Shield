@@ -100,9 +100,9 @@ Every scenario in the 12-case dataset was evaluated against the Grounding Engine
 
 ---
 
-## 5. Phase 10.2: Controlled Real-LLM Evaluation Protocol & Environmental Status
+## 5. Phase 10.3: Formal Closure of the Real-LLM Experiment (Unexecuted Prerequisite)
 
-To transition beyond deterministic contract tests on mock fixtures, Phase 10.2 developed and pre-registered an empirical real-LLM evaluation protocol in `scripts/evaluate_real_llm_explanations.py`.
+To ensure total academic transparency, Phase 10.3 formalizes the closure of the real-LLM experiment:
 
 ### A. Pre-Registered Evaluation Subset & Independent Ground Truth
 Four representative scenarios were pre-registered with facts defined independently prior to any model generation:
@@ -111,12 +111,11 @@ Four representative scenarios were pre-registered with facts defined independent
 - **`REAL-NEST-001` (Indirect Nested BOLA, Relational):** Tests GraphQL client alias resolution (`targetUser.userDocs` vs canonical `Query.user.resources`). Expected: `DENY`, `OWNERSHIP_MISMATCH`.
 - **`REAL-SAAS-003` (Multi-Tenant Document, Benign):** Tenant document retrieval. Expected: `ALLOW`, `OWNER_MATCH`, path `Query.resource`.
 
-### B. Environmental Prerequisite Check & Transparent Stance
-When executed in the local evaluation environment:
+### B. Prerequisite Outcome: Experiment Formally Unexecuted
+When executed in the evaluation environment:
 - **Prerequisite Check Outcome:** `HALTED_PREREQUISITE_ABSENT`.
 - **Environment Status:** No external `AI_API_KEY` or active OpenAI-compatible endpoint was configured (`AI_PROVIDER="mock"`, key empty).
-- **Academic Integrity Stance:** Rather than fabricating simulated numbers or disguising mock runs as real LLM outputs, the evaluation script halted cleanly and saved the complete pre-registered protocol, independent ground truth definitions, and 10-point blinded grading rubric to `docs/AI_REAL_LLM_EVALUATION_PROTOCOL.json`.
-- **Replication Ready:** Once credentials are added to `.env` (via `.env.example`), running `python scripts/evaluate_real_llm_explanations.py` automatically executes the live test suite with bounded retries and logs real latency, token usage, and required-fact coverage.
+- **Formal Scientific Closure:** Rather than retrying with a mock and mislabeling it as a live evaluation, the experiment is **formally marked as unexecuted due to prerequisite absence**. The manuscript relies exclusively on the deterministic gateway/AST benchmarks (Table 1), deterministic Grounding Engine contract tests (Table 3), and preserves the pre-registered protocol in `docs/AI_REAL_LLM_EVALUATION_PROTOCOL.json` for independent replication when credentials are supplied.
 
 ---
 

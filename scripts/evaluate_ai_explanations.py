@@ -352,9 +352,9 @@ async def run_evaluation():
             },
         },
         "per_scenario_results": scenario_evaluations,
-        "phase_10_2_real_llm_evaluation": {
-            "status": "HALTED_PREREQUISITE_ABSENT",
-            "reason": "AI_API_KEY is unset and AI_PROVIDER is set to 'mock'. No live model endpoint available.",
+        "phase_10_3_real_llm_status": {
+            "status": "FORMALLY_CLOSED_UNEXECUTED_PREREQUISITE_ABSENT",
+            "reason": "AI_API_KEY is unset and AI_PROVIDER is set to 'mock'. No live model endpoint available in evaluation environment.",
             "evaluation_paradigm": "pre_registered_controlled_protocol",
             "protocol_file": "docs/AI_REAL_LLM_EVALUATION_PROTOCOL.json",
             "pre_registered_subset": [
@@ -364,7 +364,7 @@ async def run_evaluation():
                 "REAL-SAAS-003",
             ],
             "independent_ground_truth_policy": "Established independently prior to generation from Gateway PolicyEngine and Security Graph.",
-            "academic_reporting_notes": "In accordance with scientific integrity standards, mock-provider outputs are strictly separated from live LLM benchmarks. When credentials become configured, scripts/evaluate_real_llm_explanations.py executes against this pre-registered protocol.",
+            "academic_reporting_notes": "In accordance with scientific integrity standards, mock-provider outputs are strictly separated from live LLM benchmarks. The real-LLM experiment is formally closed as unexecuted due to prerequisite absence. The pre-registered protocol remains available for independent replication when credentials are supplied.",
         },
     }
 
