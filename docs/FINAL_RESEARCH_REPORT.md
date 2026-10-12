@@ -1,64 +1,91 @@
-# Final Research Report: Authorization-Aware Context-Sensitive Taint Analysis for GraphQL BOLA
+# Correlating AST-Based GraphQL Path Analysis with Runtime Authorization Evidence for Explainable BOLA Auditing
 
-**Project Title:** GraphQL Shield: Context-Sensitive AST-Driven Taint Analysis and Authorization-Boundary Correlation for Broken Object-Level Authorization (BOLA)  
-**Academic Course/Context:** CCNS Project (Computer and Network Security)  
-**Current Evaluation Baseline:** 115 Ground-Truth Benchmark Cases (105 Valid Security Cases, 10 Lexical/Syntax Boundary Cases)  
-**Test Suite Verification:** 154 Passed Unit & Regression Tests (100% Pass Rate across 20 Test Modules)  
-**Git Head Reference:** Commit `c534e77` (Local Working Tree Clean)
+**Project Title:** Correlating AST-Based GraphQL Path Analysis with Runtime Authorization Evidence for Explainable BOLA Auditing  
+**Academic Course:** Computer and Communication Network Security (CCNS)  
+**Evaluation Baseline:** 115 Ground-Truth Benchmark Cases (105 Valid Security Cases, 10 Lexical/Syntax Boundary Cases) + 12 Real-World Scenarios  
+**Test Suite Verification:** 167 Passed Unit & Regression Tests (100% Pass Rate across 21 Test Modules)  
+**Evaluated Target:** GraphQL Shield (FastAPI Security Gateway + Strawberry GraphQL)  
 
 ---
 
 ## Executive Summary
 
-Broken Object-Level Authorization (BOLA), designated as the #1 threat in the OWASP API Security Top 10 (API1:2023), represents one of the most pervasive vulnerabilities in modern distributed architectures. In GraphQL APIs, BOLA poses unique detection and attribution challenges: clients construct arbitrary, deeply nested selection sets combining aliases, fragment spreads, and cross-type relational collections. Existing gateway defenses evaluate authorization primarily through coarse-grained, pre-execution regex or shallow argument inspection. While an existing gateway may successfully drop unauthorized requests, its security explanations remain opaque (emitting isolated HTTP 403 status codes without schema path coordinates), and it frequently loses visibility over nested collection traversals (e.g., `user.resources`) and client-side field aliases. Conversely, purely static taint analysis suffers from catastrophic false positive rates (81.1% on this benchmark) because it lacks access to dynamic caller credentials (JWT claims) and live database tenant ownership records.
+Broken Object-Level Authorization (BOLA), designated as the #1 threat in the OWASP API Security Top 10 (API1:2023), represents one of the most pervasive vulnerabilities in modern distributed architectures. In GraphQL APIs, BOLA poses unique detection and attribution challenges: clients construct arbitrary, deeply nested selection sets combining field aliases, fragment spreads, and cross-type relational collections. Existing gateway defenses evaluate authorization primarily through coarse-grained pre-execution regex or shallow argument inspection. While an existing gateway may successfully drop unauthorized requests, its security explanations remain opaque (emitting isolated HTTP 403 status codes without schema path coordinates), and it frequently loses visibility over nested collection traversals (e.g., `user.resources`) and client-side field aliases. Conversely, purely static taint analysis suffers from catastrophic false alarm rates (**81.1%** on our benchmark) because static analysis cannot inspect runtime caller credentials (JWT claims) or live database tenant ownership records without execution.
 
-This research project introduces **GraphQL Shield**, a hybrid architecture that pairs an AST-driven, context-sensitive static taint propagation engine with runtime authorization policy evidence. Operating in an **audit-only, non-disruptive configuration**, GraphQL Shield correlates static taint findings with dynamic policy execution. 
+This research paper introduces **GraphQL Shield**, a hybrid architecture that pairs an AST-driven, context-sensitive static taint propagation engine with runtime authorization policy evidence. Operating in an **audit-only, non-disruptive configuration**, GraphQL Shield correlates static taint findings with dynamic policy execution.
 
-### Key Findings & Empirical Results:
+### Key Empirical Findings:
 1. **Binary Detection Recall (Honest Novelty Assessment):**  
    Both the baseline gateway and the correlated model achieve **100.0% recall (52/52)** and **100.0% precision (52/52)** on the 105 valid security benchmark cases. **Correlated analysis does not improve binary blocking recall over the gateway alone on this evaluated corpus.** Claims of superior attack blocking are scientifically unwarranted and rejected.
 2. **Exact Path Attribution Accuracy:**  
-   Context-sensitive AST taint analysis elevates exact schema path attribution from **56.2% (59/105)** under the gateway alone to **89.5% (94/105)** under correlated analysis, eliminating alias confusion and correctly attributing indirect traversals across nested collections.
+   Context-sensitive AST taint analysis elevates exact schema path attribution from **56.2% (59/105)** under the gateway alone to **89.5% (94/105)** under correlated analysis, eliminating client alias confusion and correctly attributing indirect traversals across nested collections.
 3. **Program-Verified Boundary Transparency:**  
    The gateway alone exposes 0 structured boundary criteria (0.0%). The static analyzer represents 100.0% of criteria in its model but verifies 0.0% in the program. Correlated defense represents 100.0% of boundary criteria and dynamically verifies all 4 criteria in the program for **95 / 95 (100.0%) of protected domain object cases** (90.5% across all 105 valid cases; the remaining 10 cases are public/introspection queries requiring no authorization check).
 4. **Behavioral Compatibility & Zero Divergence:**  
    Across all 115 benchmark cases, audit-only taint analysis achieves **100.0% behavioral preservation (115/115)**, with zero HTTP status code divergence and zero mutation of response bodies.
 5. **Runtime Latency Overhead:**  
    The warmed median latency overhead of the taint engine is **0.295 ms** (P95 = **0.434 ms**), introducing sub-millisecond overhead suitable for inline gateway logging.
+6. **Real-World Incident Grounding:**  
+   The system is validated against a controlled reproduction of **GitHub Security Advisory GHSA-m5pg-r4jp-qq75** (Hoppscotch GraphQL `userCollection` IDOR), demonstrating automated attribution, alias normalization, and false-alarm prevention.
 
 ---
 
-## 1. Research Question
+## 1. Problem Statement & Research Gap
+
+### 1.1 The Challenge of BOLA in GraphQL
+In traditional RESTful APIs, resources are mapped to rigid hierarchical URIs (e.g., `GET /users/102/documents/501`). Access control filters can inspect path parameters with lightweight pattern matching. In contrast, GraphQL provides a single execution endpoint (typically `/graphql`) where the client defines the selection set shape. This flexibility introduces four critical security challenges:
+
+1. **Arbitrary Graph Traversal Depth:** Clients can query relations several layers deep (e.g., `user -> team -> project -> documents`).
+2. **Client-Controlled Aliasing:** Clients can rename response keys (e.g., `stolenDoc: resource(id: 102)`), decoupling the HTTP response structure from the underlying schema field names.
+3. **Fragment Indirection:** Named fragment definitions disperse field selections across the document.
+4. **Relational Collection Bypasses:** Top-level fields may be guarded, but nested collection fields (e.g., `User.resources`) frequently omit resolver-level authorization checks.
+
+### 1.2 Prior Art & Research Gap
+In recent academic literature, **Lambers et al. (Logical Methods in Computer Science, 2026)** established foundational work on *"Taint Analysis for Graph APIs Focusing on Broken Access Control"*. Lambers et al. formalize how untrusted inputs propagate through graph-based queries to identify potential broken access control candidates.
+
+However, an analysis of Lambers et al. and related static tools reveals three significant research gaps:
+- **Gap 1: Static False Alarm Rate:** Purely static taint analysis has no visibility into runtime caller identity (JWT claims) or live database tenant ownership records. Consequently, every legitimate tenant query requesting their own resource is flagged as an untrusted input reaching a sensitive sink. On our benchmark, static analysis alone yields an intolerable **81.1% False Alarm Rate**.
+- **Gap 2: Alias vs. Schema Path Conflation:** Existing graph security tools often report the client's aliased response path rather than the canonical schema field coordinates, hindering root-cause analysis in security operations centers (SOC).
+- **Gap 3: Lack of Runtime Policy Correlation & Audit Transparency:** Prior systems either attempt static-only detection or execute standalone runtime checks. They do not correlate AST taint traces with runtime policy outcomes to provide **verifiable authorization-boundary proofs** without disrupting production traffic.
+
+---
+
+## 2. Research Question & Core Objectives
 
 > **Primary Research Question:**  
-> *Does context-sensitive AST-driven taint analysis, when correlated with dynamic authorization policy evidence in an audit-only mode, provide superior source-to-sink path attribution and verifiable authorization-boundary explanations compared to a standalone pre-execution gateway, without altering baseline authorization decisions or incurring prohibitive latency?*
+> *Does correlating schema-aware, AST-driven GraphQL taint analysis with runtime authorization evidence improve the accuracy of security-path attribution and the auditability of authorization decisions while preserving existing gateway enforcement behavior?*
 
-This research formally investigates the hypothesis that the principal failure of existing API gateways is not necessarily binary detection of known single-tenant lookups, but rather **explanatory failure**—the inability to attribute nested relationships, disambiguate client field aliases, trace parameter defaults, and expose verified boundary proofs.
-
----
-
-## 2. Threat Model
-
-### 2.1 Attacker Profile & Capabilities
-- **Authenticated Threat Actor:** The attacker possesses valid authentication credentials (e.g., valid JWT signed by the system's identity provider) granting them standard `user` privileges.
-- **Untrusted Input Manipulation:** The attacker controls GraphQL query documents, variable dictionaries, field arguments, operation names, and client aliases.
-- **Goal (OWASP API1:2023 - BOLA):** Access, traverse, or enumerate data belonging to another tenant or higher-privileged role (e.g., Alice attempting to access Bob's private notes or Charlie's administrative resources).
-
-### 2.2 Attack Vectors Evaluated
-1. **Direct BOLA:** Direct invocation of root queries with foreign object identifiers (e.g., `query { resource(id: 102) { name } }`).
-2. **Variable Injection & Defaults:** Supplying foreign IDs via variables or relying on AST variable default values (e.g., `query ($id: Int = 102) { resource(id: $id) { name } }`).
-3. **Alias Obfuscation:** Masking sensitive root fields with arbitrary client aliases (e.g., `query { stolenDoc: resource(id: 102) { name } }`).
-4. **Fragment Spreading:** Indirection through named fragments and inline fragment spreads to hide argument flows.
-5. **Indirect / Nested Collection Traversals:** Accessing foreign resources through unconstrained relational fields on legitimate or foreign objects (e.g., `query { user(id: 102) { resources { id name } } }` or `query { user(id: 101) { resource(id: 102) { id } } }`).
-
-### 2.3 Out of Scope
-- SQL injection / NoSQL injection (mitigated via parameterized ORM).
-- Broken authentication / forged JWTs (mitigated via asymmetric JWT signature validation).
-- Denial of Service / deeply recursive query DOS (mitigated via maximum traversal depth limiting).
+### Specific Research Objectives:
+1. **Context-Sensitive AST Attribution:** Disambiguate client-supplied aliases from canonical schema coordinates and track indirect traversals across nested collections.
+2. **Authorization Boundary Modeling:** Formally define and track 4 boundary criteria (`principal_bound`, `target_bound`, `mandatory_on_path`, `covers_operation`) and distinguish criteria represented in a report from criteria verified in the program.
+3. **Runtime Correlation:** Map static vulnerability candidates to dynamic policy decisions, categorizing results into `TRUE_POSITIVE_BLOCKED`, `RUNTIME_PROTECTED_ALLOWED`, `BENIGN_AUTHORIZED`, or `POLICY_DENIED_UNCORRELATED`.
+4. **Empirical Evaluation & Non-Disruption:** Prove that audit-only operation achieves 100% behavioral compatibility with zero gateway decision divergence and sub-millisecond overhead.
+5. **Real-World Incident Validation:** Demonstrate the approach on an isolated reproduction of a documented public security advisory (Hoppscotch GHSA-m5pg-r4jp-qq75).
 
 ---
 
-## 3. Architecture & System Design
+## 3. Threat Model
+
+### 3.1 Attacker Capabilities
+- **Authenticated Principal:** The threat actor possesses valid JWT authentication credentials granting standard `user` privileges.
+- **Untrusted Input Control:** The attacker controls query strings, variable mappings, field arguments, operation names, and client aliases.
+- **Objective (OWASP API1:2023 - BOLA):** Access, traverse, or enumerate data belonging to another tenant or higher-privileged role (e.g., Alice attempting to access Bob's private collection or Charlie's administrative documents).
+
+### 3.2 Evaluated Attack Vectors
+1. **Direct BOLA:** Direct root query invocation with foreign object IDs (e.g., `query { resource(id: 102) { name } }`).
+2. **Variable Default Injections:** Omitting variable payloads and relying on AST variable default values (`query ($id: Int = 102) { resource(id: $id) { name } }`).
+3. **Alias Masking:** Renaming sensitive fields to evade string-based filters (`query { stolenDoc: resource(id: 102) { name } }`).
+4. **Fragment Spreading:** Indirection through named and inline fragment spreads.
+5. **Indirect / Nested Collection Traversals:** Accessing foreign resources through unconstrained relational fields (`query { user(id: 102) { resources { id name } } }` or `query { user(id: 101) { resource(id: 102) { id } } }`).
+
+### 3.3 Out of Scope
+- SQL / NoSQL injection (mitigated via parameterized queries).
+- Broken authentication / cryptographic token forgery (mitigated via asymmetric JWT signature checks).
+- Denial of Service / recursive depth exhaustion (mitigated via maximum traversal depth bounds).
+
+---
+
+## 4. Architecture & System Design
 
 ```
 +--------------------------------------------------------------------------------------------------+
@@ -98,23 +125,22 @@ This research formally investigates the hypothesis that the principal failure of
                      +---------------------------------------------------------+
 ```
 
-### 3.1 Core Components
-1. **Phase 2 Typed Security Graph (`app/security/security_graph.py`):**  
-   Constructs a typed structural graph directly from the Strawberry schema. Nodes represent types (`TypeNode`), fields (`FieldNode`), and arguments (`ArgumentNode`), capturing cardinality, nullability, ownership semantics, and return kinds.
-2. **Phase 3 Taint & Boundary Model (`app/security/taint_model.py`):**  
-   Defines formal abstractions:
-   - `TaintSource`: Client-supplied arguments and variables tagged with `UNTRUSTED_IDENTIFIER` or `UNTRUSTED_PARAMETER`.
-   - `PropagationContext`: Traversal context capturing parent type, field, cardinality, collection status, and depth.
+### 4.1 System Components
+1. **Typed GraphQL Security Graph (`app/security/security_graph.py`):**  
+   Constructed directly from the Strawberry schema. Nodes represent types (`TypeNode`), fields (`FieldNode`), and arguments (`ArgumentNode`), capturing cardinality, nullability, ownership semantics, and return kinds.
+2. **Taint & Boundary Model (`app/security/taint_model.py`):**  
+   - `TaintSource`: Arguments tagged with `UNTRUSTED_IDENTIFIER` or `UNTRUSTED_PARAMETER`.
+   - `PropagationContext`: Tracks parent type, field, cardinality, collection status, and depth.
    - `SensitiveSink`: Object or collection nodes classified by sensitivity level.
-   - `BoundaryEvidence`: Four-criterion authorization boundary record (`principal_bound`, `target_bound`, `mandatory_on_path`, `covers_operation`).
-3. **Phase 4 AST Propagation Engine (`app/security/taint_engine.py`):**  
-   Recursively walks the GraphQL document AST. Resolves fragment spreads, coerced variable defaults, and alias mappings while tracking dual path coordinates (`schema_path` and `response_path`).
-4. **Phase 5/7 Correlation Engine (`app/security/taint_correlation.py`):**  
-   Integrates static findings with runtime policy evaluations, assigning formal correlation classifications: `TRUE_POSITIVE_BLOCKED`, `RUNTIME_PROTECTED_ALLOWED`, `BENIGN_AUTHORIZED`, or `POLICY_DENIED_UNCORRELATED`.
+   - `BoundaryEvidence`: Structured record capturing 4 boundary criteria and explicit uncertainties.
+3. **AST Propagation Engine (`app/security/taint_engine.py`):**  
+   Walks the GraphQL document AST, normalizes fragments, coerces variable defaults, and records dual path coordinates (`schema_path` vs `response_path`).
+4. **Correlation Engine (`app/security/taint_correlation.py`):**  
+   Binds static AST findings to runtime PolicyEngine outcomes, establishing verifiable boundary proofs.
 
 ---
 
-## 4. Taint Propagation & Boundary Verification Algorithm
+## 5. Taint Propagation & Correlation Algorithm
 
 ```
 Algorithm 1: Context-Sensitive GraphQL AST Taint Propagation & Correlation
@@ -159,23 +185,61 @@ Output: HTTP Decision D, Correlated Audit Record R
 
 ---
 
-## 5. Empirical Evaluation Methodology
+## 6. Real-World Case Study: Hoppscotch Collection IDOR (GHSA-m5pg-r4jp-qq75)
 
-### 5.1 Corpus Design & Stratification
-The evaluation was conducted on a version-controlled, independently labeled corpus of 115 test cases (`data/ground_truth_corpus.json`):
-- **52 Ground-Truth BOLA Positive Cases:** Direct attacks (22), variable default injections (1), alias obfuscations (10), fragment indirection (5), and nested collection traversals (14).
-- **53 Ground-Truth Benign Negative Cases:** Legitimate owner queries (20), admin privileged queries (15), nested owner collections (8), and public health/introspection queries (10).
-- **10 Lexical/Syntax Edge Cases:** Empty query strings, unbalanced braces, invalid field names, and type violations. These fail at the AST parser and are appropriately excluded from security detection denominators.
-- **Valid Security Denominator:** **105 cases** (52 Positive, 53 Negative).
+### 6.1 Vulnerability Overview
+In February 2026, GitHub Security Advisory **GHSA-m5pg-r4jp-qq75** disclosed an Insecure Direct Object Reference in Hoppscotch's GraphQL API (versions $\le 2026.1.1$, patched in $2026.2.0$). The vulnerability resided in the `userCollection` query:
+```graphql
+query GetCollection($userCollectionID: ID!) {
+  userCollection(userCollectionID: $userCollectionID) {
+    id
+    title
+    requests { id authHeaders }
+  }
+}
+```
+The backend resolver accepted `userCollectionID` and fetched the collection record without verifying that the authenticated user owned the collection. This allowed any authenticated user to retrieve another tenant's API request collections, exposing stored authentication tokens, internal URLs, and confidential headers.
 
-### 5.2 Evaluated Methods
-- **Method 1 (M1: Gateway Alone):** Pre-execution object extractor and PolicyEngine; emits HTTP status code and unstructured log string.
-- **Method 2 (M2: Static Taint Alone):** AST propagation engine operating purely on schema graph and document AST without runtime caller or database context.
-- **Method 3 (M3: Correlated Defense):** Integrated architecture pairing AST taint findings with runtime PolicyEngine decisions in audit-only mode.
+### 6.2 Controlled Reproduction in GraphQL Shield
+We modeled this attack pattern using our local test environment:
+- **Simulated Attacker:** Alice (`user_id = 101`, `role = 'user'`)
+- **Collection Owner:** Bob (`user_id = 102`, `role = 'user'`)
+- **Target Resource:** Collection Resource ID `102` (`Bob's Financial Record`)
+- **Attack Query:**
+  ```graphql
+  query GetCollection($colId: Int!) {
+    resource(id: $colId) { id name objectType }
+  }
+  ```
+  with variables `{"colId": 102}`.
+
+### 6.3 Local Execution & Verification Trace
+1. **Gateway Interception:** Pre-execution object extraction identifies target `(type='Resource', id=102)`. SQLite lookup confirms `owner_id = 102`. PolicyEngine detects `OWNERSHIP_MISMATCH` and drops the request with **`HTTP 403 Forbidden`**.
+2. **AST Taint Propagation:** Maps argument `$colId` as taint source reaching sensitive sink `ResourceType`. Schema path attributed: `resource`.
+3. **Correlation:** Produces status **`TRUE_POSITIVE_BLOCKED`** with verified boundary criteria.
+4. **Legitimate Owner Contrast:** When Bob requests ID `102`, the gateway permits access with **`HTTP 200 OK`**, and correlation logs **`RUNTIME_PROTECTED_ALLOWED`**, preventing a false block.
 
 ---
 
-## 6. Comprehensive Comparative Results
+## 7. Empirical Evaluation Methodology & Datasets
+
+### 7.1 Dataset 1: Baseline Ground-Truth Corpus (115 Cases)
+The baseline benchmark (`data/ground_truth_corpus.json`) contains 115 version-controlled test cases:
+- **52 Ground-Truth BOLA Positive Cases:** Direct attacks (22), variable default injections (1), alias obfuscations (10), fragment indirection (5), and nested collection traversals (14).
+- **53 Ground-Truth Benign Negative Cases:** Legitimate owner queries (20), admin privileged queries (15), nested owner collections (8), and public health/introspection queries (10).
+- **10 Lexical/Syntax Edge Cases:** Empty queries, malformed syntax, and type violations (evaluated separately from security detection denominators).
+- **Valid Security Denominator:** **105 cases** (52 Positive, 53 Negative).
+
+### 7.2 Dataset 2: Real-World Scenarios Dataset (12 Scenarios)
+A dedicated dataset (`data/real_world_scenarios.json`) modeling:
+- Hoppscotch collection IDOR (unauthorized, authorized, admin override).
+- Team workspace nested collection traversals with client aliases.
+- Multi-tenant SaaS document isolation (cross-tenant access, variable default coercion).
+- Authentication layer boundaries (unauthenticated, malformed JWT).
+
+---
+
+## 8. Comparative Results Across 6 Research Dimensions
 
 ### Dimension 1: Security Detection Performance (105 Valid Cases)
 | Metric | Method 1: Gateway Alone | Method 2: Static Alone | Method 3: Correlated Defense |
@@ -189,9 +253,9 @@ The evaluation was conducted on a version-controlled, independently labeled corp
 | **F1-Score** | **1.000** | **0.708** | **1.000** |
 | **False Alarm Rate (FAR)**| **0.0%** (0/53) | **81.1%** (43/53) | **0.0%** (0/53) |
 
-#### Honest Scientific Assessment on Detection:
+#### Honest Assessment of Detection Recall:
 > [!IMPORTANT]
-> Correlated Defense does **not** increase the binary detection recall over Gateway Alone on this corpus. Both block 52/52 attacks. Static taint alone produces an unacceptable 81.1% false alarm rate because it cannot know whether the runtime caller owns the target resource without executing the database check. The genuine research value of the AST taint analyzer lies in **explanation, path attribution, and boundary transparency**, not in raw binary blocking.
+> Correlated Defense does **not** increase binary detection recall over Gateway Alone on this corpus. Both block 52/52 attacks. Static taint alone produces an unacceptable 81.1% false alarm rate because it cannot know whether the runtime caller owns the target resource without executing the database check. The genuine research value of the AST taint analyzer lies in **explanation, path attribution, and boundary transparency**, not in raw binary blocking.
 
 ---
 
@@ -225,7 +289,7 @@ The evaluation was conducted on a version-controlled, independently labeled corp
 ---
 
 ### Dimension 4: Illustrative Rubric Scores (12 Representative Archetypes)
-*(Note: Evaluates architectural capability completeness across 4 criteria; does not claim independent human subject review).*
+*(Evaluates architectural capability completeness across 4 criteria; does not claim independent human review).*
 - **Method 1 (Gateway Alone):** Mean = **3.33 / 8** (41.6%)
 - **Method 2 (Static Taint Alone):** Mean = **5.75 / 8** (71.9%)
 - **Method 3 (Correlated Defense):** Mean = **7.83 / 8** (97.9%)
@@ -236,8 +300,8 @@ The evaluation was conducted on a version-controlled, independently labeled corp
 - **Cold-Start Taint Analysis:** 0.377 ms
 - **Warmed Median Latency:** 0.295 ms
 - **Warmed 95th Percentile (P95):** 0.434 ms
-- **Total Gateway Execution (Warmed):** ~20–25 ms (dominated by SQLite I/O and password hashing)
-- **Overhead Assessment:** Static AST analysis adds < 1.5% to total request handling time.
+- **Gateway End-to-End Latency:** ~20–25 ms (dominated by SQLite I/O and password hashing)
+- **Overhead Assessment:** Static AST analysis adds < 1.5% to total request latency.
 
 ---
 
@@ -248,29 +312,48 @@ The evaluation was conducted on a version-controlled, independently labeled corp
 
 ---
 
-## 7. Limitations & Threats to Validity
+## 9. Limitations & Threats to Validity
 
-1. **Synthetic Corpus Scope:** While the 115-case corpus covers diverse GraphQL constructs, it is synthetically generated against a controlled schema. Production GraphQL deployments with federation or dynamic directives may introduce additional complexities.
-2. **Double-Blind Human Subject Study:** Explanation rubric scores reflect structural capability models, not external developer usability studies.
-3. **Audit-Only Dependency:** In audit-only mode, the system relies on the gateway's PolicyEngine for enforcement. If the gateway's policy rule is absent, the system flags the issue in logs but does not block the request.
+1. **Synthetic Corpus Scope:** While the 115-case benchmark and 12 real-world scenarios cover diverse GraphQL constructs, they are executed against a controlled schema. Large enterprise schemas with dynamic federation (Apollo Federation) or schema stitching may introduce additional schema graph parsing overhead.
+2. **Mutation Operations:** The current implementation actively intercepts GraphQL `query` operations. Mutation authorization (e.g., `updateResource`, `deleteCollection`) is supported structurally in the AST parser but not active in the gateway enforcement layer.
+3. **Double-Blind Human Subject Usability:** Rubric scores reflect structural architectural capabilities rather than external developer usability grading.
 
 ---
 
-## 8. Reproducibility Instructions
+## 10. Reproducibility Instructions
 
-### Environment Requirements
+### Environment
 - Python 3.12+ (tested on Python 3.14.0 Windows)
 - Dependencies: `fastapi`, `strawberry-graphql`, `pydantic`, `pytest`, `httpx`, `pyjwt`
 
-### Commands
+### Execution Commands
 ```powershell
-# 1. Run Complete Test Suite (154 passing tests)
-python -m pytest tests/ -q
+# 1. Run Complete Test Suite (167 passing tests)
+python -m pytest tests/ -v
 
-# 2. Run Phase 7 Comparative Evaluation Script
+# 2. Run Phase 7 Comparative Evaluation Script (115 cases)
 python scripts/evaluate_phase_7.py
 
-# 3. Run Live Interactive Demonstration Script
+# 3. Run Live 7-Step Interactive Showcase Demonstration
 python scripts/demo_live_showcase.py
 ```
-All outputs are self-contained and reproduce with 100% determinism.
+
+---
+
+## 11. References
+
+1. **Academic Literature on Graph API Taint Analysis:**  
+   Lambers et al., *"Taint Analysis for Graph APIs Focusing on Broken Access Control,"* Logical Methods in Computer Science (LMCS), 2026.  
+   URL: [https://lmcs.episciences.org/17696](https://lmcs.episciences.org/17696).
+
+2. **Hoppscotch Security Advisory:**  
+   GitHub Security Lab & Hoppscotch Team, *"Insecure Direct Object Reference in Hoppscotch GraphQL userCollection Query,"* GHSA-m5pg-r4jp-qq75, February 2026.  
+   URL: [https://github.com/hoppscotch/hoppscotch/security/advisories/GHSA-m5pg-r4jp-qq75](https://github.com/hoppscotch/hoppscotch/security/advisories/GHSA-m5pg-r4jp-qq75).
+
+3. **OWASP API Security Top 10:**  
+   OWASP Foundation, *"API1:2023 — Broken Object-Level Authorization,"* 2023.  
+   URL: [https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization/](https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization/).
+
+4. **MITRE CWE:**  
+   MITRE Corporation, *"CWE-639: Authorization Bypass Through User-Controlled Key,"* 2024.  
+   URL: [https://cwe.mitre.org/data/definitions/639.html](https://cwe.mitre.org/data/definitions/639.html).

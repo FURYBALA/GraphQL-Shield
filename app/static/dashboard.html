@@ -6,35 +6,66 @@
     <title>GraphQL Shield Dashboard</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1000px; margin: auto; }
-        h1 { text-align: center; color: #2c3e50; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; border-bottom: 4px solid #bdc3c7; }
+        .container { max-width: 1100px; margin: auto; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 25px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); text-align: center; border-bottom: 4px solid #bdc3c7; }
         .stat-card h3 { margin: 0 0 10px 0; font-size: 13px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
         .stat-card .value { font-size: 32px; font-weight: bold; color: #2c3e50; }
         .stat-card.danger { border-bottom-color: #e74c3c; }
         .stat-card.danger .value { color: #e74c3c; }
         .stat-card.success { border-bottom-color: #27ae60; }
         .stat-card.success .value { color: #27ae60; }
-        .table-container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
-        th { background: #f8f9fa; color: #333; font-weight: 600; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; color: #fff; display: inline-block; }
-        .badge.allow { background: #27ae60; }
-        .badge.deny { background: #e74c3c; }
-        .badge.high { background: #c0392b; }
-        .badge.low { background: #2ecc71; }
-        .badge.medium { background: #f39c12; }
-        code { background: #f4f4f4; padding: 2px 6px; border-radius: 4px; color: #d35400; font-size: 13px; }
-        .live-indicator { display: inline-block; width: 10px; height: 10px; background-color: #2ecc71; border-radius: 50%; animation: pulse 2s infinite; margin-right: 10px; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); } 100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); } }
+        
+        .section-card { background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #edf2f7; padding-bottom: 12px; }
+        .section-header h2 { margin: 0; color: #2c3e50; font-size: 19px; }
+        
+        /* Scenario Lab Styles */
+        .lab-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .lab-btn { background: #edf2f7; border: 1px solid #cbd5e0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; color: #4a5568; transition: all 0.2s; }
+        .lab-btn:hover { background: #e2e8f0; }
+        .lab-btn.active { background: #3182ce; color: #fff; border-color: #2b6cb0; box-shadow: 0 2px 4px rgba(49,130,206,0.3); }
+        
+        .lab-details { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; }
+        .scenario-meta { margin-bottom: 15px; }
+        .scenario-title { font-size: 17px; font-weight: bold; color: #1a202c; margin-bottom: 6px; }
+        .scenario-desc { font-size: 13px; color: #4a5568; line-height: 1.5; margin-bottom: 8px; }
+        .scenario-context { font-size: 12px; color: #718096; background: #fff; border-left: 3px solid #3182ce; padding: 8px 12px; border-radius: 0 4px 4px 0; }
+        
+        .lab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 15px; }
+        .lab-box { background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 14px; }
+        .lab-box-title { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #718096; margin-bottom: 8px; }
+        .lab-box-content { font-size: 13px; color: #2d3748; }
+        .lab-box-content strong { color: #1a202c; }
+        
+        .query-box { grid-column: 1 / -1; background: #1a202c; color: #e2e8f0; border-radius: 6px; padding: 12px 16px; font-family: monospace; font-size: 12px; overflow-x: auto; margin-top: 10px; }
+        .explanation-banner { grid-column: 1 / -1; padding: 12px 16px; border-radius: 6px; font-size: 13px; line-height: 1.5; margin-top: 10px; }
+        .explanation-banner.deny { background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; }
+        .explanation-banner.allow { background: #f0fff4; border: 1px solid #9ae6b4; color: #276749; }
+        
+        /* Table Styles */
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #edf2f7; font-size: 13px; }
+        th { background: #f7fafc; color: #4a5568; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        .badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; display: inline-block; }
+        .badge.allow { background: #38a169; }
+        .badge.deny { background: #e53e3e; }
+        .badge.high { background: #c53030; }
+        .badge.low { background: #38a169; }
+        .badge.medium { background: #dd6b20; }
+        .badge.verified { background: #2b6cb0; }
+        .badge.candidate { background: #805ad5; }
+        code { background: #edf2f7; padding: 2px 6px; border-radius: 4px; color: #c05621; font-size: 12px; font-family: monospace; }
+        .live-indicator { display: inline-block; width: 10px; height: 10px; background-color: #48bb78; border-radius: 50%; animation: pulse 2s infinite; margin-right: 8px; vertical-align: middle; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(72, 187, 120, 0); } 100% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0); } }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🛡️ GraphQL Shield Dashboard <span class="live-indicator"></span></h1>
         
+        <!-- Top Statistics Grid -->
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Total Requests</h3>
@@ -58,28 +89,59 @@
             </div>
         </div>
 
-        <div class="table-container">
-            <h2 style="margin-top: 0; color: #2c3e50; font-size: 18px;">Recent Audit Events</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>User (Role)</th>
-                        <th>Path</th>
-                        <th>Decision</th>
-                        <th>Reason</th>
-                        <th>Risk</th>
-                        <th>Score</th>
-                    </tr>
-                </thead>
-                <tbody id="logs-body">
-                    <tr><td colspan="7" style="text-align: center;">Loading live data...</td></tr>
-                </tbody>
-            </table>
+        <!-- Real-World Security Scenario Lab Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2>🧪 Real-World Security Scenario Lab</h2>
+                <span style="font-size: 12px; color: #718096;">Live local execution via Gateway & Taint Engine</span>
+            </div>
+            <p style="font-size: 13px; color: #4a5568; margin-top: 0; margin-bottom: 16px;">
+                Demonstrates how GraphQL Shield evaluates realistic attack and legitimate-use scenarios based on documented public security incidents and enterprise multi-tenancy.
+            </p>
+            
+            <div class="lab-tabs" id="scenario-tabs">
+                <button class="lab-btn active" onclick="selectScenario(0)">1. Hoppscotch Collection IDOR</button>
+                <button class="lab-btn" onclick="selectScenario(1)">2. Nested Collection Traversal</button>
+                <button class="lab-btn" onclick="selectScenario(2)">3. SaaS Document Isolation</button>
+                <button class="lab-btn" onclick="selectScenario(3)">4. Legitimate Owner Access</button>
+            </div>
+
+            <div class="lab-details" id="scenario-details">
+                <div style="text-align: center; color: #718096; padding: 20px;">Loading live scenario execution...</div>
+            </div>
+        </div>
+
+        <!-- Recent Audit Events Table -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2>📋 Recent Gateway Audit Events</h2>
+                <span style="font-size: 12px; color: #718096;">Auto-refreshed every 2 seconds</span>
+            </div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>User (Role)</th>
+                            <th>Path</th>
+                            <th>Decision</th>
+                            <th>Reason</th>
+                            <th>Risk Level</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-body">
+                        <tr><td colspan="7" style="text-align: center;">Loading live data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
+        let cachedScenarios = [];
+        let activeScenarioIndex = 0;
+
         async function fetchStats() {
             try {
                 const response = await fetch('/api/v1/dashboard-stats');
@@ -97,7 +159,7 @@
                 tbody.innerHTML = '';
                 
                 if (data.recent_logs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No audit logs found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #718096;">No audit logs recorded yet.</td></tr>';
                     return;
                 }
                 
@@ -107,7 +169,6 @@
                     const decisionBadge = `<span class="badge ${log.decision.toLowerCase()}">${log.decision}</span>`;
                     const riskBadge = `<span class="badge ${log.risk_level.toLowerCase()}">${log.risk_level}</span>`;
                     
-                    // Format timestamp slightly better if possible
                     let time = log.timestamp;
                     if(time.includes('.')) time = time.split('.')[0];
                     
@@ -123,13 +184,127 @@
                     tbody.appendChild(tr);
                 });
             } catch (error) {
-                console.error('Error fetching dashboard data:', error);
+                console.error('Error fetching dashboard stats:', error);
             }
         }
 
-        // Fetch immediately and poll every 2 seconds
+        async function loadScenarioLab() {
+            try {
+                const res = await fetch('/api/v1/security/scenario-lab');
+                const data = await res.json();
+                cachedScenarios = data.scenarios || [];
+                renderScenario(activeScenarioIndex);
+            } catch (err) {
+                console.error('Error loading Scenario Lab:', err);
+                document.getElementById('scenario-details').innerHTML = 
+                    `<div style="color: #e53e3e;">Failed to load real-world scenario lab: ${err.message}</div>`;
+            }
+        }
+
+        function selectScenario(index) {
+            activeScenarioIndex = index;
+            const buttons = document.querySelectorAll('.lab-btn');
+            buttons.forEach((btn, idx) => {
+                if (idx === index) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            renderScenario(index);
+        }
+
+        function renderScenario(index) {
+            if (!cachedScenarios || cachedScenarios.length <= index) return;
+            const s = cachedScenarios[index];
+            const isDeny = s.gateway_enforcement.decision === 'DENY';
+            const decisionClass = isDeny ? 'deny' : 'allow';
+
+            const html = `
+                <div class="scenario-meta">
+                    <div class="scenario-title">${s.name}</div>
+                    <div class="scenario-desc"><strong>Security Objective:</strong> ${s.security_objective}</div>
+                    <div class="scenario-context"><strong>Incident Motivation:</strong> ${s.real_world_context}</div>
+                </div>
+
+                <div class="lab-grid">
+                    <!-- Box 1: Simulated Actors -->
+                    <div class="lab-box">
+                        <div class="lab-box-title">Simulated Principals</div>
+                        <div class="lab-box-content">
+                            <strong>Caller:</strong> ${s.simulated_caller.username} (ID: ${s.simulated_caller.user_id}, Role: ${s.simulated_caller.role})<br>
+                            <strong>Resource Owner:</strong> ${s.resource_owner.username} (ID: ${s.resource_owner.user_id})<br>
+                            <strong>Target Resource:</strong> ID ${s.resource_owner.resource_id}
+                        </div>
+                    </div>
+
+                    <!-- Box 2: Gateway Decision -->
+                    <div class="lab-box">
+                        <div class="lab-box-title">Gateway HTTP Decision</div>
+                        <div class="lab-box-content">
+                            <strong>HTTP Status:</strong> HTTP ${s.gateway_enforcement.http_status_code}<br>
+                            <strong>Enforcement:</strong> <span class="badge ${decisionClass}">${s.gateway_enforcement.decision}</span><br>
+                            <strong>Policy Reason:</strong> <code>${s.gateway_enforcement.reason}</code><br>
+                            <strong>Latency:</strong> ${s.gateway_enforcement.latency_ms} ms
+                        </div>
+                    </div>
+
+                    <!-- Box 3: Path Attribution -->
+                    <div class="lab-box">
+                        <div class="lab-box-title">Path Attribution</div>
+                        <div class="lab-box-content">
+                            <strong>Canonical Schema Path:</strong> <code>${s.path_attribution.primary_schema_path}</code><br>
+                            <strong>Client Response Path:</strong> <code>${s.path_attribution.primary_response_path}</code><br>
+                            <strong>Alias Disambiguated:</strong> ${s.path_attribution.is_alias_differentiated ? 'Yes (Alias mapped to schema)' : 'No (Direct field)'}
+                        </div>
+                    </div>
+
+                    <!-- Box 4: Taint Intelligence -->
+                    <div class="lab-box">
+                        <div class="lab-box-title">Context-Sensitive Taint</div>
+                        <div class="lab-box-content">
+                            <strong>Candidate Kind:</strong> <span class="badge candidate">${s.taint_analysis.findings[0] ? s.taint_analysis.findings[0].candidate_kind : 'NONE'}</span><br>
+                            <strong>Taint Source:</strong> <code>${s.taint_analysis.findings[0] && s.taint_analysis.findings[0].taint_source ? s.taint_analysis.findings[0].taint_source : 'None'}</code><br>
+                            <strong>Sensitive Sink:</strong> ${s.taint_analysis.findings[0] ? s.taint_analysis.findings[0].sensitive_sink : 'None'}
+                        </div>
+                    </div>
+
+                    <!-- Box 5: Boundary Evidence -->
+                    <div class="lab-box">
+                        <div class="lab-box-title">Authorization Boundary Evidence</div>
+                        <div class="lab-box-content">
+                            <strong>Criteria Represented:</strong> ${s.boundary_evidence.criteria_represented_in_report ? '100% (4/4 in report)' : 'None'}<br>
+                            <strong>Criteria Verified in Program:</strong> <span class="badge ${s.boundary_evidence.criteria_verified_in_program ? 'verified' : 'deny'}">${s.boundary_evidence.criteria_verified_in_program ? 'VERIFIED (Dynamic)' : 'UNVERIFIED'}</span><br>
+                            <span style="font-size: 11px; color: #718096;">${s.boundary_evidence.verification_source}</span>
+                        </div>
+                    </div>
+
+                    <!-- Box 6: Correlation -->
+                    <div class="lab-box">
+                        <div class="lab-box-title">Runtime Correlation Status</div>
+                        <div class="lab-box-content">
+                            <strong>Status:</strong> <span class="badge ${s.correlation.status.includes('BLOCKED') ? 'deny' : 'allow'}">${s.correlation.status}</span><br>
+                            <span style="font-size: 12px; color: #4a5568;">${s.correlation.rationale}</span>
+                        </div>
+                    </div>
+
+                    <!-- GraphQL Operation Code -->
+                    <div class="query-box">
+                        # Evaluated GraphQL Operation
+                        ${s.operation.query.trim()}
+                        ${Object.keys(s.operation.variables).length > 0 ? '\n# Variables:\n' + JSON.stringify(s.operation.variables, null, 2) : ''}
+                    </div>
+
+                    <!-- Concise Security Explanation -->
+                    <div class="explanation-banner ${decisionClass}">
+                        <strong>Security Rationale:</strong> ${s.explanation}
+                    </div>
+                </div>
+            `;
+            document.getElementById('scenario-details').innerHTML = html;
+        }
+
+        // Initialize dashboard
         fetchStats();
         setInterval(fetchStats, 2000);
+        loadScenarioLab();
     </script>
 </body>
 </html>

@@ -180,6 +180,20 @@ def get_taint_audit_endpoint(current_user: dict = Depends(get_current_user)):
         "records": get_taint_audit_records()
     }
 
+from app.security.scenario_lab import get_all_real_world_scenarios
+
+@app.get("/api/v1/security/scenario-lab")
+def get_scenario_lab_endpoint():
+    """
+    Demonstration endpoint serving live real-world security scenarios
+    and actual gateway + taint correlation intelligence for the dashboard.
+    """
+    return {
+        "title": "Real-World Security Scenario Lab",
+        "description": "Live, controlled real-world BOLA scenario evaluations backed by actual gateway execution",
+        "scenarios": get_all_real_world_scenarios()
+    }
+
 # Secure Strawberry GraphQL router protected by the BOLA security gateway
 graphql_app = GraphQLRouter(schema, context_getter=None, dependencies=[Depends(bola_enforcement_middleware)])
 app.include_router(graphql_app, prefix="/graphql")

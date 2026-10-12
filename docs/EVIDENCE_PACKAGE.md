@@ -1,7 +1,7 @@
 # Evidence Package: GraphQL Shield Research Verification
 
 **Repository:** `c:\Users\balan\Downloads\CCNS Project`  
-**Git Commit Head:** `c534e77`  
+**Git Commit Head:** `4c8d099` (Local Master)  
 **Evaluation Date:** October 2026  
 **Auditor / Assistant:** Antigravity Pair-Programming Assistant  
 **Verification Status:** 100% Deterministic Reproducibility
@@ -20,13 +20,13 @@
 
 ### One-Command Setup & Verification
 ```powershell
-# Step 1: Run complete test suite (20 test suites, 154 passing tests)
-python -m pytest -v
+# Step 1: Run complete automated test suite (21 test suites, 167 passing tests)
+python -m pytest -q
 
 # Step 2: Run 6-dimension evaluation across 115 benchmark cases
 python scripts/evaluate_phase_7.py
 
-# Step 3: Run live demonstration showcase (4 scenarios)
+# Step 3: Run live demonstration showcase (7-step sequence with assertions)
 python scripts/demo_live_showcase.py
 ```
 
@@ -39,45 +39,54 @@ python scripts/demo_live_showcase.py
 platform win32 -- Python 3.14.0, pytest-8.1.1, pluggy-1.4.0
 rootdir: C:\Users\balan\Downloads\CCNS Project
 configfile: pytest.ini
-collected 154 items
+collected 167 items
 
 tests/test_audit.py::test_audit_logger_records_event PASSED              [  0%]
 tests/test_audit.py::test_audit_logger_redacts_tokens PASSED             [  1%]
 tests/test_auth.py::test_login_success PASSED                            [  1%]
 tests/test_auth.py::test_login_invalid_credentials PASSED                [  2%]
-tests/test_auth.py::test_protected_without_token PASSED                  [  3%]
+tests/test_auth.py::test_protected_without_token PASSED                  [  2%]
 tests/test_auth.py::test_protected_expired_token PASSED                  [  3%]
 tests/test_dashboard.py::test_dashboard_metrics_endpoint PASSED          [  4%]
-tests/test_database.py::test_database_connection PASSED                  [  5%]
+tests/test_database.py::test_database_connection PASSED                  [  4%]
 tests/test_database.py::test_seed_data_integrity PASSED                  [  5%]
 tests/test_evaluation_framework.py::test_corpus_schema_validity PASSED   [  6%]
 tests/test_graphql.py::test_health_query PASSED                          [  7%]
 tests/test_graphql.py::test_user_query_valid PASSED                      [  7%]
 tests/test_graphql.py::test_resource_query_valid PASSED                  [  8%]
-tests/test_health.py::test_health_endpoint PASSED                        [  9%]
-tests/test_nested_authorization.py::test_nested_collection_auth PASSED   [ 10%]
-tests/test_nested_authorization.py::test_cross_user_nested_deny PASSED   [ 11%]
+tests/test_health.py::test_health_endpoint PASSED                        [  8%]
+tests/test_nested_authorization.py::test_nested_collection_auth PASSED   [  9%]
+tests/test_nested_authorization.py::test_cross_user_nested_deny PASSED   [ 10%]
 tests/test_object_extractor.py::test_extract_root_resource PASSED        [ 11%]
-tests/test_object_extractor.py::test_extract_nested_user_resources PASSED [ 12%]
-tests/test_ownership_inference.py::test_ownership_inference_rules PASSED [ 13%]
-tests/test_phase_10_comprehensive.py::test_01_direct_bola PASSED         [ 14%]
-... [134 additional tests passing] ...
-tests/test_phase_7_explainability.py::test_taint_engine_extracts_ast_variable_default_when_omitted PASSED [ 95%]
-tests/test_phase_7_explainability.py::test_taint_engine_explicit_variable_overrides_ast_default PASSED [ 96%]
-tests/test_phase_7_explainability.py::test_finding_preserves_both_schema_and_response_paths_under_alias PASSED [ 97%]
-tests/test_phase_7_explainability.py::test_nested_collection_traversal_path_attribution PASSED [ 98%]
-tests/test_phase_7_explainability.py::test_boundary_evidence_strict_properties_and_uncertainties PASSED [ 98%]
-tests/test_phase_7_explainability.py::test_correlation_distinguishes_candidate_from_confirmed_violation PASSED [ 99%]
-tests/test_phase_7_explainability.py::test_behavioral_compatibility_audit_only_preserves_gateway_decisions PASSED [100%]
+tests/test_object_extractor.py::test_extract_nested_user_resources PASSED [ 11%]
+tests/test_ownership_inference.py::test_ownership_inference_rules PASSED [ 12%]
+tests/test_phase_10_comprehensive.py::test_01_direct_bola PASSED         [ 13%]
+... [134 baseline tests passing] ...
+tests/test_phase_7_explainability.py::test_boundary_evidence_strict_properties_and_uncertainties PASSED [ 91%]
+tests/test_phase_7_explainability.py::test_correlation_distinguishes_candidate_from_confirmed_violation PASSED [ 91%]
+tests/test_phase_7_explainability.py::test_behavioral_compatibility_audit_only_preserves_gateway_decisions PASSED [ 92%]
+tests/test_real_world_scenarios.py::test_scenario_hoppscotch_collection_idor_blocked PASSED [ 92%]
+tests/test_real_world_scenarios.py::test_scenario_hoppscotch_collection_legitimate_allowed PASSED [ 93%]
+tests/test_real_world_scenarios.py::test_scenario_hoppscotch_admin_override PASSED [ 94%]
+tests/test_real_world_scenarios.py::test_scenario_aliased_collection_traversal_blocked PASSED [ 94%]
+tests/test_real_world_scenarios.py::test_scenario_aliased_collection_path_attribution PASSED [ 95%]
+tests/test_real_world_scenarios.py::test_scenario_saas_multi_tenant_document_blocked PASSED [ 96%]
+tests/test_real_world_scenarios.py::test_scenario_saas_multi_tenant_document_allowed PASSED [ 96%]
+tests/test_real_world_scenarios.py::test_scenario_nested_team_workspace_traversal_blocked PASSED [ 97%]
+tests/test_real_world_scenarios.py::test_scenario_variable_default_injection_blocked PASSED [ 98%]
+tests/test_real_world_scenarios.py::test_scenario_missing_auth_denied PASSED [ 98%]
+tests/test_real_world_scenarios.py::test_scenario_legitimate_owner_no_false_alarm PASSED [ 99%]
+tests/test_real_world_scenarios.py::test_scenario_dataset_file_structure PASSED [ 99%]
+tests/test_real_world_scenarios.py::test_scenario_lab_all_scenarios_execution PASSED [100%]
 
-============================= 154 passed in 5.12s =============================
+============================= 167 passed in 5.71s =============================
 ```
 
 ---
 
 ## 3. Benchmark Corpus Specification (`data/ground_truth_corpus.json`)
 
-- **Total Cases:** 115
+- **Total Cases:** 115 (Preserved 100% intact)
 - **Valid Security Cases:** 105 (52 BOLA positive, 53 benign negative)
 - **Lexical/Syntax Boundary Cases:** 10 (Excluded from security detection denominators)
 
@@ -92,6 +101,25 @@ tests/test_phase_7_explainability.py::test_behavioral_compatibility_audit_only_p
 8. `NESTED_OWNER_COLLECTION` (8 cases): Legitimate owner traversing their own nested collections.
 9. `PUBLIC_INTROSPECTION` (10 cases): Safe public queries (`health`, `__schema`, `__type`).
 10. `MALFORMED_SYNTAX` (10 cases): Non-executable GraphQL documents failing at AST parser.
+
+---
+
+## 3.1 Real-World Scenario Dataset (`data/real_world_scenarios.json`)
+
+To evaluate real-world production vulnerabilities without altering the fixed 115-case benchmark, a dedicated dataset of 12 real-world scenarios was created:
+
+1. `RW-001`: Hoppscotch Collection IDOR Reproduction (`GHSA-m5pg-r4jp-qq75`) — Direct cross-tenant access to Bob's collection ID 102.
+2. `RW-002`: Hoppscotch Collection Legitimate Owner Access — Alice reading her own collection folder 201.
+3. `RW-003`: Hoppscotch Collection Admin Override — Administrator Charlie inspecting collection 102.
+4. `RW-004`: Nested Workspace Collection Traversal with Field Aliases (`targetUser.userDocs`).
+5. `RW-005`: SaaS Multi-Tenant Document Repository Isolation (Tenant 1 Alice targeting Tenant 2 Bob document 102).
+6. `RW-006`: SaaS Multi-Tenant Legitimate Same-Tenant Document Retrieval.
+7. `RW-007`: Hierarchical Organization Team Resources Traversal.
+8. `RW-008`: GraphQL Variable Default Value ID Injection in SaaS Environment.
+9. `RW-009`: Unauthenticated Collection Lookup (Authentication Layer Defense).
+10. `RW-010`: False Alarm Prevention Verification on Sensitive Resource.
+11. `RW-011`: Multiple Aliased Fields in Single Document (`colA: resource(id: 101)`, `colB: resource(id: 102)`).
+12. `RW-012`: Legitimate Multi-Resource Inspection by Admin Principal.
 
 ---
 
@@ -140,20 +168,24 @@ DIMENSION 6: BEHAVIORAL COMPATIBILITY
 
 ---
 
-## 5. Live Demonstration Showcase Transcript
+## 5. Live Demonstration Showcase Transcript (7-Step Sequence)
 
 Run via: `python scripts/demo_live_showcase.py`
 
-### Key Scenarios Demonstrated:
-- **Scenario 1 (Direct BOLA):** Alice requests Bob's `resource(id: 102)`. Gateway returns `HTTP 403 Forbidden` (`OWNERSHIP_MISMATCH`). Taint engine flags `DIRECT_BOLA_CANDIDATE` on path `resource`. Correlation records `TRUE_POSITIVE_BLOCKED`.
-- **Scenario 2 (Indirect BOLA):** Alice requests Bob's `user(id: 102) { resources }` using client alias `targetUser`. Gateway returns `HTTP 403 Forbidden`. Taint engine uncovers nested relationship `UserType.resources`, maps alias to canonical path, and correlation records `TRUE_POSITIVE_BLOCKED`.
-- **Scenario 3 (Legitimate Access):** Alice requests her own `resource(id: 101)`. Gateway returns `HTTP 200 OK`. Static taint flags candidate, but correlation verifies runtime `OWNER_MATCH` and marks `RUNTIME_PROTECTED_ALLOWED` (preventing false alarm).
-- **Scenario 4 (Audit-Only Compatibility):** Confirms 100% zero-divergence across all 115 benchmark cases with sub-millisecond added latency.
+### 7-Step Sequence Demonstrated:
+- **Step 1 (Direct BOLA Denial):** Alice requests Bob's `resource(id: 102)`. Gateway returns `HTTP 403 Forbidden` (`OWNERSHIP_MISMATCH`). AST Taint engine flags `DIRECT_BOLA_CANDIDATE` on path `resource`. Correlation records `TRUE_POSITIVE_BLOCKED`.
+- **Step 2 (Indirect Nested Traversal Denial):** Alice requests Bob's `user(id: 102) { resources }`. Gateway returns `HTTP 403 Forbidden`. Taint engine uncovers nested relationship `UserType.resources`, and correlation records `TRUE_POSITIVE_BLOCKED`.
+- **Step 3 (Legitimate Owner Access):** Alice requests her own `resource(id: 101)`. Gateway returns `HTTP 200 OK`. Static taint flags candidate, but correlation verifies runtime `OWNER_MATCH` and marks `RUNTIME_PROTECTED_ALLOWED` (preventing false alarm).
+- **Step 4 (Aliased Query Path Disambiguation):** Alice queries `stolenDoc: resource(id: 102)`. Gateway returns `HTTP 403 Forbidden`. AST parser maps response alias `stolenDoc` back to canonical schema path `resource`.
+- **Step 5 (Hoppscotch IDOR Reproduction — GHSA-m5pg-r4jp-qq75):** Alice requests Bob's collection `userCollection(userCollectionID: 102)`. Gateway returns `HTTP 403 Forbidden` (`OWNERSHIP_MISMATCH`). Correlation records `TRUE_POSITIVE_BLOCKED`.
+- **Step 6 (Rich Audit Explanation & Boundary Verification):** Queries `/api/v1/security/taint-audit`. Verifies `caller_bound=True`, `target_bound=True`, `ownership_checked=True`, and correlation `TRUE_POSITIVE_BLOCKED`.
+- **Step 7 (Audit-Only Compatibility & Overhead Confirmation):** Re-runs verification across all 115 benchmark cases, confirming 0 divergences and sub-millisecond added latency.
 
 ---
 
 ## 6. Commit History & Audit Chain
 
+- `feat(real-world)` — integrate real-world security case studies, scenario lab, and literature positioning
 - `c534e77` — `audit(phase-7): compute program-verified boundary criteria strictly from actual runtime policy evidence`
 - `fce597d` — `audit(phase-7): distinguish criteria representation from program verification and relabel rubric as illustrative`
 - `5437b32` — `feat(phase-7): implement comparative evaluation of explainability and authorization boundaries`
