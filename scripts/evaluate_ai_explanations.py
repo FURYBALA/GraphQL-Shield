@@ -292,38 +292,52 @@ async def run_evaluation():
     path_consistency_pct = round((path_consistent_count / num_scenarios) * 100.0, 1)
 
     print("\n" + "=" * 80)
-    print("EVALUATION RESULTS SUMMARY")
+    print("EVALUATION RESULTS SUMMARY (DETERMINISTIC FIXTURES & VALIDATOR CONTRACTS)")
     print("=" * 80)
-    print("RQ2: Audit Dimension Completeness (Mean across 12 Real-World Scenarios):")
+    print("RQ2: Audit Dimension Completeness (Illustrative Capability Rubric across 10 Dimensions):")
     print(f"  Method A (Gateway-Only Log):                  {mean_a * 100:.1f}% (4.0 / 10 dimensions)")
     print(f"  Method B (Static Taint Analysis Alone):       {mean_b * 100:.1f}% (2.0 / 10 dimensions)")
     print(f"  Method C (Correlated Evidence Without AI):    {mean_c * 100:.1f}% (7.0 / 10 dimensions)")
     print(f"  Method D (Evidence-Grounded AI Analyst):      {mean_d * 100:.1f}% (10.0 / 10 dimensions)")
+    print("  *Note: Evaluates architectural presence of metadata fields; does not claim human quality grading.*")
     print("-" * 80)
-    print("RQ3: AI Grounding, Safety & Hallucination Defense:")
+    print("RQ3: AI Grounding, Safety & Defect Defense (Mock Contract & Invariant Tests):")
+    print(f"  Provider Evaluated:                           MockAIProvider (Deterministic Template Engine)")
     print(f"  Mean Grounding Score:                         {mean_grounding * 100:.1f}%")
-    print(f"  Citation Accuracy:                            {citation_accuracy_pct}% ({valid_citations_count}/{total_citations} valid)")
+    print(f"  Citation Precision (ID Existence):            {citation_accuracy_pct}% ({valid_citations_count}/{total_citations} valid)")
     print(f"  Decision Consistency Rate:                    {decision_consistency_pct}% ({decision_consistent_count}/{num_scenarios})")
     print(f"  Path Consistency Rate:                        {path_consistency_pct}% ({path_consistent_count}/{num_scenarios})")
     print(f"  Injected Hallucinated Citation Detection:    {'100% PASS' if cit_detected else 'FAIL'}")
     print(f"  Injected Decision Contradiction Detection:    {'100% PASS' if dec_detected else 'FAIL'}")
     print(f"  Injected Path Misattribution Detection:       {'100% PASS' if path_detected else 'FAIL'}")
-    print(f"  Adversarial Prompt Injection Robustness:      {'100% PASS' if adv_injection_thwarted else 'FAIL'}")
+    print(f"  Pipeline Prompt Injection Isolation:          {'100% PASS' if adv_injection_thwarted else 'FAIL'}")
+    print("  *Note: Prompt injection test validates structural AST isolation and validator rule checks.*")
     print("=" * 80)
 
     # Save output to docs/AI_EVALUATION_RESULTS.json
     output_data = {
-        "evaluation_title": "Evidence-Grounded AI Security Analyst Empirical Evaluation",
+        "evaluation_title": "Evidence-Grounded AI Security Analyst: Deterministic Fixture & Validator Evaluation",
+        "academic_audit_metadata": {
+            "evaluation_paradigm": "deterministic_contract_and_fixture_verification",
+            "provider_under_test": "MockAIProvider (Deterministic) & FlawedMockAIProvider (Adversarial Fixtures)",
+            "independent_human_assessment": False,
+            "semantic_explanation_quality_assessed": False,
+            "completeness_metric_nature": "illustrative_architectural_capability_rubric",
+            "prompt_injection_scope": "pipeline_isolation_and_guardrail_verification_only",
+            "gateway_enforcement_authority": "Gateway PolicyEngine exclusively (Zero AI Enforcement Authority)",
+        },
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "evaluation_duration_seconds": eval_duration_sec,
         "scenarios_evaluated": num_scenarios,
         "rq2_comparative_completeness": {
+            "description": "Illustrative architectural capability rubric across 10 security metadata dimensions",
             "method_a_gateway_only": {"mean_score": mean_a, "percentage": round(mean_a * 100, 1)},
             "method_b_static_taint": {"mean_score": mean_b, "percentage": round(mean_b * 100, 1)},
             "method_c_correlated_no_ai": {"mean_score": mean_c, "percentage": round(mean_c * 100, 1)},
             "method_d_correlated_ai": {"mean_score": mean_d, "percentage": round(mean_d * 100, 1)},
         },
         "rq3_ai_safety_and_grounding": {
+            "description": "Programmatic validator contract verification on Mock and FlawedMock fixtures",
             "mean_grounding_score": mean_grounding,
             "total_citations_evaluated": total_citations,
             "valid_citations_count": valid_citations_count,
@@ -334,7 +348,7 @@ async def run_evaluation():
                 "hallucinated_citations_detected": cit_detected,
                 "decision_contradictions_detected": dec_detected,
                 "path_mismatches_detected": path_detected,
-                "prompt_injection_thwarted": adv_injection_thwarted,
+                "prompt_injection_pipeline_isolation_verified": adv_injection_thwarted,
             },
         },
         "per_scenario_results": scenario_evaluations,

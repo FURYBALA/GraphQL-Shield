@@ -9,14 +9,19 @@
 
 ## 1. Executive Summary
 
-This report presents the empirical findings from the evaluation of the **Evidence-Grounded AI Security Analyst** (Phase 10) in the CCNS GraphQL BOLA security system.
+This report presents the empirical findings from the contract and fixture evaluation of the **Evidence-Grounded AI Security Analyst** (Phase 10) in the CCNS GraphQL BOLA security system.
+
+### Evaluation Scope & Provider Fixture:
+- **Evaluated Provider:** `MockAIProvider` (deterministic template engine) and `FlawedMockAIProvider` (adversarial defect injection).
+- **Evaluation Paradigm:** Programmatic invariant testing, referential integrity verification, and structural pipeline isolation. Live open-ended LLMs with human double-blind review were not part of this deterministic benchmark.
+- **Enforcement Authority:** 100% deterministic Gateway `PolicyEngine`. The AI Analyst has zero authorization authority.
 
 ### Key Highlights:
-1. **Audit Completeness (RQ2):** The Evidence-Grounded AI Analyst achieves **100.0% completeness** across all 10 verifiable security dimensions, significantly outperforming Gateway-Only logging (**40.0%**), Static Taint Analysis alone (**20.0%**), and Correlated Structured Evidence without AI (**70.0%**).
-2. **Grounding & Citation Precision (RQ3):** Evaluated across 132 cited evidence items, the system achieved a **100.0% valid citation rate** with **zero hallucinated citations**.
-3. **Safety Invariants & Defect Detection (RQ3):** The automated Grounding Engine demonstrated **100.0% detection accuracy** against injected hallucinated citations, decision contradictions, and canonical path mutations.
-4. **Adversarial Prompt Injection Defense:** Attacks embedding natural language jailbreak instructions inside GraphQL operation payloads were **100.0% neutralized**.
-5. **Gateway Non-Interference:** Generating AI explanations produced zero deviations in gateway authorization enforcement.
+1. **Audit Completeness (RQ2):** Under an illustrative architectural capability rubric across 10 security metadata dimensions, the Evidence-Grounded AI Analyst achieves **100.0% completeness** (presence of all 10 dimensions), compared to Gateway-Only logging (**40.0%**), Static Taint Analysis alone (**20.0%**), and Correlated Structured Evidence without AI (**70.0%**).
+2. **Grounding & Citation Precision (RQ3):** Evaluated across 132 cited evidence items against the deterministic mock fixture, the system achieved a **100.0% valid citation rate** (all 132 referential evidence IDs exist) with **zero hallucinated citation IDs**.
+3. **Safety Invariants & Defect Detection (RQ3):** The automated Grounding Engine demonstrated **100.0% detection accuracy** against synthetically injected hallucinated citations (`E99`, `E100`), decision contradictions, and canonical path mutations.
+4. **Adversarial Prompt Injection Pipeline Isolation:** Untrusted natural language injection payloads inside GraphQL queries were **100.0% quarantined** within delimited evidence envelopes, and post-generation guardrails verified gateway policy adherence.
+5. **Gateway Non-Interference:** Generating AI explanations produced zero deviations in gateway authorization enforcement (100% preserved).
 
 ---
 
@@ -52,23 +57,25 @@ We evaluated 12 real-world security scenarios across the four architectural base
 
 ---
 
-## 3. RQ3: AI Grounding, Safety & Defect Detection
+## 3. RQ3: AI Grounding, Safety & Defect Detection (Fixture Contract Tests)
 
-To verify that the AI Analyst cannot hallucinate or contradict security policies, we tested both nominal execution and deliberate defect injection.
+To verify the programmatic invariants of the Grounding Engine, we tested nominal template output using `MockAIProvider` and deliberate flaw injection using `FlawedMockAIProvider`.
 
-**Table 2: Safety & Grounding Metrics**
+**Table 2: Safety & Grounding Metrics (Deterministic Fixture Verification)**
 
 | Metric / Test Category | Target Invariant | Measured Value | Benchmark Result |
 | :--- | :--- | :---: | :---: |
-| **Mean Grounding Score** | Score $\ge 0.90$ | **1.000 (100.0%)** | **PASS** |
-| **Citation Precision** | Valid / Total Citations | **132 / 132 (100.0%)** | **PASS** |
-| **Hallucinated Citation Rate**| Invalid Citations | **0 / 132 (0.0%)** | **PASS** |
+| **Mean Grounding Score** | Score $\ge 0.90$ on compliant mock fixture | **1.000 (100.0%)** | **PASS** |
+| **Citation ID Precision** | Valid / Total Citations (ID existence) | **132 / 132 (100.0%)** | **PASS** |
+| **Hallucinated Citation Rate**| Invalid Citations on nominal mock | **0 / 132 (0.0%)** | **PASS** |
 | **Decision Consistency Rate** | Matches Gateway Decision | **12 / 12 (100.0%)** | **PASS** |
-| **Path Consistency Rate** | Matches Security Graph | **12 / 12 (100.0%)** | **PASS** |
-| **Injected Citation Flaw Detection** | Flag `E99`, `E100` | **100.0% Caught** | **PASS** |
-| **Injected Decision Contradiction** | Flag claims contradicting Gateway | **100.0% Caught** | **PASS** |
-| **Injected Path Mismatch Detection**| Flag incorrect schema path | **100.0% Caught** | **PASS** |
-| **Prompt Injection Defense** | Neutralize jailbreak payloads | **100.0% Defended** | **PASS** |
+| **Path Consistency Rate** | Matches Security Graph coordinate | **12 / 12 (100.0%)** | **PASS** |
+| **Injected Citation Flaw Detection** | Catch `E99`, `E100` in `FlawedMockAIProvider` | **100.0% Caught** | **PASS** |
+| **Injected Decision Contradiction** | Catch inverted decision claims | **100.0% Caught** | **PASS** |
+| **Injected Path Mismatch Detection**| Catch schema path mutations | **100.0% Caught** | **PASS** |
+| **Prompt Injection Pipeline Isolation** | Untrusted AST query delimited | **100.0% Isolated** | **PASS** |
+
+*Note: Metrics reflect programmatic contract testing and schema validation against deterministic fixtures. They verify that the validator correctly rejects contract violations and prevents untrusted query strings from overriding gateway decisions; they do not claim universal immunity to open-ended LLM jailbreaks or human-graded natural language quality.*
 
 ---
 

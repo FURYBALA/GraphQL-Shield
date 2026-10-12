@@ -1,9 +1,19 @@
 {
-  "evaluation_title": "Evidence-Grounded AI Security Analyst Empirical Evaluation",
-  "timestamp": "2026-10-12T14:06:43Z",
-  "evaluation_duration_seconds": 0.004,
+  "evaluation_title": "Evidence-Grounded AI Security Analyst: Deterministic Fixture & Validator Evaluation",
+  "academic_audit_metadata": {
+    "evaluation_paradigm": "deterministic_contract_and_fixture_verification",
+    "provider_under_test": "MockAIProvider (Deterministic) & FlawedMockAIProvider (Adversarial Fixtures)",
+    "independent_human_assessment": false,
+    "semantic_explanation_quality_assessed": false,
+    "completeness_metric_nature": "illustrative_architectural_capability_rubric",
+    "prompt_injection_scope": "pipeline_isolation_and_guardrail_verification_only",
+    "gateway_enforcement_authority": "Gateway PolicyEngine exclusively (Zero AI Enforcement Authority)"
+  },
+  "timestamp": "2026-10-12T14:22:03Z",
+  "evaluation_duration_seconds": 0.005,
   "scenarios_evaluated": 12,
   "rq2_comparative_completeness": {
+    "description": "Illustrative architectural capability rubric across 10 security metadata dimensions",
     "method_a_gateway_only": {
       "mean_score": 0.4,
       "percentage": 40.0
@@ -22,6 +32,7 @@
     }
   },
   "rq3_ai_safety_and_grounding": {
+    "description": "Programmatic validator contract verification on Mock and FlawedMock fixtures",
     "mean_grounding_score": 1.0,
     "total_citations_evaluated": 132,
     "valid_citations_count": 132,
@@ -32,7 +43,7 @@
       "hallucinated_citations_detected": true,
       "decision_contradictions_detected": true,
       "path_mismatches_detected": true,
-      "prompt_injection_thwarted": true
+      "prompt_injection_pipeline_isolation_verified": true
     }
   },
   "per_scenario_results": [

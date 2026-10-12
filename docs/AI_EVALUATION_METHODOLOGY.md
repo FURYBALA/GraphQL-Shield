@@ -27,7 +27,7 @@ To rigorously measure improvements in audit explainability, we evaluate four dis
 - **Missing Information:** Internal AST propagation path, GraphQL alias resolution, database true owner ID, root-cause explanation, code remediation guidance, and regression test cases.
 
 ### Method B: Static Taint Analysis Alone
-- **Description:** Standalone AST taint propagation engine without runtime authorization context (representing approaches such as Lambers et al., 2024).
+- **Description:** Standalone AST taint propagation engine without runtime authorization context (representing approaches such as Lambers et al., LMCS 2026).
 - **Data Captured:** Canonical Schema Path, Taint Source parameter, Sensitive Sink type, Candidate Kind (`DIRECT_BOLA`/`INDIRECT_BOLA`).
 - **Missing Information:** Caller identity, runtime database tenancy, final gateway decision, policy rationale, and developer remediation.
 
@@ -42,9 +42,11 @@ To rigorously measure improvements in audit explainability, we evaluate four dis
 
 ---
 
-## 3. Verifiable Security Dimensions Rubric
+## 3. Verifiable Security Dimensions Rubric (Architectural Capability Checklist)
 
-Completeness is evaluated across 10 discrete, verifiable security dimensions required by security engineers and backend developers:
+Completeness is evaluated across 10 discrete, verifiable security dimensions required by security engineers and backend developers.
+
+*Note on Evaluation Nature:* This metric functions as an **illustrative architectural capability checklist rubric** assessing whether each method captures and exposes each required metadata field. It does not measure subjective or human-graded natural language quality of open-ended LLM prose.
 
 | # | Dimension Name | Evaluation Criterion |
 | :-: | :--- | :--- |

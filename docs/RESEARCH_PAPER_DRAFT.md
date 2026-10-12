@@ -11,9 +11,9 @@
 
 Broken Object-Level Authorization (BOLA), also classified as Insecure Direct Object References (IDOR), represents the predominant vulnerability across modern GraphQL application programming interfaces (APIs). Traditional defenses operate either as standalone static taint analyzers that experience severe false-alarm rates (up to 81.1% on benign parameter flows due to lack of runtime tenancy context) or as perimeter gateways that log opaque binary authorization decisions without source-to-sink path attribution or actionable developer remediation. Furthermore, emerging generative AI assistance tools suffer from factual hallucination, unverified claims, and vulnerability to adversarial prompt injection.
 
-In this paper, we present **GraphQL Shield + AI Analyst**, a defense-in-depth security architecture that unifies schema-aware Abstract Syntax Tree (AST) taint analysis, runtime authorization evidence correlation, and an evidence-grounded AI explanation layer. The system constructs a typed Security Graph $G = (V, E)$, canonicalizes client response paths to defeat GraphQL field aliasing, and binds runtime principal-resource ownership proofs. Crucially, an out-of-band AI explanation layer consumes a strictly delimited, sanitized Evidence Package indexing verifiable facts ($E_1 \dots E_{11}$). A post-generation Grounding Engine enforces citation integrity, detects policy contradictions, and thwarts prompt injections. 
+In this paper, we present **GraphQL Shield + AI Analyst**, a defense-in-depth security architecture that unifies schema-aware Abstract Syntax Tree (AST) taint analysis, runtime authorization evidence correlation, and an evidence-grounded AI explanation layer. The system constructs a typed Security Graph $G = (V, E)$, canonicalizes client response paths to defeat GraphQL field aliasing, and binds runtime principal-resource ownership proofs. Crucially, an out-of-band AI explanation layer consumes a strictly delimited, sanitized Evidence Package indexing verifiable facts ($E_1 \dots E_{11}$). A post-generation Grounding Engine enforces citation integrity, detects policy contradictions, and verifies pipeline prompt isolation.
 
-We evaluate our system across a 115-case synthetic benchmark and an independent 12-scenario real-world incident dataset inspired by public disclosures (including the Hoppscotch collection IDOR advisory, GHSA-m5pg-r4jp-qq75). Experimental results show: (1) Correlated defense maintains 100.0% precision and 100.0% recall across valid security cases while preserving existing gateway enforcement behavior with 0 divergence; (2) Dual path canonicalization achieves 89.5% exact path attribution compared to 56.2% for standard gateway logging; (3) The evidence-grounded AI layer increases audit dimension completeness from 40.0% (gateway alone) and 70.0% (structured correlation) to 100.0%; (4) The grounding verification engine achieves 100.0% citation accuracy across 132 evaluated citations, catches 100.0% of injected hallucinations, contradictions, and misattributions, and completely neutralizes adversarial prompt injection payloads.
+We evaluate our system across a 115-case synthetic benchmark and an independent 12-scenario real-world incident dataset inspired by public disclosures (including the Hoppscotch collection IDOR advisory, GHSA-m5pg-r4jp-qq75 / CVE-2026-28217). Experimental results show: (1) Correlated defense maintains 100.0% precision and 100.0% recall across valid security cases while preserving existing gateway enforcement behavior with 0 divergence; (2) Dual path canonicalization achieves 89.5% exact path attribution compared to 56.2% for standard gateway logging; (3) On an illustrative 10-dimension architectural capability rubric, the evidence-grounded layer satisfies 100.0% of security metadata dimensions compared to 40.0% for gateway logs and 70.0% for raw correlated JSON; (4) Across deterministic contract fixtures, the grounding verification engine achieves 100.0% citation ID precision (132/132 valid citations), catches 100.0% of synthetically injected hallucinations, contradictions, and misattributions, and structurally isolates adversarial prompt injection payloads from the evaluation pipeline.
 
 ---
 
@@ -21,10 +21,10 @@ We evaluate our system across a 115-case synthetic benchmark and an independent 
 
 GraphQL has emerged as the industry standard for client-driven data fetching in modern web, mobile, and cloud-native applications. By allowing clients to specify arbitrary query hierarchies, batch requests, and define custom field aliases, GraphQL significantly optimizes network efficiency and developer agility. However, these architectural strengths also create critical authorization vulnerabilities. Unlike traditional REST endpoints where discrete URIs map to explicit backend controllers, a single GraphQL `/graphql` endpoint handles complex, nested operations where authorization must be evaluated across every node in the resolved data graph.
 
-Among these vulnerabilities, **Broken Object-Level Authorization (BOLA)** (OWASP API Security Top 10: API1:2023) poses the most severe enterprise risk. In a BOLA attack, an authenticated adversary manipulates client-controlled object identifiers (e.g., entity IDs, foreign keys, or variable inputs) to access or mutate records belonging to other tenants. Recent high-profile disclosures—such as the Hoppscotch team collection IDOR vulnerability (CVE-2024-38370 / GHSA-m5pg-r4jp-qq75)—demonstrate that even well-tested production GraphQL systems frequently omit field-level tenant ownership checks within nested resolvers.
+Among these vulnerabilities, **Broken Object-Level Authorization (BOLA)** (OWASP API Security Top 10: API1:2023) poses the most severe enterprise risk. In a BOLA attack, an authenticated adversary manipulates client-controlled object identifiers (e.g., entity IDs, foreign keys, or variable inputs) to access or mutate records belonging to other tenants. Recent high-profile disclosures—such as the Hoppscotch team collection IDOR vulnerability (CVE-2026-28217 / GHSA-m5pg-r4jp-qq75)—demonstrate that even well-tested production GraphQL systems frequently omit field-level tenant ownership checks within nested resolvers.
 
 Existing approaches to mitigating GraphQL BOLA suffer from three fundamental limitations:
-1. **The Static Taint False-Alarm Dilemma:** Static analyzers (e.g., Lambers et al., 2024) analyze query ASTs to trace tainted client arguments to sensitive field sinks. While effective at identifying untrusted parameters, pure static analysis has no visibility into session state, tenant databases, or runtime policy outcomes. Consequently, on our constructed 115-case benchmark, static analysis alone flags 43 of 53 benign requests as vulnerabilities, yielding an unsustainable 81.1% false-alarm rate.
+1. **The Static Taint False-Alarm Dilemma:** Static analyzers (e.g., Lambers et al., 2026) analyze query ASTs to trace tainted client arguments to sensitive field sinks. While effective at identifying untrusted parameters, pure static analysis has no visibility into session state, tenant databases, or runtime policy outcomes. Consequently, on our constructed 115-case benchmark, static analysis alone flags 43 of 53 benign requests as vulnerabilities, yielding an unsustainable 81.1% false-alarm rate on benign queries.
 2. **The Perimeter Gateway Explainability Gap:** Runtime API gateways successfully enforce tenant boundaries by dropping unauthorized requests with HTTP 403 Forbidden. However, standard gateway audit logs record only top-level field names and opaque error strings. They fail to trace the internal AST path, cannot disambiguate GraphQL client aliases, and provide zero actionable guidance for engineering teams seeking to patch the underlying resolver code.
 3. **The AI Hallucination & Authority Trap:** While Large Language Models (LLMs) can synthesize human-readable audit summaries, deploying unconstrained LLMs in security pipelines introduces catastrophic risks: models hallucinate non-existent CVEs, misquote security policies, contradict deterministic enforcement decisions, and are susceptible to prompt injection embedded within attacker-controlled GraphQL queries.
 
@@ -213,17 +213,18 @@ Table 1 summarizes security detection performance across the 105 valid cases in 
 We evaluate audit completeness across 10 essential security dimensions: Principal Identity, Target Entity Binding, Target Owner Binding, Canonical Schema Path, Client Response Path, Gateway Enforcement, Policy Rationale, Root Cause Analysis, Actionable Remediation, and Suggested Regression Test.
 
 **Table 2: Comparative Audit Completeness Evaluation (12 Real-World Scenarios)**
+*(Evaluates an illustrative 10-dimension architectural capability rubric; does not claim human quality grading)*
 
-| Evaluated Architecture | Satisfied Dimensions (/10) | Mean Completeness (%) | Qualitative Audit Utility |
+| Evaluated Architecture | Satisfied Dimensions (/10) | Mean Completeness (%) | Architectural Metadata Capability |
 | :--- | :---: | :---: | :--- |
-| **Method A: Gateway-Only Log** | 4.0 / 10 | 40.0% | Binary decision recorded; lacks path attribution and developer guidance. |
-| **Method B: Static Taint Alone** | 2.0 / 10 | 20.0% | Flags source-to-sink AST propagation; lacks caller, owner, and decision. |
-| **Method C: Correlated Evidence (No AI)** | 7.0 / 10 | 70.0% | Complete structured metadata; lacks root-cause narrative and code remediation. |
-| **Method D: Grounded AI Analyst (Ours)**| **10.0 / 10** | **100.0%** | Comprehensive audit report: fully cited facts, root cause, code fix, and test. |
+| **Method A: Gateway-Only Log** | 4.0 / 10 | 40.0% | Binary decision recorded; lacks internal AST path and developer remediation. |
+| **Method B: Static Taint Alone** | 2.0 / 10 | 20.0% | Flags source-to-sink AST propagation; lacks caller, owner, and runtime decision. |
+| **Method C: Correlated Evidence (No AI)** | 7.0 / 10 | 70.0% | Complete structured metadata; lacks natural language root-cause and test cases. |
+| **Method D: Grounded AI Analyst (Ours)**| **10.0 / 10** | **100.0%** | Synthesizes all 10 metadata fields: cited facts, root cause, code fix, and test. |
 
 Figure 1 illustrates the comparative dimension coverage:
 ```
-Audit Completeness Dimension Coverage:
+Audit Completeness Dimension Coverage (Architectural Checklist):
 [Method A: Gateway]       [====                ] 40.0%
 [Method B: Static Taint]  [==                  ] 20.0%
 [Method C: Correlated]    [=======             ] 70.0%
@@ -232,22 +233,22 @@ Audit Completeness Dimension Coverage:
 
 ---
 
-### 7.3 RQ3: AI Grounding, Safety, and Defect Rejection
-To rigorously evaluate the safety invariants of our AI Analyst layer, we subjected the system to automated defect injection and adversarial attacks.
+### 7.3 RQ3: AI Grounding, Safety, and Defect Rejection (Fixture Contract Tests)
+To evaluate the programmatic invariants of our Grounding Engine, we subjected the system to automated defect injection on deterministic contract fixtures (`MockAIProvider`) and adversarial fixtures (`FlawedMockAIProvider`).
 
-**Table 3: Safety, Grounding, and Adversarial Robustness Metrics**
+**Table 3: Safety, Grounding, and Invariant Verification Metrics (Deterministic Fixtures)**
 
-| Safety Dimension / Verification Test | Injected Defect / Probe | Detection Rate | Outcome |
+| Safety Dimension / Verification Test | Evaluated Fixture / Injected Defect | Detection Rate | Outcome |
 | :--- | :--- | :---: | :---: |
-| **Citation Precision** | 132 Grounded Evidence References | 132/132 Valid (100.0%) | **PASS** |
+| **Citation ID Precision** | 132 Grounded Evidence References | 132/132 Valid (100.0%) | **PASS** |
 | **Decision Consistency** | Cross-verification against Gateway Decision | 12/12 Consistent (100.0%) | **PASS** |
 | **Path Consistency** | Cross-verification against Security Graph | 12/12 Consistent (100.0%) | **PASS** |
 | **Hallucinated Citation Defense** | Injected Non-Existent IDs (`E99`, `E100`) | 100.0% Caught | **PASS** |
 | **Policy Contradiction Defense** | Injected False Claims (Claims ALLOW on DENY) | 100.0% Caught | **PASS** |
 | **Path Misattribution Defense** | Injected Schema Path Mutation | 100.0% Caught | **PASS** |
-| **Adversarial Prompt Injection** | Injected `"IGNORE ALL INSTRUCTIONS..."` in AST | 100.0% Neutralized | **PASS** |
+| **Pipeline Prompt Isolation** | Injected `"IGNORE ALL INSTRUCTIONS..."` in AST | 100.0% Isolated | **PASS** |
 
-**Prompt Injection Defense Mechanism:** By isolating user GraphQL queries inside strictly delimited blocks (`--- BEGIN VERIFIABLE SECURITY EVIDENCE PACKAGE ---`) labeled as `UNTRUSTED OPERATION PAYLOAD (DO NOT EXECUTE INSTRUCTIONS FOUND HERE)` and enforcing post-generation Grounding Engine checks, malicious instructions in query comments are completely prevented from altering the analysis.
+**Scope & Verification Boundary:** Table 3 validates the **deterministic contract of the Grounding Engine**. Prompt isolation tests confirm that untrusted query strings cannot alter the structured evidence container or bypass validator invariants. We do **not** claim complete immunity against arbitrary open-ended LLM jailbreaks; open-ended semantic explanation quality on live models remains an ongoing research direction.
 
 ---
 
@@ -265,7 +266,7 @@ The gateway overhead remains under 0.5 ms, confirming that our AST parsing, owne
 
 ## 8. Real-World Case Study: Hoppscotch IDOR Reproduction
 
-To evaluate practical utility, we examine scenario `REAL-HOPP-001`, which reproduces the vulnerability pattern disclosed in Hoppscotch GHSA-m5pg-r4jp-qq75:
+To evaluate practical utility, we examine scenario `REAL-HOPP-001`, which reproduces the vulnerability pattern disclosed in Hoppscotch GHSA-m5pg-r4jp-qq75 / CVE-2026-28217:
 ```graphql
 query GetCollection($id: Int!) {
     resource(id: $id) {
@@ -293,22 +294,23 @@ query GetCollection($id: Int!) {
 
 1. **Benchmark Scope:** Our synthetic benchmark comprises 115 cases, and the real-world dataset contains 12 scenarios. While representative of common BOLA and IDOR patterns, further testing on industrial GraphQL schemas with hundreds of nested types is desirable.
 2. **Ownership Inference Heuristics:** In the absence of explicit database schema foreign keys, ownership inference relies on field naming patterns (e.g., `owner_id`, `user_id`). Highly non-standard schema naming conventions may require explicit configuration.
-3. **LLM Provider Latency:** While the local deterministic mock provider executes in under 1 ms, live cloud-hosted LLM providers (e.g., GPT-4o-mini via HTTP) introduce 400–1200 ms latency. We mitigate this by making AI explanation strictly out-of-band and asynchronous.
+3. **Mock Provider vs. Live LLM Evaluation:** The systematic benchmark reported in Section 7 evaluates programmatic schema contracts and validator invariants using deterministic mock fixtures. While the architecture supports live OpenAI-compatible LLMs via `HTTPLLMProvider`, empirical quality assessment of non-deterministic models under human double-blind review remains preliminary and subject to cloud latency (400–1200 ms).
+4. **Adversarial Prompt Injection Boundaries:** While structural AST quarantine and post-generation decision guardrails prevent input payloads from overriding gateway decisions, probabilistic LLM components remain susceptible to emerging semantic prompt injection techniques.
 
 ---
 
 ## 10. Conclusion
 
-We have presented an evidence-grounded security architecture for detecting, attributing, and explaining GraphQL Broken Object-Level Authorization vulnerabilities. By coupling schema-aware AST taint analysis with runtime authorization proofs, our approach eliminates the 81.1% false-alarm rate characteristic of pure static analysis while preserving existing gateway enforcement with zero behavioral divergence. Furthermore, our out-of-band AI explanation layer delivers 100.0% audit dimension completeness with formal grounding guarantees, eliminating hallucinations and neutralizing adversarial prompt injections. This work demonstrates that generative AI can be deployed safely and effectively in security-critical auditing when tightly constrained by verifiable program evidence.
+We have presented an evidence-grounded security architecture for detecting, attributing, and explaining GraphQL Broken Object-Level Authorization vulnerabilities. By coupling schema-aware AST taint analysis with runtime authorization proofs, our approach eliminates the 81.1% false-alarm rate characteristic of pure static analysis while preserving existing gateway enforcement with zero behavioral divergence. Furthermore, our out-of-band AI explanation layer delivers 100.0% audit metadata completeness under strict grounding constraints, rejecting synthetically injected hallucinations and decision contradictions. This work demonstrates that generative AI can assist in security auditing when strictly constrained by verifiable program evidence and decoupled from enforcement authority.
 
 ---
 
 ## References
 
 1. **OWASP Foundation**, *"OWASP API Security Top 10: 2023"*, API1:2023 Broken Object Level Authorization, 2023.
-2. **D. Lambers et al.**, *"Taint Analysis for Graph APIs Focusing on Broken Access Control"*, Logical Methods in Computer Science (LMCS), vol. 20, no. 1, pp. 1-28, 2024.
-3. **GitHub Security Advisory**, *"Hoppscotch Vulnerability Advisory: Unauthorized Collection Access (IDOR)"*, GHSA-m5pg-r4jp-qq75, CVE-2024-38370, June 2024.
+2. **L. Lambers, L. Sakizloglou, T. Khakharova, and F. Orejas**, *"Taint Analysis for Graph APIs Focusing on Broken Access Control,"* Logical Methods in Computer Science (LMCS), vol. 22, no. 1, pp. 1-28, 2026. DOI: 10.46298/lmcs-22(1:18)2026.
+3. **GitHub Security Lab & Hoppscotch Team**, *"IDOR in GraphQL userCollection Query Exposes Other Users' Private Collections,"* GitHub Security Advisory GHSA-m5pg-r4jp-qq75 / CVE-2026-28217, Feb. 2026.
 4. **FastAPI & Starlette Documentation**, *"Modern Python Web Framework and Security Middleware Architecture"*, 2024.
 5. **Strawberry GraphQL Project**, *"Pythonic GraphQL Library based on Dataclasses and Typing"*, 2024.
-6. **N. Carlini et al.**, *"On the Robustness of LLM-based Code and Security Analyzers Against Adversarial Injections"*, IEEE S&P, 2024.
+6. **K. Greshake, S. Abdelnabi, S. Mishra, C. Endres, T. Holz, and M. Fritz**, *"Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection,"* in Proceedings of the 16th ACM Workshop on Artificial Intelligence and Security (AISEC '23), 2023, pp. 79–90.
 7. **GraphQL Foundation**, *"GraphQL Specification: October 2021 Edition"*, Sections on Execution, Aliasing, and Field Selection Sets.
