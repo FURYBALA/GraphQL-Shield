@@ -21,6 +21,7 @@ MANIFEST = os.path.join(ROOT, "MANIFEST.sha256")
 INCLUDE_FILES = [
     "requirements.txt",
     "constraints.txt",
+    "pytest.ini",
     "README.md",
     "SETUP.md",
     "DEMO_RUNBOOK.md",
@@ -32,7 +33,7 @@ INCLUDE_FILES = [
     "VIVA_QA.docx",
 ]
 
-INCLUDE_DIRS = ["app", "tests", "scripts", "data", "docs", "tools", ".github"]
+INCLUDE_DIRS = ["app", "tests", "scripts", "data", "docs", "tools", ".github", "ownership_gateway"]
 
 EXCLUDE_DIRS = {
     "__pycache__", "node_modules", ".git", ".venv", "venv",

@@ -647,6 +647,23 @@ def generate_exploit_scripts_endpoint(request: ExploitGenerationRequest):
         "python": generate_poc_python(tc)
     }
 
+@app.post("/api/v1/benchmark/reset-seed")
+def benchmark_reset_seed(request: Request):
+    """
+    Restores the seed users/objects so the external ownership gateway (ownership_gateway/) can undo
+    mutation attacks between benchmark runs against /graphql-insecure.
+    Same restrictions as the demo session: never in production, loopback peers only, no proxy headers.
+    """
+    if getattr(settings, "ENVIRONMENT", "development").lower() == "production":
+        raise HTTPException(status_code=403, detail="Benchmark reset is prohibited in production environments.")
+    client_host = request.client.host if request.client else "testclient"
+    if client_host not in {"127.0.0.1", "localhost", "::1", "testclient"}:
+        raise HTTPException(status_code=403, detail=f"Benchmark reset restricted to local loopback. Direct peer {client_host} forbidden.")
+    if any(request.headers.get(h) for h in ("x-forwarded-for", "x-real-ip", "forwarded")):
+        raise HTTPException(status_code=403, detail="Benchmark reset rejected: proxied requests are not allowed.")
+    from app.seed import restore_seed_rows
+    return {"ok": True, "restored": restore_seed_rows()}
+
 # Secure Strawberry GraphQL router protected by the BOLA security gateway
 graphql_app = GraphQLRouter(schema, context_getter=None, dependencies=[Depends(bola_enforcement_middleware)])
 app.include_router(graphql_app, prefix="/graphql")

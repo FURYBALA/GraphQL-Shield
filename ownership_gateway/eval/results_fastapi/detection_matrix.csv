@@ -1,0 +1,13 @@
+case,category,title,off,depth,argcheck,response_only,shield
+F01,Direct object reference,Read another user's resource and secret key by ID,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+F02,Alias enumeration,Enumerate 5 foreign resources in one request using aliases,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+F03,Query batching,Batched array of operations targeting other users,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+F04,Variables,Victim ID hidden in GraphQL variables,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+F05,Fragments,Victim fields requested through a named fragment,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+F06,Nested traversal,Pivot from a PUBLIC profile into the victim's resources,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+F07,Nested traversal,Fetch a foreign resource nested under the attacker's OWN profile,LEAKED,LEAKED,LEAKED,BLOCKED,BLOCKED
+F08,Nested traversal,Walk a foreign folder's children,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+F09,Field-level exposure,Read a private field (secretToken) of a public type,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+F10,Mutation tampering,Rename another user's resource,LEAKED,LEAKED,BLOCKED,LEAKED,BLOCKED
+F11,Mutation tampering,Transfer another user's resource to the attacker,LEAKED,LEAKED,BLOCKED,LEAKED,BLOCKED
+F12,Mutation tampering,"Delete another user's resource (Boolean return, no object)",LEAKED,LEAKED,BLOCKED,LEAKED,BLOCKED

@@ -1,0 +1,441 @@
+{
+  "timestamp": "2026-10-21 00:17:01",
+  "target": "GraphQL Shield FastAPI app (/graphql-insecure, in-process enforcement bypassed)",
+  "iterations": 50,
+  "summary": {
+    "off": {
+      "label": "No protection",
+      "attacks_prevented": 0,
+      "attacks_total": 12,
+      "prevention_rate": 0.0,
+      "false_positives": 0,
+      "benign_total": 10,
+      "fpr": 0.0,
+      "p50_ms": 31.08,
+      "p95_ms": 45.33,
+      "p50_overhead_ms": 14.7
+    },
+    "depth": {
+      "label": "Depth/alias limits (hardening baseline)",
+      "attacks_prevented": 0,
+      "attacks_total": 12,
+      "prevention_rate": 0.0,
+      "false_positives": 0,
+      "benign_total": 10,
+      "fpr": 0.0,
+      "p50_ms": 31.51,
+      "p95_ms": 47.91,
+      "p50_overhead_ms": 15.13
+    },
+    "argcheck": {
+      "label": "Argument-level ID check (WAF-style baseline)",
+      "attacks_prevented": 11,
+      "attacks_total": 12,
+      "prevention_rate": 0.917,
+      "false_positives": 1,
+      "benign_total": 10,
+      "fpr": 0.1,
+      "p50_ms": 30.43,
+      "p95_ms": 48.43,
+      "p50_overhead_ms": 14.05
+    },
+    "response_only": {
+      "label": "Response verification only (ablation)",
+      "attacks_prevented": 9,
+      "attacks_total": 12,
+      "prevention_rate": 0.75,
+      "false_positives": 0,
+      "benign_total": 10,
+      "fpr": 0.0,
+      "p50_ms": 30.65,
+      "p95_ms": 47.67,
+      "p50_overhead_ms": 14.27
+    },
+    "shield": {
+      "label": "GraphQLShield (full)",
+      "attacks_prevented": 12,
+      "attacks_total": 12,
+      "prevention_rate": 1.0,
+      "false_positives": 0,
+      "benign_total": 10,
+      "fpr": 0.0,
+      "p50_ms": 33.94,
+      "p95_ms": 50.16,
+      "p50_overhead_ms": 17.56
+    }
+  },
+  "attack_matrix": {
+    "F01": {
+      "off": true,
+      "depth": true,
+      "argcheck": false,
+      "response_only": false,
+      "shield": false
+    },
+    "F02": {
+      "off": true,
+      "depth": true,
+      "argcheck": false,
+      "response_only": false,
+      "shield": false
+    },
+    "F03": {
+      "off": true,
+      "depth": true,
+      "argcheck": false,
+      "response_only": false,
+      "shield": false
+    },
+    "F04": {
+      "off": true,
+      "depth": true,
+      "argcheck": false,
+      "response_only": false,
+      "shield": false
+    },
+    "F05": {
+      "off": true,
+      "depth": true,
+      "argcheck": false,
+      "response_only": false,
+      "shield": false
+    },
+    "F06": {
+      "off": true,
+      "depth": true,
+      "argcheck": false,
+      "response_only": false,
+      "shield": false
+    },
+    "F07": {
+      "off": true,
+      "depth": true,
+      "argcheck": true,
+      "response_only": false,
+      "shield": false
+    },
+    "F08": {
+      "off": true,
+      "depth": true,
+      "argcheck": false,
+      "response_only": false,
+      "shield": false
+    },
+    "F09": {
+      "off": true,
+      "depth": true,
+      "argcheck": false,
+      "response_only": false,
+      "shield": false
+    },
+    "F10": {
+      "off": true,
+      "depth": true,
+      "argcheck": false,
+      "response_only": true,
+      "shield": false
+    },
+    "F11": {
+      "off": true,
+      "depth": true,
+      "argcheck": false,
+      "response_only": true,
+      "shield": false
+    },
+    "F12": {
+      "off": true,
+      "depth": true,
+      "argcheck": false,
+      "response_only": true,
+      "shield": false
+    }
+  },
+  "benign_matrix": {
+    "G01": {
+      "off": true,
+      "depth": true,
+      "argcheck": true,
+      "response_only": true,
+      "shield": true
+    },
+    "G02": {
+      "off": true,
+      "depth": true,
+      "argcheck": true,
+      "response_only": true,
+      "shield": true
+    },
+    "G03": {
+      "off": true,
+      "depth": true,
+      "argcheck": false,
+      "response_only": true,
+      "shield": true
+    },
+    "G04": {
+      "off": true,
+      "depth": true,
+      "argcheck": true,
+      "response_only": true,
+      "shield": true
+    },
+    "G05": {
+      "off": true,
+      "depth": true,
+      "argcheck": true,
+      "response_only": true,
+      "shield": true
+    },
+    "G06": {
+      "off": true,
+      "depth": true,
+      "argcheck": true,
+      "response_only": true,
+      "shield": true
+    },
+    "G07": {
+      "off": true,
+      "depth": true,
+      "argcheck": true,
+      "response_only": true,
+      "shield": true
+    },
+    "G08": {
+      "off": true,
+      "depth": true,
+      "argcheck": true,
+      "response_only": true,
+      "shield": true
+    },
+    "G09": {
+      "off": true,
+      "depth": true,
+      "argcheck": true,
+      "response_only": true,
+      "shield": true
+    },
+    "G10": {
+      "off": true,
+      "depth": true,
+      "argcheck": true,
+      "response_only": true,
+      "shield": true
+    }
+  },
+  "latency": {
+    "direct": {
+      "p50": 16.38,
+      "p95": 35.02,
+      "mean": 19.81,
+      "n": 450
+    },
+    "off": {
+      "p50": 31.08,
+      "p95": 45.33,
+      "mean": 29.54,
+      "n": 450
+    },
+    "depth": {
+      "p50": 31.51,
+      "p95": 47.91,
+      "mean": 31.45,
+      "n": 450
+    },
+    "argcheck": {
+      "p50": 30.43,
+      "p95": 48.43,
+      "mean": 30.84,
+      "n": 450
+    },
+    "response_only": {
+      "p50": 30.65,
+      "p95": 47.67,
+      "mean": 31.47,
+      "n": 450
+    },
+    "shield": {
+      "p50": 33.94,
+      "p95": 50.16,
+      "mean": 33.36,
+      "n": 450
+    }
+  },
+  "categories": {
+    "Direct object reference": {
+      "off": [
+        0,
+        1
+      ],
+      "depth": [
+        0,
+        1
+      ],
+      "argcheck": [
+        1,
+        1
+      ],
+      "response_only": [
+        1,
+        1
+      ],
+      "shield": [
+        1,
+        1
+      ]
+    },
+    "Alias enumeration": {
+      "off": [
+        0,
+        1
+      ],
+      "depth": [
+        0,
+        1
+      ],
+      "argcheck": [
+        1,
+        1
+      ],
+      "response_only": [
+        1,
+        1
+      ],
+      "shield": [
+        1,
+        1
+      ]
+    },
+    "Query batching": {
+      "off": [
+        0,
+        1
+      ],
+      "depth": [
+        0,
+        1
+      ],
+      "argcheck": [
+        1,
+        1
+      ],
+      "response_only": [
+        1,
+        1
+      ],
+      "shield": [
+        1,
+        1
+      ]
+    },
+    "Variables": {
+      "off": [
+        0,
+        1
+      ],
+      "depth": [
+        0,
+        1
+      ],
+      "argcheck": [
+        1,
+        1
+      ],
+      "response_only": [
+        1,
+        1
+      ],
+      "shield": [
+        1,
+        1
+      ]
+    },
+    "Fragments": {
+      "off": [
+        0,
+        1
+      ],
+      "depth": [
+        0,
+        1
+      ],
+      "argcheck": [
+        1,
+        1
+      ],
+      "response_only": [
+        1,
+        1
+      ],
+      "shield": [
+        1,
+        1
+      ]
+    },
+    "Nested traversal": {
+      "off": [
+        0,
+        3
+      ],
+      "depth": [
+        0,
+        3
+      ],
+      "argcheck": [
+        2,
+        3
+      ],
+      "response_only": [
+        3,
+        3
+      ],
+      "shield": [
+        3,
+        3
+      ]
+    },
+    "Field-level exposure": {
+      "off": [
+        0,
+        1
+      ],
+      "depth": [
+        0,
+        1
+      ],
+      "argcheck": [
+        1,
+        1
+      ],
+      "response_only": [
+        1,
+        1
+      ],
+      "shield": [
+        1,
+        1
+      ]
+    },
+    "Mutation tampering": {
+      "off": [
+        0,
+        3
+      ],
+      "depth": [
+        0,
+        3
+      ],
+      "argcheck": [
+        3,
+        3
+      ],
+      "response_only": [
+        0,
+        3
+      ],
+      "shield": [
+        3,
+        3
+      ]
+    }
+  }
+}
