@@ -1,0 +1,3901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCNS Security Workbench — GraphQL Shield Dashboard & Authorization Research Engine</title>
+<!-- CodeMirror (with fallback to enhanced textarea) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+<link rel="stylesheet" href="/static/research_lab.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<style>
+  :root {
+    --bg-app: #080b11;
+    --bg-sidebar: #0d111a;
+    --bg-header: #0f1420;
+    --bg-surface: #121826;
+    --bg-panel: #161e30;
+    --bg-card: #1b253b;
+    --bg-card-hover: #212d47;
+    --bg-editor: #090d16;
+    --bg-code: #0b0f19;
+    
+    --border-subtle: #1c2638;
+    --border-base: #26334d;
+    --border-strong: #384b6f;
+    --border-focus: #10b981;
+
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-dim: #475569;
+
+    --emerald-500: #10b981;
+    --emerald-dim: rgba(16, 185, 129, 0.12);
+    --emerald-border: rgba(16, 185, 129, 0.35);
+
+    --rose-500: #f43f5e;
+    --rose-dim: rgba(244, 63, 94, 0.12);
+    --rose-border: rgba(244, 63, 94, 0.35);
+
+    --amber-500: #f59e0b;
+    --amber-dim: rgba(245, 158, 11, 0.12);
+    --amber-border: rgba(245, 158, 11, 0.35);
+
+    --sky-500: #0ea5e9;
+    --sky-dim: rgba(14, 165, 233, 0.12);
+    --sky-border: rgba(14, 165, 233, 0.35);
+
+    --indigo-500: #6366f1;
+    --indigo-dim: rgba(99, 102, 241, 0.12);
+
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", "Fira Code", Consolas, monospace;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: var(--bg-app);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Scrollbars */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-base); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+  /* App Shell */
+  .app-shell {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 250px;
+    flex: 0 0 250px;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    z-index: 50;
+    user-select: none;
+    transition: width 0.2s ease;
+  }
+  .sidebar.collapsed {
+    width: 64px;
+    flex: 0 0 64px;
+  }
+  .sidebar-header {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .brand-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 16px;
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
+    flex-shrink: 0;
+  }
+  .brand-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .brand-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+  }
+  .brand-subtitle {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .sidebar.collapsed .brand-info,
+  .sidebar.collapsed .nav-title,
+  .sidebar.collapsed .nav-text,
+  .sidebar.collapsed .nav-badge,
+  .sidebar.collapsed .sidebar-footer-text {
+    display: none;
+  }
+  .nav-section {
+    padding: 14px 14px 4px;
+  }
+  .nav-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 0 8px 6px;
+  }
+  .nav-menu {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .nav-item button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: var(--radius-md);
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .nav-item button:hover {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+  }
+  .nav-item button.active {
+    background: var(--bg-panel);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 0 var(--emerald-500);
+  }
+  .nav-item button svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    opacity: 0.75;
+  }
+  .nav-item button.active svg {
+    opacity: 1;
+    color: var(--emerald-500);
+  }
+  .nav-badge {
+    margin-left: auto;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: var(--bg-card);
+    color: var(--text-muted);
+  }
+  .nav-badge.alert {
+    background: var(--rose-dim);
+    color: var(--rose-500);
+    border: 1px solid var(--rose-border);
+  }
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .session-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--emerald-500);
+    box-shadow: 0 0 8px var(--emerald-500);
+  }
+  .status-dot.offline {
+    background: var(--rose-500);
+    box-shadow: 0 0 8px var(--rose-500);
+  }
+
+  /* Main Area */
+  .main-stage {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--bg-app);
+    overflow: hidden;
+  }
+
+  /* Global Top Bar */
+  .top-bar {
+    height: 52px;
+    background: var(--bg-header);
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    flex: 0 0 52px;
+    z-index: 40;
+  }
+  .top-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .nav-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 6px;
+    border-radius: var(--radius-sm);
+  }
+  .nav-toggle-btn:hover { color: var(--text-primary); background: var(--bg-panel); }
+  .screen-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .endpoint-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-md);
+    padding: 3px 10px;
+  }
+  .endpoint-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .endpoint-input {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    width: 210px;
+    outline: none;
+  }
+  .top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .conn-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: var(--radius-md);
+    font-size: 11.5px;
+    font-weight: 600;
+    background: var(--emerald-dim);
+    border: 1px solid var(--emerald-border);
+    color: var(--emerald-500);
+  }
+  .conn-badge.offline {
+    background: var(--rose-dim);
+    border-color: var(--rose-border);
+    color: var(--rose-500);
+  }
+  .btn-icon-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-base);
+    color: var(--text-secondary);
+    padding: 5px 12px;
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-icon-label:hover {
+    background: var(--bg-panel);
+    color: #fff;
+    border-color: var(--border-strong);
+  }
+
+  /* View Container */
+  .view-viewport {
+    flex: 1 1 auto;
+    position: relative;
+    overflow: hidden;
+  }
+  .view-screen {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .view-screen.active {
+    display: flex;
+  }
+
+  /* =========================================================================
+     WORKBENCH THREE-PANEL LAYOUT
+     ========================================================================= */
+  .workbench-grid {
+    display: flex;
+    flex: 1 1 auto;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* Left Panel: Schema Operations */
+  .wb-panel-ops {
+    width: 280px;
+    flex: 0 0 280px;
+    background: var(--bg-surface);
+    border-right: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all 0.2s ease;
+  }
+  .panel-header {
+    padding: 10px 14px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 0 0 auto;
+  }
+  .panel-header-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-secondary);
+  }
+  .filter-search-wrap {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    flex: 0 0 auto;
+  }
+  .search-input {
+    width: 100%;
+    background: var(--bg-editor);
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    color: var(--text-primary);
+    font-size: 12px;
+    outline: none;
+  }
+  .search-input:focus { border-color: var(--border-focus); }
+  .ops-scroll-list {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 8px;
+  }
+  .ops-category {
+    margin-bottom: 12px;
+  }
+  .ops-category-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ops-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    margin-bottom: 1px;
+    transition: all 0.12s;
+  }
+  .ops-item:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+  }
+  .ops-item.selected {
+    background: var(--bg-panel);
+    color: #fff;
+    font-weight: 600;
+  }
+  .badge-tag {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 1px 4px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+  .badge-tag.q { background: var(--sky-dim); color: var(--sky-500); }
+  .badge-tag.m { background: var(--amber-dim); color: var(--amber-500); }
+  .badge-tag.rel { background: var(--indigo-dim); color: #818cf8; }
+
+  /* Center Panel: Editor & Controls */
+  .wb-panel-center {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg-app);
+    min-width: 400px;
+  }
+  .editor-config-header {
+    padding: 10px 18px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 0 0 auto;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .config-identity-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ctrl-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .ctrl-select, .ctrl-input {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    padding: 5px 8px;
+    font-size: 12px;
+    font-family: var(--font-sans);
+    outline: none;
+  }
+  .ctrl-select:focus, .ctrl-input:focus { border-color: var(--border-focus); }
+  .editor-tabs-bar {
+    display: flex;
+    align-items: center;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 0 16px;
+    gap: 4px;
+  }
+  .editor-tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .editor-tab-btn.active {
+    color: #fff;
+    border-bottom-color: var(--emerald-500);
+  }
+  .editor-actions-toolbar {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-ghost-small {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .btn-ghost-small:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-color: var(--border-subtle);
+  }
+  .editor-stage {
+    flex: 1 1 auto;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-editor);
+  }
+  .code-editor-panel {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+  }
+  .code-editor-panel.active {
+    display: flex;
+  }
+  /* CodeMirror styling overrides */
+  .CodeMirror {
+    height: 100% !important;
+    background: var(--bg-editor) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 12.5px !important;
+    line-height: 1.6 !important;
+  }
+  .CodeMirror-gutters {
+    background: #070a10 !important;
+    border-right: 1px solid var(--border-subtle) !important;
+  }
+
+  /* Native Fallback Textarea Editor */
+  .native-editor-wrap {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+  .native-gutter {
+    width: 44px;
+    flex: 0 0 44px;
+    background: #070a10;
+    border-right: 1px solid var(--border-subtle);
+    padding: 10px 8px;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    user-select: none;
+    white-space: pre;
+    overflow: hidden;
+  }
+  .native-textarea {
+    flex: 1 1 auto;
+    background: var(--bg-editor);
+    border: none;
+    outline: none;
+    padding: 10px 14px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    resize: none;
+    white-space: pre;
+    overflow: auto;
+    tab-size: 2;
+  }
+
+  /* Execution Control Strip */
+  .execution-control-strip {
+    padding: 12px 18px;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 0 0 auto;
+  }
+  .btn-run-primary {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 12px rgba(16, 185, 129, 0.3);
+    transition: all 0.15s ease;
+  }
+  .btn-run-primary:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.45);
+  }
+  .btn-run-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-secondary {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-base);
+    color: var(--text-primary);
+    padding: 8px 14px;
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }
+  .btn-secondary:hover {
+    background: var(--bg-card);
+    border-color: var(--border-strong);
+  }
+
+  /* Bottom Collapsible History Drawer */
+  .wb-drawer {
+    height: 190px;
+    flex: 0 0 190px;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: height 0.2s ease;
+  }
+  .wb-drawer.collapsed {
+    height: 36px;
+    flex: 0 0 36px;
+  }
+  .drawer-header {
+    height: 36px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .drawer-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .drawer-content {
+    flex: 1 1 auto;
+    overflow: auto;
+  }
+
+  /* Right Panel: Execution Results Inspector */
+  .wb-panel-inspector {
+    width: 450px;
+    flex: 0 0 450px;
+    background: var(--bg-surface);
+    border-left: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .inspector-tabs-bar {
+    display: flex;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 0 10px;
+    overflow-x: auto;
+  }
+  .inspector-tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 10px 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+  }
+  .inspector-tab-btn.active {
+    color: #fff;
+    border-bottom-color: var(--emerald-500);
+  }
+  .inspector-scroll-area {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Empty State */
+  .empty-state-box {
+    padding: 48px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 12px;
+    color: var(--text-muted);
+  }
+  .empty-state-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+  }
+  .empty-state-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .empty-state-text {
+    font-size: 12px;
+    max-width: 320px;
+    line-height: 1.5;
+  }
+
+  /* Result Banners */
+  .verdict-card {
+    padding: 14px 16px;
+    border-radius: var(--radius-lg);
+    border: 1px solid;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .verdict-card.pass {
+    background: var(--emerald-dim);
+    border-color: var(--emerald-border);
+  }
+  .verdict-card.fail {
+    background: var(--rose-dim);
+    border-color: var(--rose-border);
+  }
+  .verdict-card.warn {
+    background: var(--amber-dim);
+    border-color: var(--amber-border);
+  }
+  .verdict-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .verdict-heading {
+    font-size: 13.5px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+  }
+  .verdict-card.pass .verdict-heading { color: var(--emerald-500); }
+  .verdict-card.fail .verdict-heading { color: var(--rose-500); }
+  .verdict-card.warn .verdict-heading { color: var(--amber-500); }
+  .verdict-explanation {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.45;
+  }
+
+  /* Metric Tiles */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .metric-tile {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+  }
+  .metric-tile-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .metric-tile-val {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  /* Structured Evidence Box */
+  .detail-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .detail-card-head {
+    padding: 9px 14px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .detail-card-body {
+    padding: 12px 14px;
+    font-size: 12px;
+  }
+  .data-line {
+    display: flex;
+    align-items: baseline;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .data-line:last-child { border-bottom: none; }
+  .data-key {
+    width: 140px;
+    flex: 0 0 140px;
+    color: var(--text-muted);
+    font-size: 11.5px;
+  }
+  .data-val {
+    flex: 1 1 auto;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+  }
+
+  /* Code & JSON Pre */
+  .code-block {
+    background: var(--bg-code);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.5;
+    color: #e2e8f0;
+    max-height: 260px;
+    overflow: auto;
+    white-space: pre;
+  }
+
+  /* =========================================================================
+     STANDALONE FULL SCREENS
+     ========================================================================= */
+  .screen-layout {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 24px;
+    gap: 16px;
+  }
+  .screen-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 0 0 auto;
+  }
+  .screen-title-group h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .screen-title-group p {
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .screen-table-box {
+    flex: 1 1 auto;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: auto;
+  }
+  .clean-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    text-align: left;
+  }
+  .clean-table th {
+    position: sticky;
+    top: 0;
+    background: var(--bg-panel);
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-base);
+    z-index: 2;
+  }
+  .clean-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    vertical-align: middle;
+  }
+  .clean-table tr:hover td {
+    background: var(--bg-card);
+    color: var(--text-primary);
+  }
+
+  /* Badges */
+  .pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+  }
+  .pill-badge.allow { background: var(--emerald-dim); color: var(--emerald-500); border: 1px solid var(--emerald-border); }
+  .pill-badge.deny { background: var(--rose-dim); color: var(--rose-500); border: 1px solid var(--rose-border); }
+  .pill-badge.warn { background: var(--amber-dim); color: var(--amber-500); border: 1px solid var(--amber-border); }
+  .pill-badge.neutral { background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border-base); }
+
+  /* Comparison Dual Columns */
+  .dual-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+  }
+  .dual-col-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .dual-col-header {
+    padding: 12px 16px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Modals */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-backdrop.open {
+    display: flex;
+  }
+  .modal-window {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-xl);
+    width: 90%;
+    max-width: 680px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.6);
+  }
+  .modal-header-bar {
+    padding: 14px 18px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-base);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-title-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .modal-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  /* Toast Notification */
+  .toast-banner {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 200;
+    background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    border-left: 4px solid var(--emerald-500);
+    border-radius: var(--radius-md);
+    padding: 12px 18px;
+    font-size: 12.5px;
+    color: #fff;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transform: translateY(120px);
+    opacity: 0;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .toast-banner.visible {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .toast-banner.error {
+    border-left-color: var(--rose-500);
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- SIDEBAR NAVIGATION -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-icon">🛡️</div>
+      <div class="brand-info">
+        <span class="brand-title">CCNS Security</span>
+        <span class="brand-subtitle">GraphQL Shield Lab</span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-title">Testing Tools</div>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <button class="active" data-view="workbench" id="btn-nav-workbench">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            <span class="nav-text">Workbench</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button data-view="comparison" id="btn-nav-comparison">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+            <span class="nav-text">Comparison & Evidence</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button data-view="schema" id="btn-nav-schema">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            <span class="nav-text">Schema Explorer</span>
+            <span class="nav-badge" id="nav-badge-schema">0</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-title">Audit & Research</div>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <button data-view="runs" id="btn-nav-runs">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span class="nav-text">Test Runs</span>
+            <span class="nav-badge" id="nav-badge-runs">0</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button data-view="findings" id="btn-nav-findings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span class="nav-text">Findings</span>
+            <span class="nav-badge alert" id="nav-badge-findings">0</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button data-view="audit" id="btn-nav-audit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span class="nav-text">Audit Trail</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button data-view="research" id="btn-nav-research">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.31L4.69 18.5A2 2 0 0 0 6.36 21h11.28a2 2 0 0 0 1.67-2.5L14 9.31V2"/><line x1="8.5" y1="2" x2="15.5" y2="2"/><line x1="7" y1="14" x2="17" y2="14"/></svg>
+            <span class="nav-text">Research Lab</span>
+            <span class="nav-badge" id="nav-badge-research" style="background:#0284c7;color:#fff;">LAB</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button data-view="exports" id="btn-nav-exports">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span class="nav-text">Exports & Research</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button data-view="settings" id="btn-nav-settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span class="nav-text">Settings</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="session-status-indicator">
+        <span class="status-dot" id="sidebar-status-dot"></span>
+        <span class="sidebar-footer-text" id="sidebar-role-text">Local Security Session</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN STAGE -->
+  <main class="main-stage">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <button class="nav-toggle-btn" id="btn-toggle-sidebar" title="Toggle Sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="screen-title" id="topbar-view-title">Workbench</span>
+        <div class="endpoint-pill">
+          <span class="endpoint-label">Gateway</span>
+          <input type="text" class="endpoint-input" id="global-endpoint-url" value="http://127.0.0.1:8000" spellcheck="false">
+        </div>
+      </div>
+
+      <div class="top-bar-right">
+        <div class="conn-badge" id="conn-status-badge">
+          <span class="status-dot"></span>
+          <span id="conn-status-text">ONLINE</span>
+          <span style="opacity:0.75" id="conn-latency-text">(1ms)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;padding:4px 10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:20px;color:var(--emerald-400)" id="live-stream-badge">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--emerald-400);box-shadow:0 0 6px var(--emerald-400)"></span>
+          <span>Live Stream Active</span>
+        </div>
+        <button class="btn-icon-label" id="btn-topbar-sync-schema" title="Sync live schema from GraphQL endpoint">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+          <span>Sync Schema</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- VIEW VIEWPORT -->
+    <div class="view-viewport">
+
+      <!-- ===================================================================
+           VIEW 1: WORKBENCH
+           =================================================================== -->
+      <section class="view-screen active" id="view-workbench">
+        <div class="workbench-grid">
+          
+          <!-- LEFT: OPERATIONS EXPLORER -->
+          <div class="wb-panel-ops" id="wb-ops-pane">
+            <div class="panel-header">
+              <span class="panel-header-title">Discovered Operations</span>
+              <span class="pill-badge neutral" id="ops-count-pill">0</span>
+            </div>
+            <div class="filter-search-wrap">
+              <input type="text" class="search-input" id="ops-search-input" placeholder="Search operations & paths..." spellcheck="false">
+            </div>
+            <div class="ops-scroll-list" id="ops-list-container">
+              <div class="empty-state-box">
+                <div class="empty-state-icon">📡</div>
+                <div class="empty-state-title">Loading Schema...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CENTER: EDITOR & WORKSPACE -->
+          <div class="wb-panel-center">
+            <!-- Configuration Strip -->
+            <div class="editor-config-header">
+              <div class="config-identity-group">
+                <span class="ctrl-label">Caller Principal:</span>
+                <select class="ctrl-select" id="caller-identity-select"></select>
+              </div>
+
+              <div class="config-identity-group">
+                <span class="ctrl-label">Target ID:</span>
+                <input type="number" class="ctrl-input" id="target-id-input" placeholder="auto" style="width:75px">
+              </div>
+
+              <div class="config-identity-group">
+                <span class="ctrl-label">Operation:</span>
+                <select class="ctrl-select" id="op-class-select">
+                  <option value="query">query</option>
+                  <option value="mutation">mutation</option>
+                </select>
+              </div>
+
+              <div style="margin-left:auto;display:flex;gap:6px">
+                <button class="btn-ghost-small" id="btn-preset-legit">Owner Access</button>
+                <button class="btn-ghost-small" id="btn-preset-direct">Direct BOLA</button>
+                <button class="btn-ghost-small" id="btn-preset-nested">Nested BOLA</button>
+                <button class="btn-ghost-small" id="btn-preset-mutation">Mutation BOLA</button>
+              </div>
+            </div>
+
+            <!-- Editor Tabs -->
+            <div class="editor-tabs-bar">
+              <button class="editor-tab-btn active" data-editor-tab="query">GraphQL Query</button>
+              <button class="editor-tab-btn" data-editor-tab="vars">Variables (JSON)</button>
+              
+              <div class="editor-actions-toolbar">
+                <button class="btn-ghost-small" id="btn-format-query" title="Format GraphQL Query">Format</button>
+                <button class="btn-ghost-small" id="btn-validate-query" title="Validate Syntax">Validate</button>
+                <button class="btn-ghost-small" id="btn-copy-query" title="Copy Query">Copy</button>
+                <button class="btn-ghost-small" id="btn-reset-query" title="Reset Query">Reset</button>
+              </div>
+            </div>
+
+            <!-- Code Editor Stage -->
+            <div class="editor-stage">
+              <!-- Query Editor -->
+              <div class="code-editor-panel active" id="editor-panel-query">
+                <textarea id="cm-query-area" style="display:none"></textarea>
+                <div class="native-editor-wrap" id="native-query-wrap">
+                  <div class="native-gutter" id="query-gutter">1</div>
+                  <textarea class="native-textarea" id="native-query-input" spellcheck="false" wrap="off"></textarea>
+                </div>
+              </div>
+
+              <!-- Variables Editor -->
+              <div class="code-editor-panel" id="editor-panel-vars">
+                <textarea id="cm-vars-area" style="display:none"></textarea>
+                <div class="native-editor-wrap" id="native-vars-wrap">
+                  <div class="native-gutter" id="vars-gutter">1</div>
+                  <textarea class="native-textarea" id="native-vars-input" spellcheck="false" wrap="off">{}</textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Execution Control Bar -->
+            <div class="execution-control-strip">
+              <button class="btn-run-primary" id="btn-execute-test">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span>Run Test</span>
+              </button>
+              <button class="btn-secondary" id="btn-minimize-test" title="Delta-debugging query minimization">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                <span>Minimize PoC</span>
+              </button>
+              <button class="btn-secondary" id="btn-export-exploit" title="Export standalone cURL and Python exploit">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                <span>Export Exploit</span>
+              </button>
+              <button class="btn-secondary" id="btn-open-fuzzer" title="Mutate query into 5 adversarial evasion variants" style="border-color:var(--amber-500);color:var(--amber-400)">
+                <span>⚡ Adversarial Fuzzer</span>
+              </button>
+              <button class="btn-secondary" id="btn-open-remediation" title="Generate Strawberry, GraphQL Shield, and OPA/Rego remediation policies" style="border-color:var(--emerald-500);color:var(--emerald-400)">
+                <span>🛡️ Remediate BOLA</span>
+              </button>
+              <button class="btn-secondary" id="btn-open-matrix" title="View 2D Cross-Tenant Isolation Simulator" style="border-color:var(--sky-500);color:var(--sky-400)">
+                <span>🌐 Tenant Matrix</span>
+              </button>
+
+              <div style="margin-left:auto;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)" id="exec-status-indicator">Ready</div>
+            </div>
+
+            <!-- Bottom Collapsible History Drawer -->
+            <div class="wb-drawer" id="wb-drawer">
+              <div class="drawer-header" id="drawer-toggle">
+                <div class="drawer-title">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span>Execution History & Timeline</span>
+                  <span class="pill-badge neutral" id="history-count-pill">0</span>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="drawer-arrow"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <div class="drawer-content">
+                <table class="clean-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Time</th>
+                      <th>Principal</th>
+                      <th>Target</th>
+                      <th>Canonical Path</th>
+                      <th>HTTP</th>
+                      <th>Policy Decision</th>
+                      <th>Verdict</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="history-table-body">
+                    <tr><td colspan="9" style="text-align:center;padding:24px;color:var(--text-dim)">No executions recorded in this session.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT: EXECUTION RESULTS INSPECTOR -->
+          <div class="wb-panel-inspector">
+            <div class="inspector-tabs-bar">
+              <button class="inspector-tab-btn active" data-insp-tab="overview">Overview</button>
+              <button class="inspector-tab-btn" data-insp-tab="response">Response</button>
+              <button class="inspector-tab-btn" data-insp-tab="evidence">Auth Evidence</button>
+              <button class="inspector-tab-btn" data-insp-tab="ast">AST & Ownership</button>
+              <button class="inspector-tab-btn" data-insp-tab="audit">Audit Events</button>
+              <button class="inspector-tab-btn" data-insp-tab="request">Request</button>
+              <span class="inspector-exec-badge" id="inspector-exec-badge" style="margin-left:auto;font-family:var(--font-mono);font-size:11px;color:var(--text-muted);padding:3px 8px;border-radius:4px;background:rgba(255,255,255,0.04)">No Execution</span>
+            </div>
+
+            <div class="inspector-scroll-area" id="inspector-content">
+              <!-- Default Empty State -->
+              <div class="empty-state-box" id="inspector-empty-state">
+                <div class="empty-state-icon">🔬</div>
+                <div class="empty-state-title">No Execution Selected</div>
+                <div class="empty-state-text">
+                  Compose a query or select an operation from the schema explorer, configure the caller principal, and click <b>Run Test</b> to inspect actual authorization decisions and response evidence.
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           VIEW 2: DUAL COMPARISON & EVIDENCE TRACE
+           =================================================================== -->
+      <section class="view-screen" id="view-comparison">
+        <div class="screen-layout">
+          <div class="screen-header-bar">
+            <div class="screen-title-group">
+              <h2>Dual-Target Authorization Boundary Comparison</h2>
+              <p>Correlating schema-aware AST paths with runtime authorization evidence vs. intentionally vulnerable baseline</p>
+            </div>
+            <button class="btn-run-primary" id="btn-comp-retest">Re-run Dual Test</button>
+          </div>
+
+          <!-- Evidence Pipeline Flow Trace -->
+          <div class="detail-card">
+            <div class="detail-card-head">
+              <span>Authorization Evidence Correlation Pipeline</span>
+              <span class="pill-badge allow">EVIDENCE-GROUNDED</span>
+            </div>
+            <div class="detail-card-body" style="display:flex;align-items:center;justify-content:space-between;gap:8px;overflow-x:auto;padding:16px">
+              <div style="text-align:center"><div class="pill-badge neutral">1. Operation</div><div style="font-size:11px;margin-top:4px" id="trace-op">N/A</div></div>
+              <div style="color:var(--text-dim)">➔</div>
+              <div style="text-align:center"><div class="pill-badge neutral">2. AST Path</div><div style="font-size:11px;margin-top:4px" id="trace-path">N/A</div></div>
+              <div style="color:var(--text-dim)">➔</div>
+              <div style="text-align:center"><div class="pill-badge neutral">3. Target Object</div><div style="font-size:11px;margin-top:4px" id="trace-target">N/A</div></div>
+              <div style="color:var(--text-dim)">➔</div>
+              <div style="text-align:center"><div class="pill-badge neutral">4. Principal</div><div style="font-size:11px;margin-top:4px" id="trace-principal">N/A</div></div>
+              <div style="color:var(--text-dim)">➔</div>
+              <div style="text-align:center"><div class="pill-badge neutral">5. PolicyEngine</div><div style="font-size:11px;margin-top:4px" id="trace-decision">N/A</div></div>
+              <div style="color:var(--text-dim)">➔</div>
+              <div style="text-align:center"><div class="pill-badge neutral">6. Evidence</div><div style="font-size:11px;margin-top:4px" id="trace-evidence">N/A</div></div>
+              <div style="color:var(--text-dim)">➔</div>
+              <div style="text-align:center"><div class="pill-badge neutral">7. Audit Event</div><div style="font-size:11px;margin-top:4px" id="trace-audit">N/A</div></div>
+            </div>
+          </div>
+
+          <!-- Dual Columns -->
+          <div class="dual-columns">
+            <!-- Protected Gateway -->
+            <div class="dual-col-card">
+              <div class="dual-col-header">
+                <span style="font-weight:700;color:var(--emerald-500)">🛡️ Protected Gateway (/graphql)</span>
+                <span class="pill-badge allow" id="comp-gw-pill">HTTP 403 Forbidden</span>
+              </div>
+              <div class="detail-card-body" style="display:flex;flex-direction:column;gap:12px;overflow-y:auto">
+                <div class="data-line"><span class="data-key">Policy Decision:</span><span class="data-val" id="comp-gw-dec">-</span></div>
+                <div class="data-line"><span class="data-key">Policy Reason:</span><span class="data-val" id="comp-gw-reason">-</span></div>
+                <div class="data-line"><span class="data-key">Risk Score:</span><span class="data-val" id="comp-gw-risk">-</span></div>
+                <div class="data-line"><span class="data-key">Duration:</span><span class="data-val" id="comp-gw-time">-</span></div>
+                <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-top:6px">Gateway Response Body:</div>
+                <pre class="code-block" id="comp-gw-body">Run a test in Workbench to populate comparison.</pre>
+              </div>
+            </div>
+
+            <!-- Vulnerable Baseline -->
+            <div class="dual-col-card">
+              <div class="dual-col-header">
+                <span style="font-weight:700;color:var(--rose-500)">⚠️ Vulnerable Baseline (/graphql-insecure)</span>
+                <span class="pill-badge deny" id="comp-fx-pill">HTTP 200 OK (LEAK)</span>
+              </div>
+              <div class="detail-card-body" style="display:flex;flex-direction:column;gap:12px;overflow-y:auto">
+                <div class="data-line"><span class="data-key">Observed Leak:</span><span class="data-val" id="comp-fx-leak">-</span></div>
+                <div class="data-line"><span class="data-key">Returned Owner ID:</span><span class="data-val" id="comp-fx-owner">-</span></div>
+                <div class="data-line"><span class="data-key">Requesting User:</span><span class="data-val" id="comp-fx-caller">-</span></div>
+                <div class="data-line"><span class="data-key">State Modification:</span><span class="data-val" id="comp-fx-state">-</span></div>
+                <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-top:6px">Vulnerable Fixture Response:</div>
+                <pre class="code-block" id="comp-fx-body">Run a test in Workbench to populate comparison.</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           VIEW 3: SCHEMA EXPLORER
+           =================================================================== -->
+      <section class="view-screen" id="view-schema">
+        <div class="screen-layout">
+          <div class="screen-header-bar">
+            <div class="screen-title-group">
+              <h2>Discovered GraphQL Schema & Access Boundaries</h2>
+              <p>Live schema introspection · Entity accessors · Inferred ownership relationships</p>
+            </div>
+            <div style="display:flex;gap:10px">
+              <input type="text" class="ctrl-input" id="schema-search-input" placeholder="Filter schema fields..." style="width:240px">
+              <button class="btn-secondary" id="btn-schema-sync">Sync Live Introspection</button>
+            </div>
+          </div>
+
+          <!-- Interactive Schema Graph & Ownership Boundaries -->
+          <div class="detail-card" style="margin-bottom:16px">
+            <div class="detail-card-head" style="display:flex;justify-content:space-between;align-items:center">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-weight:700">Interactive Schema Graph & Ownership Boundaries</span>
+                <span class="pill-badge info">GraphQL Object Types</span>
+                <span class="pill-badge emerald">Inferred Relationships</span>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="btn-ghost-small" onclick="resetSchemaGraphFilter()">Show All Types</button>
+              </div>
+            </div>
+            <div class="detail-card-body" style="padding:16px;background:var(--bg-editor)">
+              <div id="schema-graph-container" style="width:100%;min-height:140px;display:flex;align-items:center;justify-content:space-around;position:relative;flex-wrap:wrap;gap:16px">
+                <!-- Interactive Type Nodes -->
+                <div class="schema-graph-node" data-type="Query" onclick="filterSchemaByType('Query')" style="background:var(--bg-panel);border:1px solid var(--border-base);border-radius:var(--radius-md);padding:10px 14px;min-width:150px;cursor:pointer;transition:all 0.15s">
+                  <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase">Root Operation</div>
+                  <div style="font-size:13.5px;font-weight:700;color:var(--sky-400);margin:3px 0">Query</div>
+                  <div style="font-size:11px;color:var(--text-secondary)"><code>resource(id)</code><br><code>resources</code></div>
+                </div>
+
+                <div style="color:var(--text-muted);font-size:16px">➔</div>
+
+                <div class="schema-graph-node" data-type="User" onclick="filterSchemaByType('User')" style="background:var(--bg-panel);border:1px solid var(--border-base);border-radius:var(--radius-md);padding:10px 14px;min-width:150px;cursor:pointer;transition:all 0.15s">
+                  <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase">Principal Entity</div>
+                  <div style="font-size:13.5px;font-weight:700;color:var(--emerald-400);margin:3px 0">User (Principal)</div>
+                  <div style="font-size:11px;color:var(--text-secondary)"><code>id: Int</code><br><code>role: String</code></div>
+                </div>
+
+                <div style="color:var(--text-muted);font-size:16px">➔</div>
+
+                <div class="schema-graph-node" data-type="Resource" onclick="filterSchemaByType('Resource')" style="background:var(--bg-panel);border:1px solid var(--border-base);border-radius:var(--radius-md);padding:10px 14px;min-width:160px;cursor:pointer;transition:all 0.15s">
+                  <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase">Protected Entity</span>
+                    <span class="pill-badge deny" style="font-size:8.5px;padding:1px 4px">SINK</span>
+                  </div>
+                  <div style="font-size:13.5px;font-weight:700;color:var(--amber-400);margin:3px 0">Resource</div>
+                  <div style="font-size:11px;color:var(--text-secondary)"><code>owner_id ➔ User.id</code><br><span style="color:var(--rose-400)">secret_key</span></div>
+                </div>
+
+                <div style="color:var(--text-muted);font-size:16px">➔</div>
+
+                <div class="schema-graph-node" data-type="Document" onclick="filterSchemaByType('Document')" style="background:var(--bg-panel);border:1px solid var(--border-base);border-radius:var(--radius-md);padding:10px 14px;min-width:150px;cursor:pointer;transition:all 0.15s">
+                  <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase">Nested Entity</div>
+                  <div style="font-size:13.5px;font-weight:700;color:var(--purple-400);margin:3px 0">Document (Nested)</div>
+                  <div style="font-size:11px;color:var(--text-secondary)"><code>parent_id ➔ Resource.id</code><br><code>title: String</code></div>
+                </div>
+              </div>
+              <div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border-subtle);font-size:11px;color:var(--text-secondary);display:flex;justify-content:space-between">
+                <span>Click any entity node above to filter schema accessors below.</span>
+                <span id="schema-graph-filter-status" style="color:var(--emerald-400);font-weight:600">Showing All Entity Types</span>
+              </div>
+
+              <!-- Entity Details & Inferred Boundary Drawer -->
+              <div id="schema-node-drawer" style="display:none;margin-top:12px;padding:12px;background:var(--bg-app);border:1px solid var(--border-subtle);border-radius:var(--radius-md)">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                  <div style="font-weight:700;font-size:13px;color:var(--text-primary)" id="drawer-entity-name">Entity Overview</div>
+                  <span class="pill-badge info" id="drawer-entity-role">Entity Role</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;font-size:11.5px">
+                  <div>
+                    <span style="color:var(--text-muted)">Ownership Cardinality:</span>
+                    <div style="color:var(--text-primary);font-weight:600" id="drawer-cardinality">-</div>
+                  </div>
+                  <div>
+                    <span style="color:var(--text-muted)">Sensitive Sink Fields:</span>
+                    <div style="color:var(--rose-400);font-weight:600" id="drawer-sinks">-</div>
+                  </div>
+                  <div>
+                    <span style="color:var(--text-muted)">Inferred Access Rule:</span>
+                    <div style="color:var(--emerald-400);font-weight:600" id="drawer-rule">-</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="screen-table-box">
+            <table class="clean-table">
+              <thead>
+                <tr>
+                  <th>Canonical Path</th>
+                  <th>Root Field</th>
+                  <th>Target Type</th>
+                  <th>Arguments</th>
+                  <th>Boundary Fields</th>
+                  <th>Sensitive Sinks</th>
+                  <th>Provenance</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="schema-table-body">
+                <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted)">Loading schema fields...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           VIEW 4: TEST RUNS
+           =================================================================== -->
+      <section class="view-screen" id="view-runs">
+        <div class="screen-layout">
+          <div class="screen-header-bar">
+            <div class="screen-title-group">
+              <h2>Automated Differential Test Runs</h2>
+              <p>Asynchronous fuzzing engine · Least-privilege policy oracle · Controlled session evaluations</p>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn-run-primary" id="btn-run-suite-start">Execute Test Suite</button>
+              <button class="btn-secondary" id="btn-run-suite-cancel" disabled>Cancel Run</button>
+            </div>
+          </div>
+
+          <!-- Active Run Status -->
+          <div class="detail-card" id="run-progress-box" style="display:none">
+            <div class="detail-card-head">
+              <span id="active-session-label">Running Test Session</span>
+              <span class="pill-badge neutral" id="active-session-id">ID</span>
+            </div>
+            <div class="detail-card-body">
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                <span id="active-session-counts">0 / 0 tests executed</span>
+                <span id="active-session-pct" style="font-weight:700">0%</span>
+              </div>
+              <div style="height:6px;background:var(--bg-editor);border-radius:3px;overflow:hidden">
+                <div id="active-session-bar" style="height:100%;width:0%;background:var(--emerald-500);transition:width 0.2s"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="screen-table-box">
+            <table class="clean-table">
+              <thead>
+                <tr>
+                  <th>Session ID</th>
+                  <th>Status</th>
+                  <th>Total Tests</th>
+                  <th>Completed</th>
+                  <th>Findings</th>
+                  <th>Started At</th>
+                  <th>Finished At</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="runs-table-body">
+                <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted)">No test sessions recorded. Click 'Execute Test Suite' to launch.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           VIEW 5: FINDINGS
+           =================================================================== -->
+      <section class="view-screen" id="view-findings">
+        <div class="screen-layout">
+          <div class="screen-header-bar">
+            <div class="screen-title-group">
+              <h2>Confirmed Vulnerability Findings</h2>
+              <p>Real authorization discrepancies grounded in observed data leaks or state modification</p>
+            </div>
+            <span class="pill-badge deny" id="findings-count-tag">0 Vulnerabilities</span>
+          </div>
+
+          <div class="screen-table-box">
+            <table class="clean-table">
+              <thead>
+                <tr>
+                  <th>Finding ID</th>
+                  <th>Severity</th>
+                  <th>Category</th>
+                  <th>Schema Path</th>
+                  <th>Attacker Principal</th>
+                  <th>Target Object</th>
+                  <th>Observed Leak Evidence</th>
+                  <th>Reproducible</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="findings-table-body">
+                <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-muted)">No vulnerabilities detected. All authorization boundaries enforced.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           VIEW 6: AUDIT TRAIL
+           =================================================================== -->
+      <section class="view-screen" id="view-audit">
+        <div class="screen-layout">
+          <div class="screen-header-bar">
+            <div class="screen-title-group">
+              <h2>Deterministic Security Audit Trail</h2>
+              <p>Immutable SQLite audit records · Principal accountability · Real-time PolicyEngine telemetry</p>
+            </div>
+            <div style="display:flex;gap:10px">
+              <input type="text" class="ctrl-input" id="audit-search-input" placeholder="Search audit trail..." style="width:220px">
+              <select class="ctrl-select" id="audit-filter-decision">
+                <option value="ALL">All Decisions</option>
+                <option value="DENY">DENY Only</option>
+                <option value="ALLOW">ALLOW Only</option>
+              </select>
+              <button class="btn-secondary" id="btn-audit-refresh">Refresh Records</button>
+            </div>
+          </div>
+
+          <div class="screen-table-box">
+            <table class="clean-table">
+              <thead>
+                <tr>
+                  <th>Log ID</th>
+                  <th>Timestamp</th>
+                  <th>Principal</th>
+                  <th>Role</th>
+                  <th>Operation</th>
+                  <th>Object Type</th>
+                  <th>Object ID</th>
+                  <th>Canonical Path</th>
+                  <th>Decision</th>
+                  <th>Reason</th>
+                  <th>Risk</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="audit-table-body">
+                <tr><td colspan="12" style="text-align:center;padding:30px;color:var(--text-muted)">Loading audit records from database...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           VIEW 7: EXPORTS & RESEARCH
+           =================================================================== -->
+      <section class="view-screen" id="view-exports">
+        <div class="screen-layout">
+          <div class="screen-header-bar">
+            <div class="screen-title-group">
+              <h2>Security Reports & Academic Evaluation Artifacts</h2>
+              <p>Export active test session findings or evaluate standardized static benchmark datasets</p>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <!-- Active Session Exports -->
+            <div class="detail-card">
+              <div class="detail-card-head">
+                <span>Active Run Artifacts (Real Executions Only)</span>
+                <span class="pill-badge neutral" id="session-export-badge">NO ACTIVE RUN</span>
+              </div>
+              <div class="detail-card-body" style="display:flex;flex-direction:column;gap:12px">
+                <p style="color:var(--text-secondary);font-size:12.5px" id="session-export-desc">
+                  Exports findings generated directly from the currently active or selected test session in standard security reporting formats.
+                </p>
+                <div style="display:flex;gap:10px">
+                  <a class="btn-run-primary" id="btn-export-sarif-session" href="#" target="_blank">Export SARIF 2.1 (Current Run)</a>
+                  <a class="btn-secondary" id="btn-export-junit-session" href="#" target="_blank">Export JUnit XML (Current Run)</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Static Benchmark Reference -->
+            <div class="detail-card">
+              <div class="detail-card-head">
+                <span>Reference Differential Benchmark Corpus</span>
+                <span class="pill-badge neutral">115-CASE CORPUS</span>
+              </div>
+              <div class="detail-card-body" style="display:flex;flex-direction:column;gap:12px">
+                <p style="color:var(--text-secondary);font-size:12.5px">
+                  Standardized research evaluation corpus containing 105 security test cases and 10 syntax edge cases for reproducible academic evaluation.
+                </p>
+                <div style="display:flex;gap:10px">
+                  <a class="btn-secondary" href="/api/v1/differential-testing/export/sarif" target="_blank">Benchmark SARIF 2.1</a>
+                  <a class="btn-secondary" href="/api/v1/differential-testing/export/junit" target="_blank">Benchmark JUnit XML</a>
+                  <button class="btn-secondary" id="btn-view-bench-metrics">View Corpus Metrics</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Behavioral Anomaly Assessment -->
+          <div class="detail-card" style="margin-top:4px">
+            <div class="detail-card-head">
+              <span>Behavioral Anomaly Assessment (Advisory Engine)</span>
+              <button class="btn-secondary" style="padding:2px 8px;font-size:11px" id="btn-run-anomaly-scan">Run Anomaly Assessment</button>
+            </div>
+            <div class="detail-card-body">
+              <pre class="code-block" id="anomaly-results-box">Click 'Run Anomaly Assessment' to evaluate statistical outlier drift over the audit trail stream.</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           VIEW: CCNS RESEARCH LAB
+           =================================================================== -->
+      <section class="view-screen" id="view-research">
+        <div class="research-container">
+          <!-- Top Header -->
+          <div class="research-header-bar">
+            <div class="research-title-group">
+              <h2>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--sky-500)"><path d="M10 2v7.31L4.69 18.5A2 2 0 0 0 6.36 21h11.28a2 2 0 0 0 1.67-2.5L14 9.31V2"/><line x1="8.5" y1="2" x2="15.5" y2="2"/><line x1="7" y1="14" x2="17" y2="14"/></svg>
+                CCNS Research Lab
+                <span class="pill-badge neutral" style="font-size:10.5px">CCNS-EVAL-V2</span>
+              </h2>
+              <p>Evidence-Grounded AI Explanations for GraphQL BOLA Auditing: Correlating AST-Derived Paths with Runtime Authorization Evidence</p>
+            </div>
+            <div class="research-controls-group">
+              <select id="research-exp-select" class="research-select" title="Active Experiment Run"></select>
+              <select id="research-dataset-select" class="research-select" title="Target Dataset Corpus"></select>
+              <button class="btn-run-primary" id="btn-research-run-exp" onclick="launchResearchExperiment()">Run Experiment</button>
+              <button class="btn-secondary" id="btn-research-rerun-exp" onclick="rerunActiveExperiment()">Rerun</button>
+            </div>
+          </div>
+
+          <!-- Sub-Navigation Tabs -->
+          <div class="research-tabs-nav">
+            <button class="research-tab-btn active" data-rtab="overview" onclick="switchResearchSubTab('overview')">
+              Overview
+            </button>
+            <button class="research-tab-btn" data-rtab="comparison" onclick="switchResearchSubTab('comparison')">
+              Method Comparison
+            </button>
+            <button class="research-tab-btn" data-rtab="ablations" onclick="switchResearchSubTab('ablations')">
+              Ablation Studies
+            </button>
+            <button class="research-tab-btn" data-rtab="errors" onclick="switchResearchSubTab('errors')">
+              Error Analysis
+            </button>
+            <button class="research-tab-btn" data-rtab="dataset" onclick="switchResearchSubTab('dataset')">
+              Dataset & Ground Truth
+            </button>
+            <button class="research-tab-btn" data-rtab="evidence" onclick="switchResearchSubTab('evidence')">
+              Evidence Explorer
+            </button>
+            <button class="research-tab-btn" data-rtab="reports" onclick="switchResearchSubTab('reports')">
+              Reproducibility & Reports
+            </button>
+            <button class="research-tab-btn" data-rtab="generalization" onclick="switchResearchSubTab('generalization')">
+              Benchmark Generalization
+            </button>
+          </div>
+
+          <!-- Content Areas -->
+          <div class="research-content-area">
+            <!-- 1. Overview Tab -->
+            <div class="research-tab-content active" id="rtab-content-overview">
+              <div class="research-stats-grid">
+                <div class="stat-card sky">
+                  <div class="stat-card-title">Eligible Test Cases</div>
+                  <div class="stat-card-value" id="kpi-cases-count">105 / 115</div>
+                  <div class="stat-card-sub">10 syntax-malformed excluded</div>
+                </div>
+                <div class="stat-card amber">
+                  <div class="stat-card-title">Method A (Static Taint) F1</div>
+                  <div class="stat-card-value" id="kpi-static-f1">--%</div>
+                  <div class="stat-card-sub" id="kpi-static-details">P: --% | R: --%</div>
+                </div>
+                <div class="stat-card rose">
+                  <div class="stat-card-title">Method B (Gateway Alone) F1</div>
+                  <div class="stat-card-value" id="kpi-gateway-f1">--%</div>
+                  <div class="stat-card-sub" id="kpi-gateway-details">P: --% | R: --%</div>
+                </div>
+                <div class="stat-card emerald">
+                  <div class="stat-card-title">Method C (Correlated) F1</div>
+                  <div class="stat-card-value" id="kpi-correlated-f1">--%</div>
+                  <div class="stat-card-sub" id="kpi-correlated-details">P: --% | R: --%</div>
+                </div>
+              </div>
+
+              <div class="detail-card">
+                <div class="detail-card-head">
+                  <span>Method Evaluation Summary</span>
+                  <span class="pill-badge neutral">Deterministic Execution (Seed 42)</span>
+                </div>
+                <div class="detail-card-body" style="padding:0">
+                  <table class="research-table">
+                    <thead>
+                      <tr>
+                        <th>Method</th>
+                        <th>Version</th>
+                        <th>Evaluated</th>
+                        <th>Precision</th>
+                        <th>Recall</th>
+                        <th>F1 Score</th>
+                        <th>Accuracy</th>
+                        <th>FPR</th>
+                        <th>Latency</th>
+                      </tr>
+                    </thead>
+                    <tbody id="research-overview-methods-body"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="detail-card">
+                <div class="detail-card-head">
+                  <span>Saved Research Experiments</span>
+                  <span class="pill-badge neutral">SQLite Persisted</span>
+                </div>
+                <div class="detail-card-body" style="padding:0">
+                  <table class="research-table">
+                    <thead>
+                      <tr>
+                        <th>Experiment ID</th>
+                        <th>Name</th>
+                        <th>Dataset</th>
+                        <th>Started At</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="research-recent-experiments-body"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Method Comparison Tab -->
+            <div class="research-tab-content" id="rtab-content-comparison">
+              <div class="detail-card">
+                <div class="detail-card-head">
+                  <span>Primary Comparative Results Table</span>
+                  <span class="pill-badge neutral">Binary BOLA Classification</span>
+                </div>
+                <div class="detail-card-body" style="padding:0;overflow-x:auto">
+                  <table class="research-table">
+                    <thead>
+                      <tr>
+                        <th>Method</th>
+                        <th>Total</th>
+                        <th>Eval</th>
+                        <th>Excl</th>
+                        <th>TP</th>
+                        <th>FP</th>
+                        <th>TN</th>
+                        <th>FN</th>
+                        <th>Precision</th>
+                        <th>Recall</th>
+                        <th>F1 Score</th>
+                        <th>Accuracy</th>
+                        <th>Specificity</th>
+                        <th>Latency</th>
+                      </tr>
+                    </thead>
+                    <tbody id="research-comparison-table-body"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Empirical ROC & PR Discrimination Curves -->
+              <div class="detail-card" id="research-curves-card">
+                <div class="detail-card-head" style="display:flex;justify-content:space-between;align-items:center">
+                  <span>Empirical Discrimination Curves (ROC & Precision-Recall)</span>
+                  <span class="pill-badge info">Piecewise Parametric & AUC</span>
+                </div>
+                <div class="detail-card-body" id="research-curves-container" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;background:var(--bg-editor)">
+                  <div style="grid-column:1 / -1;text-align:center;padding:20px;color:var(--text-muted)">Select an experiment run to render ROC & Precision-Recall discrimination curves.</div>
+                </div>
+              </div>
+
+              <div class="detail-card">
+                <div class="detail-card-head">
+                  <span>Confusion Matrix Visual Breakdown</span>
+                  <span class="pill-badge neutral">2x2 Contingency</span>
+                </div>
+                <div class="detail-card-body">
+                  <div class="cm-cards-row" id="research-cm-cards-container"></div>
+                </div>
+              </div>
+
+              <div class="detail-card">
+                <div class="detail-card-head">
+                  <span>Per-Case Method Disagreements</span>
+                  <span class="pill-badge alert" id="research-disagreements-count">0 cases</span>
+                </div>
+                <div class="detail-card-body" style="padding:0;max-height:400px;overflow-y:auto">
+                  <table class="research-table">
+                    <thead>
+                      <tr>
+                        <th>Case ID</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Ground Truth</th>
+                        <th>Static (A)</th>
+                        <th>Gateway (B)</th>
+                        <th>Correlated (C)</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="research-disagreements-body"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Ablation Studies Tab -->
+            <div class="research-tab-content" id="rtab-content-ablations">
+              <div class="detail-card">
+                <div class="detail-card-head">
+                  <span>Controlled Ablation Analysis (vs. Method C Baseline)</span>
+                  <span class="pill-badge neutral">Paired McNemar Test</span>
+                </div>
+                <div class="detail-card-body" style="padding:0;overflow-x:auto">
+                  <table class="research-table">
+                    <thead>
+                      <tr>
+                        <th>Ablation Condition</th>
+                        <th>Base F1</th>
+                        <th>Ablated F1</th>
+                        <th>F1 Delta</th>
+                        <th>Prec Delta</th>
+                        <th>Rec Delta</th>
+                        <th>Shared</th>
+                        <th>Changed</th>
+                        <th>McNemar &chi;&sup2;</th>
+                        <th>p-value</th>
+                        <th>Significance</th>
+                      </tr>
+                    </thead>
+                    <tbody id="research-ablations-table-body"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="detail-card">
+                <div class="detail-card-head">
+                  <span>Classification Shift Details</span>
+                  <span class="pill-badge neutral">Observed Divergence</span>
+                </div>
+                <div class="detail-card-body">
+                  <div id="research-ablation-changed-cases-list" style="display:flex;flex-direction:column;gap:8px"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Error Analysis Tab -->
+            <div class="research-tab-content" id="rtab-content-errors">
+              <div class="research-stats-grid">
+                <div class="stat-card amber" onclick="filterErrorType('fp')" style="cursor:pointer">
+                  <div class="stat-card-title">False Positives</div>
+                  <div class="stat-card-value" id="error-fp-count">0</div>
+                  <div class="stat-card-sub">Benign queries flagged as attack</div>
+                </div>
+                <div class="stat-card rose" onclick="filterErrorType('fn')" style="cursor:pointer">
+                  <div class="stat-card-title">False Negatives</div>
+                  <div class="stat-card-value" id="error-fn-count">0</div>
+                  <div class="stat-card-sub">BOLA attacks undetected</div>
+                </div>
+                <div class="stat-card sky" onclick="filterErrorType('inconclusive')" style="cursor:pointer">
+                  <div class="stat-card-title">Inconclusive Cases</div>
+                  <div class="stat-card-value" id="error-inconc-count">0</div>
+                  <div class="stat-card-sub">Missing evidence / unverified</div>
+                </div>
+                <div class="stat-card" onclick="filterErrorType('excluded')" style="cursor:pointer">
+                  <div class="stat-card-title">Excluded Cases</div>
+                  <div class="stat-card-value" id="error-excluded-count">0</div>
+                  <div class="stat-card-sub">Syntax malformed / invalid queries</div>
+                </div>
+              </div>
+
+              <div class="detail-card">
+                <div class="detail-card-head">
+                  <span>Error Inspector</span>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn-secondary error-filter-btn active" data-etype="fp" onclick="filterErrorType('fp')">False Positives</button>
+                    <button class="btn-secondary error-filter-btn" data-etype="fn" onclick="filterErrorType('fn')">False Negatives</button>
+                    <button class="btn-secondary error-filter-btn" data-etype="inconclusive" onclick="filterErrorType('inconclusive')">Inconclusive</button>
+                    <button class="btn-secondary error-filter-btn" data-etype="excluded" onclick="filterErrorType('excluded')">Excluded</button>
+                  </div>
+                </div>
+                <div class="detail-card-body">
+                  <div id="research-errors-list-container" style="display:flex;flex-direction:column;gap:10px"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. Dataset & Ground Truth Tab -->
+            <div class="research-tab-content" id="rtab-content-dataset">
+              <div class="detail-card">
+                <div class="detail-card-head">
+                  <span>Registered Test Cases & Labels</span>
+                </div>
+                <div class="detail-card-body" style="padding:0;max-height:550px;overflow-y:auto">
+                  <table class="research-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Syntax</th>
+                        <th>Caller</th>
+                        <th>Target</th>
+                        <th>Owner</th>
+                        <th>Ground Truth</th>
+                        <th>Version</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="research-cases-table-body"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- 6. Evidence Explorer Tab (10-Node Pipeline) -->
+            <div class="research-tab-content" id="rtab-content-evidence">
+              <div class="evidence-explorer-container">
+                <div class="evidence-graph-panel">
+                  <div class="evidence-graph-header">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <select id="evidence-case-select" class="research-select" style="min-width:240px"></select>
+                      <span id="evidence-outcome-badge" class="pill-badge neutral">OUTCOME</span>
+                      <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)" id="evidence-exec-id">exec_syn_verified</span>
+                    </div>
+                    <span class="pill-badge neutral">10-Node Trace Pipeline</span>
+                  </div>
+                  <div class="evidence-nodes-pipeline" id="evidence-nodes-pipeline-container"></div>
+                </div>
+
+                <div class="evidence-inspector-drawer">
+                  <div class="inspector-head">
+                    <h3 id="inspector-node-title">1. Client Principal</h3>
+                    <span id="inspector-node-status" class="node-status-badge available">AVAILABLE</span>
+                  </div>
+                  <div class="inspector-section">
+                    <span class="inspector-label">Category</span>
+                    <span id="inspector-node-category" class="pill-badge neutral">OBSERVED FACT</span>
+                  </div>
+                  <div class="inspector-section">
+                    <span class="inspector-label">Summary</span>
+                    <p id="inspector-node-summary" style="font-size:12px;color:var(--text-secondary)"></p>
+                  </div>
+                  <div class="inspector-section" style="flex:1">
+                    <span class="inspector-label">Verified Facts & Payload</span>
+                    <pre class="inspector-code" id="inspector-node-details-json"></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 7. Reproducibility & Reports Tab -->
+            <div class="research-tab-content" id="rtab-content-reports">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div class="detail-card">
+                  <div class="detail-card-head">
+                    <span>Exportable Research Artifacts</span>
+                    <span class="pill-badge success">IMMUTABLE MANIFEST</span>
+                  </div>
+                  <div class="detail-card-body" style="display:flex;flex-direction:column;gap:12px">
+                    <p style="color:var(--text-secondary);font-size:12px">
+                      Download complete reproducible experiment artifacts including per-case predictions, confusion matrices, McNemar statistics, and evaluation reports.
+                    </p>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap">
+                      <a class="btn-run-primary" id="btn-download-report" href="#" target="_blank">Download Markdown Report (.md)</a>
+                      <a class="btn-secondary" id="btn-download-csv" href="#" target="_blank">Export Predictions CSV</a>
+                      <a class="btn-secondary" id="btn-download-json" href="#" target="_blank">Export Full JSON Manifest</a>
+                      <a class="btn-secondary" id="btn-download-latex" href="#" target="_blank" style="border-color:var(--purple-500);color:var(--purple-400)">📄 Export LaTeX Tables (.tex)</a>
+                      <a class="btn-run-primary" id="btn-download-bundle" href="#" target="_blank" style="background:var(--emerald-600)">📦 Download Full Paper Archive (.zip)</a>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="detail-card">
+                  <div class="detail-card-head">
+                    <span>Deterministic CLI Replication</span>
+                    <span class="pill-badge neutral">Seed 42</span>
+                  </div>
+                  <div class="detail-card-body">
+                    <p style="color:var(--text-secondary);font-size:12px;margin-bottom:8px">
+                      Run this exact experiment from the terminal to verify identical confusion matrices and metrics:
+                    </p>
+                    <pre class="code-block" id="report-cli-command"></pre>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-card">
+                <div class="detail-card-head">
+                  <span>Live Evaluation Report Preview</span>
+                  <span class="pill-badge neutral">Markdown Preview</span>
+                </div>
+                <div class="detail-card-body">
+                  <pre class="code-block" style="max-height:450px;white-space:pre-wrap" id="report-markdown-preview">Loading report...</pre>
+                </div>
+              </div>
+            </div>
+
+            <!-- 8. Benchmark Generalization Tab -->
+            <div class="research-tab-content" id="rtab-content-generalization">
+              <!-- Generalization Subheader with Split Selector -->
+              <div class="detail-card" style="margin-bottom:16px">
+                <div class="detail-card-head" style="display:flex;justify-content:space-between;align-items:center">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <span style="font-weight:700">Benchmark Generalization & Adversarial Evaluation</span>
+                    <span class="pill-badge info" id="gen2-dataset-badge">ds_generalization_v2 (v2.0.0)</span>
+                    <span class="pill-badge emerald" id="gen2-leakage-badge">Leakage-Free: Disjoint Sets</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px" id="gen2-split-filters">
+                    <span style="font-size:12px;color:var(--text-secondary)">Partition Split:</span>
+                    <button class="btn-secondary active" data-split="all" onclick="filterGeneralizationSplit('all')">All (60)</button>
+                    <button class="btn-secondary" data-split="tuning" onclick="filterGeneralizationSplit('tuning')">Tuning (23)</button>
+                    <button class="btn-secondary" data-split="held_out" onclick="filterGeneralizationSplit('held_out')">Held-Out (20)</button>
+                    <button class="btn-secondary" data-split="adversarial_stress" onclick="filterGeneralizationSplit('adversarial_stress')">Adversarial (17)</button>
+                  </div>
+                </div>
+                <div class="detail-card-body">
+                  <p style="font-size:12px;color:var(--text-secondary);margin:0">
+                    Rigorous generalization benchmark evaluating Method A (Static Taint), Method B (Runtime Gateway), and Method C (Correlated Defense) across 9 authorization attack topologies. Partitioned into strict disjoint splits with 0 cross-split query overlap.
+                  </p>
+                </div>
+              </div>
+
+              <!-- 4 Path Attribution & Attribution KPI Cards -->
+              <div class="research-stats-grid" style="margin-bottom:16px">
+                <div class="stat-card emerald">
+                  <div class="stat-card-title">AST Path Precision (Method C)</div>
+                  <div class="stat-card-value" id="gen2-path-precision">97.2%</div>
+                  <div class="stat-card-sub" id="gen2-path-precision-sub">Method B: N/A (0 paths reported)</div>
+                </div>
+                <div class="stat-card sky">
+                  <div class="stat-card-title">AST Path Recall (Method C)</div>
+                  <div class="stat-card-value" id="gen2-path-recall">100.0%</div>
+                  <div class="stat-card-sub" id="gen2-path-recall-sub">Method B: 0.0% (AST unaware)</div>
+                </div>
+                <div class="stat-card amber">
+                  <div class="stat-card-title">Exact Path Match Rate</div>
+                  <div class="stat-card-value" id="gen2-path-exact">96.4%</div>
+                  <div class="stat-card-sub">Client alias + root + child match</div>
+                </div>
+                <div class="stat-card purple">
+                  <div class="stat-card-title">Cross-Split Leakage Freedom</div>
+                  <div class="stat-card-value" id="gen2-leakage-val">0 Overlap</div>
+                  <div class="stat-card-sub">Strict disjoint query hashes</div>
+                </div>
+              </div>
+
+              <!-- 9-Category Scenario Coverage Matrix -->
+              <div class="detail-card" style="margin-bottom:16px">
+                <div class="detail-card-head">
+                  <span>9-Category Authorization Scenario Matrix</span>
+                  <span class="pill-badge neutral">Coverage Breakdown</span>
+                </div>
+                <div class="detail-card-body" style="padding:0">
+                  <div class="table-responsive">
+                    <table class="research-table" id="gen2-coverage-table">
+                      <thead>
+                        <tr>
+                          <th>Category</th>
+                          <th>Total Cases</th>
+                          <th>Security Ground Truth</th>
+                          <th>Syntax Types</th>
+                          <th>Split Distribution</th>
+                          <th>Threat Model & Evaluation Focus</th>
+                        </tr>
+                      </thead>
+                      <tbody id="gen2-coverage-tbody">
+                        <tr>
+                          <td><strong>MULTI_TENANT</strong></td>
+                          <td>8</td>
+                          <td><span class="pill-badge danger">4 VULN</span> <span class="pill-badge emerald">4 BENIGN</span></td>
+                          <td>BASIC (8)</td>
+                          <td>Tuning: 3 | Held-Out: 3 | Stress: 2</td>
+                          <td>Cross-tenant isolation boundaries between user organizations and data domains.</td>
+                        </tr>
+                        <tr>
+                          <td><strong>NESTED_RELATIONSHIP</strong></td>
+                          <td>8</td>
+                          <td><span class="pill-badge danger">4 VULN</span> <span class="pill-badge emerald">4 BENIGN</span></td>
+                          <td>BASIC (8)</td>
+                          <td>Tuning: 3 | Held-Out: 3 | Stress: 2</td>
+                          <td>Parent-child object traversals (Resource -> Documents) with independent ownership policies.</td>
+                        </tr>
+                        <tr>
+                          <td><strong>ALIAS_DISAMBIGUATION</strong></td>
+                          <td>8</td>
+                          <td><span class="pill-badge danger">4 VULN</span> <span class="pill-badge emerald">4 BENIGN</span></td>
+                          <td>ALIAS (8)</td>
+                          <td>Tuning: 3 | Held-Out: 3 | Stress: 2</td>
+                          <td>Multi-root aliased queries (e.g. <code>myRes</code> vs <code>victimRes</code>) disambiguated to discrete AST paths.</td>
+                        </tr>
+                        <tr>
+                          <td><strong>FRAGMENTS_NAMED_OPS</strong></td>
+                          <td>6</td>
+                          <td><span class="pill-badge danger">3 VULN</span> <span class="pill-badge emerald">3 BENIGN</span></td>
+                          <td>FRAGMENT (5) / NAMED (1)</td>
+                          <td>Tuning: 2 | Held-Out: 2 | Stress: 2</td>
+                          <td>Inline fragments and named operations with selective execution and target spread.</td>
+                        </tr>
+                        <tr>
+                          <td><strong>VARIABLE_OBJECT_IDS</strong></td>
+                          <td>6</td>
+                          <td><span class="pill-badge danger">3 VULN</span> <span class="pill-badge emerald">3 BENIGN</span></td>
+                          <td>VARIABLE (6)</td>
+                          <td>Tuning: 2 | Held-Out: 2 | Stress: 2</td>
+                          <td>Dynamic query variables passing target object identifiers evaluated at execution time.</td>
+                        </tr>
+                        <tr>
+                          <td><strong>OWNERSHIP_EDGE_CASES</strong></td>
+                          <td>6</td>
+                          <td><span class="pill-badge danger">3 VULN</span> <span class="pill-badge emerald">3 BENIGN</span></td>
+                          <td>BASIC (6)</td>
+                          <td>Tuning: 2 | Held-Out: 2 | Stress: 2</td>
+                          <td>Shared collaboration objects, revoked role permissions, and admin override boundaries.</td>
+                        </tr>
+                        <tr>
+                          <td><strong>MUTATION_AUTHORIZATION</strong></td>
+                          <td>8</td>
+                          <td><span class="pill-badge danger">4 VULN</span> <span class="pill-badge emerald">4 BENIGN</span></td>
+                          <td>MUTATION (8)</td>
+                          <td>Tuning: 3 | Held-Out: 3 | Stress: 2</td>
+                          <td>State-modifying mutations (update, delete, transfer) evaluated with database fixture rollback.</td>
+                        </tr>
+                        <tr>
+                          <td><strong>PARTIAL_AUTHORIZATION</strong></td>
+                          <td>6</td>
+                          <td><span class="pill-badge danger">5 VULN</span> <span class="pill-badge emerald">1 BENIGN</span></td>
+                          <td>BASIC (6)</td>
+                          <td>Tuning: 3 | Held-Out: 1 | Stress: 2</td>
+                          <td>Multi-object queries mixing authorized and unauthorized fields in a single GraphQL request.</td>
+                        </tr>
+                        <tr>
+                          <td><strong>MALFORMED_SYNTAX</strong></td>
+                          <td>4</td>
+                          <td><span class="pill-badge neutral">4 MALFORMED</span></td>
+                          <td>MALFORMED (4)</td>
+                          <td>Tuning: 2 | Held-Out: 1 | Stress: 1</td>
+                          <td>Syntax anomalies, unclosed braces, and invalid field tokens handled safely without crashing.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Two-Column: Safe Mutation Integrity + Architectural Limitations -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <!-- Safe Mutation Integrity -->
+                <div class="detail-card">
+                  <div class="detail-card-head">
+                    <span>Safe Mutation Testing & Fixture State Integrity</span>
+                    <span class="pill-badge emerald">Zero State Corruption</span>
+                  </div>
+                  <div class="detail-card-body" style="display:flex;flex-direction:column;gap:10px">
+                    <p style="font-size:12px;color:var(--text-secondary);margin:0">
+                      Mutation test cases verify that unauthorized state modifications fail closed without altering SQLite rows:
+                    </p>
+                    <div style="background:var(--bg-app);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:10px;font-family:var(--font-mono);font-size:11px;display:flex;flex-direction:column;gap:6px">
+                      <div style="display:flex;justify-content:space-between">
+                        <span style="color:var(--text-secondary)">Pre-State Snapshot:</span>
+                        <span style="color:var(--text-primary)">resource(id=101).owner_id = 1</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between">
+                        <span style="color:var(--text-secondary)">Unauthorized Mutation:</span>
+                        <span style="color:var(--rose-400)">deleteResource(id: 101) by User 2</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between">
+                        <span style="color:var(--text-secondary)">Gateway Decision:</span>
+                        <span class="pill-badge danger" style="padding:1px 6px">BLOCKED (403 Forbidden)</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between">
+                        <span style="color:var(--text-secondary)">Post-State Snapshot:</span>
+                        <span style="color:var(--text-primary)">resource(id=101).owner_id = 1</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;border-top:1px dashed var(--border-subtle);padding-top:6px;margin-top:2px">
+                        <span style="color:var(--text-secondary)">Fixture Invariant:</span>
+                        <span style="color:var(--emerald-400);font-weight:700">assert pre_state == post_state [PASS]</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Architectural & Schema Limitations -->
+                <div class="detail-card">
+                  <div class="detail-card-head">
+                    <span>Transparent Scientific Limitations</span>
+                    <span class="pill-badge neutral">Scope & Constraints</span>
+                  </div>
+                  <div class="detail-card-body" style="display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;gap:8px;align-items:flex-start">
+                      <span class="pill-badge amber" style="margin-top:2px">LIMITATION</span>
+                      <div style="font-size:12px;color:var(--text-secondary)">
+                        <strong style="color:var(--text-primary)">Integer Primary Keys:</strong> The Strawberry GraphQL schema strictly accepts and resolves integer IDs (e.g. <code>id: 101</code>). Non-integer slug or UUID lookups are outside current schema capability.
+                      </div>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:flex-start">
+                      <span class="pill-badge amber" style="margin-top:2px">LIMITATION</span>
+                      <div style="font-size:12px;color:var(--text-secondary)">
+                        <strong style="color:var(--text-primary)">Polymorphic Interfaces:</strong> GraphQL Union and Interface types (e.g. <code>Node</code> or <code>SearchResult</code>) are not defined in the current schema; single-inheritance concrete object types are evaluated.
+                      </div>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:flex-start">
+                      <span class="pill-badge emerald" style="margin-top:2px">HONESTY</span>
+                      <div style="font-size:12px;color:var(--text-secondary)">
+                        <strong style="color:var(--text-primary)">Binary Decision Parity:</strong> On single-object queries, Method B (Gateway) and Method C (Correlated) achieve identical binary accuracy (89.3%). Method C's decisive advantage is <strong>AST Path Attribution (96.4% vs 0.0%)</strong> and static false-positive suppression.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Review Label Modal -->
+      <div class="research-modal-backdrop" id="modal-review-label">
+        <div class="research-modal">
+          <div class="research-modal-head">
+            <h3>Review Ground-Truth Label</h3>
+            <button class="btn-secondary" style="padding:2px 8px" onclick="closeReviewModal()">&times;</button>
+          </div>
+          <div class="research-modal-body">
+            <div class="research-form-group">
+              <label>Case ID</label>
+              <div id="review-modal-case-id" style="font-family:var(--font-mono);font-weight:700"></div>
+            </div>
+            <div class="research-form-group">
+              <label>Current Label</label>
+              <div id="review-modal-current-sec" class="pill-badge danger" style="width:fit-content"></div>
+            </div>
+            <div class="research-form-group">
+              <label>New Ground-Truth Security</label>
+              <select id="review-modal-new-sec" class="research-input">
+                <option value="VULNERABLE">VULNERABLE</option>
+                <option value="BENIGN">BENIGN</option>
+                <option value="MALFORMED">MALFORMED</option>
+                <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+              </select>
+            </div>
+            <div class="research-form-group">
+              <label>Reviewer Name / Role</label>
+              <input type="text" id="review-modal-reviewer" class="research-input" value="Lead Security Evaluator" />
+            </div>
+            <div class="research-form-group">
+              <label>Audit Rationale (Mandatory)</label>
+              <textarea id="review-modal-rationale" class="research-textarea" placeholder="Explain the defensible rationale and evidence supporting this label correction..."></textarea>
+            </div>
+          </div>
+          <div class="research-modal-footer">
+            <button class="btn-secondary" onclick="closeReviewModal()">Cancel</button>
+            <button class="btn-run-primary" onclick="submitLabelReview()">Save Audit Record</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. Adversarial Fuzzer Studio Modal -->
+      <div class="research-modal-backdrop" id="modal-fuzzer">
+        <div class="research-modal" style="width:720px">
+          <div class="research-modal-head">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:16px">⚡</span>
+              <h3 style="margin:0">Adversarial Fuzzer Studio</h3>
+              <span class="pill-badge warning">5 Evasion Classes</span>
+            </div>
+            <button class="btn-secondary" style="padding:2px 8px" onclick="closeFuzzerStudio()">&times;</button>
+          </div>
+          <div class="research-modal-body">
+            <p style="font-size:12px;color:var(--text-secondary);margin:0">
+              Generates 5 distinct programmatic query mutations (aliasing, variable extraction, fragment nesting, directive complexity, syntactic noise) to test whether AST path attribution and authorization hold under evasion.
+            </p>
+            <div style="background:var(--bg-app);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:10px;font-size:11.5px">
+              <span style="color:var(--text-muted)">Base Query:</span>
+              <code id="fuzzer-base-query-display" style="display:block;margin-top:4px;color:var(--sky-400)">query { resource(id: 101) { id name secret_key } }</code>
+            </div>
+            <div id="fuzzer-variants-container"></div>
+          </div>
+          <div class="research-modal-footer">
+            <button class="btn-secondary" onclick="closeFuzzerStudio()">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. BOLA Remediation Modal -->
+      <div class="research-modal-backdrop" id="modal-remediation">
+        <div class="research-modal" style="width:760px">
+          <div class="research-modal-head">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:16px">🛡️</span>
+              <h3 style="margin:0">Automated BOLA Remediation & Policy Compiler</h3>
+              <span class="pill-badge success" id="remediation-target-pill">Resource.secret_key</span>
+            </div>
+            <button class="btn-secondary" style="padding:2px 8px" onclick="closeRemediationModal()">&times;</button>
+          </div>
+          <div class="research-modal-body">
+            <p style="font-size:12px;color:var(--text-secondary);margin:0" id="remediation-summary-text">
+              Remediates BOLA by generating least-privilege authorization policies enforcing ownership matching and attribute-level masking.
+            </p>
+            <div style="display:flex;gap:8px;border-bottom:1px solid var(--border-subtle);padding-bottom:8px">
+              <button class="btn-secondary remediation-tab-btn active" data-tab="strawberry" onclick="switchRemediationTab('strawberry')">Strawberry GraphQL (Python)</button>
+              <button class="btn-secondary remediation-tab-btn" data-tab="shield" onclick="switchRemediationTab('shield')">GraphQL Shield (TypeScript)</button>
+              <button class="btn-secondary remediation-tab-btn" data-tab="opa" onclick="switchRemediationTab('opa')">Open Policy Agent (Rego)</button>
+            </div>
+            <pre class="code-block" id="remediation-code-block" style="max-height:280px;overflow-y:auto;font-size:11px"></pre>
+          </div>
+          <div class="research-modal-footer">
+            <button class="btn-secondary" onclick="copyRemediationCode()">📋 Copy Policy Code</button>
+            <button class="btn-run-primary" onclick="closeRemediationModal()">Done</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Multi-Tenant Matrix Modal -->
+      <div class="research-modal-backdrop" id="modal-tenant-matrix">
+        <div class="research-modal" style="width:840px">
+          <div class="research-modal-head">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:16px">🌐</span>
+              <h3 style="margin:0">Multi-Tenant Access Isolation Matrix</h3>
+              <span class="pill-badge info">Tenant Alpha vs Tenant Beta</span>
+            </div>
+            <button class="btn-secondary" style="padding:2px 8px" onclick="closeTenantMatrixModal()">&times;</button>
+          </div>
+          <div class="research-modal-body" style="padding:14px 18px">
+            <p style="font-size:12px;color:var(--text-secondary);margin:0 0 10px 0">
+              Cross-tenant and cross-user authorization simulation. Click any matrix cell to immediately load that test pair into the Workbench:
+            </p>
+            <div style="overflow-x:auto">
+              <table class="research-table" style="width:100%">
+                <thead>
+                  <tr>
+                    <th>Requesting Principal</th>
+                    <th style="text-align:center">Resource 101<br><span style="font-size:9.5px;color:var(--emerald-400)">Tenant Alpha (101)</span></th>
+                    <th style="text-align:center">Resource 102<br><span style="font-size:9.5px;color:var(--emerald-400)">Tenant Alpha (102)</span></th>
+                    <th style="text-align:center">Resource 201<br><span style="font-size:9.5px;color:var(--purple-400)">Tenant Beta (201)</span></th>
+                    <th style="text-align:center">Resource 202<br><span style="font-size:9.5px;color:var(--purple-400)">Tenant Beta (202)</span></th>
+                  </tr>
+                </thead>
+                <tbody id="tenant-matrix-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="research-modal-footer">
+            <button class="btn-secondary" onclick="closeTenantMatrixModal()">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================================================================
+           VIEW 8: SETTINGS
+           =================================================================== -->
+      <section class="view-screen" id="view-settings">
+        <div class="screen-layout">
+          <div class="screen-header-bar">
+            <div class="screen-title-group">
+              <h2>Workbench Environment & Identity Configuration</h2>
+              <p>Configure network endpoints, view loopback session authentication, and manage session cache</p>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="detail-card">
+              <div class="detail-card-head">Target Network Configuration</div>
+              <div class="detail-card-body" style="display:flex;flex-direction:column;gap:12px">
+                <div>
+                  <div class="ctrl-label" style="margin-bottom:4px">Protected Gateway URL (/graphql)</div>
+                  <input type="text" class="ctrl-input" id="setting-gw-url" value="http://127.0.0.1:8000/graphql" style="width:100%">
+                </div>
+                <div>
+                  <div class="ctrl-label" style="margin-bottom:4px">Vulnerable Fixture URL (/graphql-insecure)</div>
+                  <input type="text" class="ctrl-input" id="setting-fx-url" value="http://127.0.0.1:8000/graphql-insecure" style="width:100%">
+                </div>
+                <button class="btn-run-primary" id="btn-save-endpoints" style="align-self:flex-start">Save Endpoints</button>
+              </div>
+            </div>
+
+            <div class="detail-card">
+              <div class="detail-card-head">Loopback Demonstration Authentication</div>
+              <div class="detail-card-body" style="display:flex;flex-direction:column;gap:12px">
+                <p style="color:var(--text-secondary);font-size:12px">
+                  Ephemeral administrator JWT session acquired via loopback-restricted <code>/api/v1/auth/demo-session</code> for audit log access.
+                </p>
+                <div>
+                  <div class="ctrl-label" style="margin-bottom:4px">Active Token Preview</div>
+                  <input type="text" class="ctrl-input" id="setting-token-preview" readonly value="Acquiring session token..." style="width:100%">
+                </div>
+                <button class="btn-secondary" id="btn-refresh-token" style="align-self:flex-start">Re-mint Demo Session</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- =========================================================================
+     EXPLOIT POC MODAL
+     ========================================================================= -->
+<div class="modal-backdrop" id="modal-exploit">
+  <div class="modal-window">
+    <div class="modal-header-bar">
+      <span class="modal-title-text">Standalone Exploit Script Generator</span>
+      <button class="modal-close-btn" id="btn-close-exploit-modal">&times;</button>
+    </div>
+    <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;gap:8px">
+        <button class="btn-secondary" id="btn-exploit-tab-curl">cURL Command</button>
+        <button class="btn-secondary" id="btn-exploit-tab-python">Python Script</button>
+        <button class="btn-run-primary" id="btn-copy-exploit-code" style="margin-left:auto">Copy Code</button>
+      </div>
+      <pre class="code-block" id="exploit-code-display" style="max-height:360px">Generating exploit payload...</pre>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-banner" id="toast-banner">
+  <span id="toast-text">Notification</span>
+</div>
+
+<script>
+"use strict";
+
+const DEFAULT_QUERY = `query GetResource($id: Int!) {
+  resource(id: $id) {
+    id
+    name
+    ownerId
+    objectType
+    secretKey
+  }
+}`;
+
+const DEFAULT_VARS = JSON.stringify({ id: 101 }, null, 2);
+
+/* ===========================================================================
+   CENTRALIZED APPLICATION STATE
+   =========================================================================== */
+const State = {
+  targetBase: window.location.origin,
+  demoToken: null,
+  activeView: "workbench",
+  activeEditorTab: "query",
+  activeInspectorTab: "overview",
+  identities: [],
+  objects: [],
+  discoveredFields: [],
+  history: [],
+  activeExecution: null,
+  runs: [],
+  activeRunId: null,
+  runPollTimer: null,
+  auditLogs: [],
+  exploitScripts: { curl: "", python: "" },
+  activeExploitTab: "curl",
+  cmQuery: null,
+  cmVars: null
+};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ===========================================================================
+   ROBUST API CLIENT
+   =========================================================================== */
+async function callApi(path, opts = {}) {
+  const url = (opts.baseUrl || State.targetBase).replace(/\/$/, "") + path;
+  const headers = Object.assign({ "Content-Type": "application/json" }, opts.headers || {});
+  if (State.demoToken && !headers["Authorization"]) {
+    headers["Authorization"] = `Bearer ${State.demoToken}`;
+  }
+  const res = await fetch(url, Object.assign({}, opts, { headers }));
+  if (!res.ok) {
+    let detail = "";
+    try { const d = await res.json(); detail = d.detail || JSON.stringify(d); } catch (e) {}
+    throw new Error(`HTTP ${res.status}: ${detail || res.statusText}`);
+  }
+  const ct = res.headers.get("content-type") || "";
+  if (ct.includes("application/json")) return res.json();
+  return res.text();
+}
+
+function notify(msg, isError = false) {
+  const el = $("toast-banner");
+  $("toast-text").textContent = msg;
+  el.className = "toast-banner visible" + (isError ? " error" : "");
+  setTimeout(() => el.className = "toast-banner", 4000);
+}
+
+/* ===========================================================================
+   CONNECTIVITY CHECK
+   =========================================================================== */
+async function checkServerHealth() {
+  const t0 = performance.now();
+  try {
+    await callApi("/health");
+    const dur = Math.round(performance.now() - t0);
+    $("conn-status-badge").className = "conn-badge";
+    $("conn-status-text").textContent = "ONLINE";
+    $("conn-latency-text").textContent = `(${dur}ms)`;
+    $("sidebar-status-dot").className = "status-dot";
+  } catch (err) {
+    $("conn-status-badge").className = "conn-badge offline";
+    $("conn-status-text").textContent = "DISCONNECTED";
+    $("conn-latency-text").textContent = "(unreachable)";
+    $("sidebar-status-dot").className = "status-dot offline";
+  }
+}
+setInterval(checkServerHealth, 12000);
+
+/* ===========================================================================
+   INITIALIZE DEMO SESSION & IDENTITIES
+   =========================================================================== */
+async function acquireDemoSession() {
+  try {
+    const res = await callApi("/api/v1/auth/demo-session", { method: "POST" });
+    State.demoToken = res.access_token;
+    $("setting-token-preview").value = res.access_token;
+    $("sidebar-role-text").textContent = `Principal: ${res.role.toUpperCase()} #${res.user_id}`;
+  } catch (err) {
+    $("setting-token-preview").value = "Unauthenticated";
+    console.warn("Could not acquire loopback demo session:", err);
+  }
+}
+
+async function loadIdentities() {
+  try {
+    const res = await callApi("/api/v1/authorization-engine/identities");
+    State.identities = res.identities || [];
+    State.objects = res.objects || [];
+
+    const sel = $("caller-identity-select");
+    sel.innerHTML = "";
+
+    State.identities.forEach(u => {
+      const opt = document.createElement("option");
+      opt.value = u.id;
+      opt.dataset.role = u.role;
+      let displayName = (u.username || "").toUpperCase();
+      if (u.id === 101 || displayName === "ALICE") displayName = "BALANILAVAN";
+      else if (u.id === 102 || displayName === "BOB") displayName = "CHINMAYANAND";
+      else if (u.id === 103 || displayName === "CHARLIE") displayName = "KAPILESH";
+      else if (u.id === 104) displayName = "SAKTHIVEL";
+      opt.textContent = `${displayName} (ID: ${u.id}, Role: ${u.role})`;
+      sel.appendChild(opt);
+    });
+
+    const anon = document.createElement("option");
+    anon.value = "anon";
+    anon.dataset.role = "anonymous";
+    anon.textContent = "ANONYMOUS (No Auth Token)";
+    sel.appendChild(anon);
+
+    if (sel.options.length > 0) sel.selectedIndex = 0;
+  } catch (err) {
+    console.error("Failed to load identities:", err);
+  }
+}
+
+/* ===========================================================================
+   SCHEMA DISCOVERY
+   =========================================================================== */
+async function discoverSchema() {
+  $("exec-status-indicator").textContent = "Syncing schema...";
+  try {
+    const data = await callApi("/api/v1/authorization-engine/discover", {
+      method: "POST",
+      body: JSON.stringify({ base_url: State.targetBase })
+    });
+    State.discoveredFields = data.fields || [];
+    $("nav-badge-schema").textContent = State.discoveredFields.length;
+    $("ops-count-pill").textContent = State.discoveredFields.length;
+
+    renderOperationsTree();
+    renderSchemaViewTable();
+    $("exec-status-indicator").textContent = "Schema ready";
+    notify(`Schema discovery complete: ${State.discoveredFields.length} operations identified`);
+  } catch (err) {
+    $("exec-status-indicator").textContent = "Discovery failed";
+    notify("Schema discovery failed: " + err.message, true);
+  }
+}
+
+function renderOperationsTree() {
+  const container = $("ops-list-container");
+  const filter = ($("ops-search-input").value || "").toLowerCase();
+
+  const filtered = State.discoveredFields.filter(f => f.path_key.toLowerCase().includes(filter));
+  if (!filtered.length) {
+    container.innerHTML = `<div class="empty-state-box"><div class="empty-state-text">No operations match search.</div></div>`;
+    return;
+  }
+
+  const queries = filtered.filter(f => !f.is_nested && f.parent_type === "Query");
+  const mutations = filtered.filter(f => !f.is_nested && f.parent_type === "Mutation");
+  const inferred = filtered.filter(f => f.is_nested);
+
+  let html = "";
+  if (queries.length) {
+    html += `<div class="ops-category"><div class="ops-category-label"><span>Root Queries</span><span>${queries.length}</span></div>`;
+    queries.forEach(f => {
+      html += `<div class="ops-item" data-path="${esc(f.path_key)}" onclick="applyOperationToEditor('${esc(f.path_key)}')">
+        <span class="badge-tag q">Q</span>
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis">${esc(f.path_key)}</span>
+        <span style="font-size:10px;color:var(--text-muted)">${f.id_argument ? `(${esc(f.id_argument)})` : ""}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (mutations.length) {
+    html += `<div class="ops-category"><div class="ops-category-label"><span>Mutations</span><span>${mutations.length}</span></div>`;
+    mutations.forEach(f => {
+      html += `<div class="ops-item" data-path="${esc(f.path_key)}" onclick="applyOperationToEditor('${esc(f.path_key)}')">
+        <span class="badge-tag m">M</span>
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis">${esc(f.path_key)}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (inferred.length) {
+    html += `<div class="ops-category"><div class="ops-category-label"><span>Inferred Paths</span><span>${inferred.length}</span></div>`;
+    inferred.forEach(f => {
+      html += `<div class="ops-item" data-path="${esc(f.path_key)}" onclick="applyOperationToEditor('${esc(f.path_key)}')">
+        <span class="badge-tag rel">REL</span>
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis">${esc(f.path_key)}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function applyOperationToEditor(pathKey) {
+  const f = State.discoveredFields.find(x => x.path_key === pathKey);
+  if (!f) return;
+
+  document.querySelectorAll(".ops-item").forEach(el => el.classList.toggle("selected", el.dataset.path === pathKey));
+  const sampleId = (State.objects[0] && State.objects[0].id) || 101;
+  let q = "";
+
+  if (f.parent_type === "Mutation") {
+    $("op-class-select").value = "mutation";
+    if (f.path_key.includes("update")) {
+      q = `mutation UpdateResource {\n  updateResource(id: ${sampleId}, name: "Updated Name") {\n    id\n    name\n    ownerId\n  }\n}`;
+    } else if (f.path_key.includes("transfer")) {
+      q = `mutation TransferOwnership {\n  transferOwnership(id: ${sampleId}, newOwnerId: 102) {\n    id\n    name\n    ownerId\n  }\n}`;
+    } else {
+      q = `mutation {\n  ${f.field_name}(id: ${sampleId}) {\n    id\n  }\n}`;
+    }
+  } else {
+    $("op-class-select").value = "query";
+    if (f.path_key === "resource") {
+      q = `query GetResource {\n  resource(id: ${sampleId}) {\n    id\n    name\n    ownerId\n    secretKey\n  }\n}`;
+    } else if (f.path_key === "user") {
+      q = `query GetUser {\n  user(id: 101) {\n    id\n    username\n    role\n    secretToken\n  }\n}`;
+    } else if (f.path_key === "user.resource") {
+      q = `query NestedResource {\n  user(id: 101) {\n    id\n    resource(id: 102) {\n      id\n      name\n      ownerId\n    }\n  }\n}`;
+    } else {
+      q = `query {\n  ${f.path_key}${f.id_argument ? `(id: ${sampleId})` : ""} {\n    id\n  }\n}`;
+    }
+  }
+
+  setEditorContent(q);
+  $("target-id-input").value = sampleId;
+  notify(`Loaded operation: ${pathKey}`);
+}
+
+/* ===========================================================================
+   CODE EDITORS (CODEMIRROR WITH TEXTAREA FALLBACK)
+   =========================================================================== */
+function initCodeEditors() {
+  const queryInit = `query GetResource {\n  resource(id: 101) {\n    id\n    name\n    ownerId\n    secretKey\n  }\n}`;
+
+  if (window.CodeMirror) {
+    try {
+      State.cmQuery = CodeMirror.fromTextArea($("cm-query-area"), {
+        lineNumbers: true,
+        mode: "javascript",
+        theme: "material-darker",
+        tabSize: 2,
+        value: queryInit
+      });
+      State.cmQuery.setValue(queryInit);
+      State.cmQuery.on("change", () => syncNativeGutter("query", State.cmQuery.getValue()));
+
+      State.cmVars = CodeMirror.fromTextArea($("cm-vars-area"), {
+        lineNumbers: true,
+        mode: "javascript",
+        theme: "material-darker",
+        tabSize: 2,
+        value: "{}"
+      });
+      State.cmVars.setValue("{}");
+
+      // Hide native wraps
+      $("native-query-wrap").style.display = "none";
+      $("native-vars-wrap").style.display = "none";
+      $("cm-query-area").style.display = "block";
+      $("cm-vars-area").style.display = "block";
+      return;
+    } catch (e) {
+      console.warn("CodeMirror initialization failed, using native fallback:", e);
+    }
+  }
+
+  // Native fallback
+  $("native-query-input").value = queryInit;
+  syncNativeGutter("query", queryInit);
+  $("native-query-input").addEventListener("input", e => syncNativeGutter("query", e.target.value));
+  $("native-vars-input").addEventListener("input", e => syncNativeGutter("vars", e.target.value));
+}
+
+function getQueryContent() {
+  if (State.cmQuery) return State.cmQuery.getValue().trim();
+  return $("native-query-input").value.trim();
+}
+
+function getVarsContent() {
+  if (State.cmVars) return State.cmVars.getValue().trim();
+  return $("native-vars-input").value.trim();
+}
+
+function setEditorContent(val) {
+  if (State.cmQuery) {
+    State.cmQuery.setValue(val);
+  } else {
+    $("native-query-input").value = val;
+    syncNativeGutter("query", val);
+  }
+}
+
+function setVarsContent(val) {
+  if (State.cmVars) {
+    State.cmVars.setValue(val);
+  } else {
+    $("native-vars-input").value = val;
+    syncNativeGutter("vars", val);
+  }
+}
+
+function syncNativeGutter(kind, text) {
+  const gutter = kind === "query" ? $("query-gutter") : $("vars-gutter");
+  if (!gutter) return;
+  const lines = text.split("\n").length;
+  let g = "";
+  for (let i = 1; i <= lines; i++) g += i + "\n";
+  gutter.textContent = g;
+}
+
+/* ===========================================================================
+   WORKBENCH EXECUTION
+   =========================================================================== */
+async function executeWorkbench() {
+  const query = getQueryContent();
+  if (!query) { notify("GraphQL query cannot be empty", true); return; }
+
+  let variables = {};
+  try {
+    variables = JSON.parse(getVarsContent() || "{}");
+  } catch (err) {
+    notify("Variables syntax error: invalid JSON", true);
+    return;
+  }
+
+  const callerSel = $("caller-identity-select");
+  const callerOpt = callerSel.options[callerSel.selectedIndex];
+  const callerId = callerOpt.value === "anon" ? null : parseInt(callerOpt.value, 10);
+  const callerRole = callerOpt.dataset.role || "user";
+  const targetId = $("target-id-input").value ? parseInt($("target-id-input").value, 10) : null;
+  const isMutation = $("op-class-select").value === "mutation";
+
+  $("btn-execute-test").disabled = true;
+  $("exec-status-indicator").textContent = "Executing request...";
+
+  try {
+    const payload = {
+      query,
+      variables,
+      caller_id: callerId,
+      caller_role: callerRole,
+      target_object_id: targetId,
+      base_url: State.targetBase,
+      is_mutation: isMutation
+    };
+
+    const res = await callApi("/api/v1/authorization-engine/execute", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    res.exec_id = res.execution_id || ("exec_" + Date.now().toString(36) + "_" + (State.history.length + 1));
+    State.activeExecution = res;
+    const badge = $("inspector-exec-badge");
+    if (badge) {
+      badge.textContent = res.exec_id;
+      badge.style.color = "var(--emerald-400)";
+    }
+    renderExecutionInspector(res);
+    renderDualComparison(res);
+    pushHistoryRecord(res);
+
+    $("exec-status-indicator").textContent = `Verdict: ${res.verdict.classification}`;
+    notify(`Execution complete: ${res.verdict.classification} (${res.exec_id})`);
+  } catch (err) {
+    $("exec-status-indicator").textContent = "Execution failed";
+    notify("Execution error: " + err.message, true);
+  } finally {
+    $("btn-execute-test").disabled = false;
+  }
+}
+
+function renderExecutionInspector(data) {
+  const container = $("inspector-content");
+  const verdict = data.verdict.classification;
+  const gw = data.gateway || {};
+  const ast = data.ast || {};
+  const owner = (data.ownership && data.ownership[0]) || {};
+
+  let bannerClass = "warn";
+  let bannerTitle = "AMBIGUOUS EVALUATION";
+  let bannerDesc = "The request generated an inconclusive authorization verdict requiring verification.";
+
+  if (verdict === "OK_DENIED") {
+    bannerClass = "pass";
+    bannerTitle = "AUTHORIZATION POLICY ENFORCED";
+    bannerDesc = "Security Gateway intercepted and deterministically dropped unauthorized access with HTTP 403 Forbidden.";
+  } else if (verdict === "OK_ALLOWED") {
+    bannerClass = "pass";
+    bannerTitle = "LEGITIMATE OWNER ACCESS PERMITTED";
+    bannerDesc = "Principal authenticated and ownership verified. Request was forwarded to the backend resolver.";
+  } else if (verdict === "CONFIRMED_VULNERABILITY") {
+    bannerClass = "fail";
+    bannerTitle = "CONFIRMED BOLA VULNERABILITY (LEAK / TAMPER)";
+    bannerDesc = "CRITICAL: Foreign object data was returned to an unauthorized caller or database state was modified!";
+  } else if (verdict === "ORACLE_FALSE_POSITIVE") {
+    bannerClass = "warn";
+    bannerTitle = "ORACLE DIVERGENCE";
+    bannerDesc = "Gateway policy rejected a request that the oracle expected to permit.";
+  }
+
+  // Switch tabs
+  switch (State.activeInspectorTab) {
+    case "response":
+      container.innerHTML = `
+        <div class="detail-card">
+          <div class="detail-card-head">
+            <span>Gateway HTTP Response</span>
+            <span class="pill-badge ${gw.status === 200 ? 'allow' : 'deny'}">HTTP ${gw.status}</span>
+          </div>
+          <div class="detail-card-body">
+            <pre class="code-block">${esc(gw.body_text || JSON.stringify(gw.body, null, 2))}</pre>
+          </div>
+        </div>
+      `;
+      break;
+
+    case "evidence":
+      container.innerHTML = `
+        <div class="detail-card">
+          <div class="detail-card-head">Deterministic PolicyEngine Evidence</div>
+          <div class="detail-card-body">
+            <div class="data-line"><span class="data-key">Execution ID:</span><span class="data-val"><code>${esc(data.exec_id || 'Active')}</code></span></div>
+            <div class="data-line"><span class="data-key">Timestamp:</span><span class="data-val">${esc(data.executed_at || 'Just now')}</span></div>
+            <div class="data-line"><span class="data-key">Decision:</span><span class="data-val">${esc(gw.decision || 'N/A')}</span></div>
+            <div class="data-line"><span class="data-key">Policy Reason:</span><span class="data-val">${esc(gw.reason || 'NONE')}</span></div>
+            <div class="data-line"><span class="data-key">Risk Score:</span><span class="data-val">${esc(gw.risk_level || '0/100')}</span></div>
+            <div class="data-line"><span class="data-key">Enforcement Point:</span><span class="data-val">Reverse-Proxy Gateway Middleware</span></div>
+            <div class="data-line"><span class="data-key">Authority:</span><span class="data-val">app.security.authorization.PolicyEngine</span></div>
+          </div>
+        </div>
+      `;
+      break;
+
+    case "ast":
+      container.innerHTML = `
+        <div class="detail-card">
+          <div class="detail-card-head">AST & Ownership Resolution</div>
+          <div class="detail-card-body">
+            <div class="data-line"><span class="data-key">Canonical Path:</span><span class="data-val">${esc(ast.canonical_paths ? ast.canonical_paths.join(', ') : 'N/A')}</span></div>
+            <div class="data-line"><span class="data-key">Caller Principal:</span><span class="data-val">User ID ${data.caller.id || 'Anon'} (${data.caller.role})</span></div>
+            <div class="data-line"><span class="data-key">Target Object ID:</span><span class="data-val">${owner.object_id || 'N/A'} (${owner.object_type || 'Resource'})</span></div>
+            <div class="data-line"><span class="data-key">True DB Owner ID:</span><span class="data-val">${owner.owner_id != null ? owner.owner_id : 'Unknown'}</span></div>
+            <div class="data-line"><span class="data-key">Resolution Status:</span><span class="data-val">${esc(owner.status || 'EXPLICIT_DB')}</span></div>
+          </div>
+        </div>
+      `;
+      break;
+
+    case "audit":
+      let auditRows = "No audit events recorded for this request.";
+      if (data.audit_events && data.audit_events.length) {
+        auditRows = data.audit_events.map(a => `
+          <div style="padding:8px;border-bottom:1px solid var(--border-subtle);font-family:var(--font-mono);font-size:11px">
+            <div>Log #${a.id} [${a.timestamp}] User ${a.user_id} (${a.role})</div>
+            <div style="color:var(--text-muted)">Op: ${a.operation} | Decision: ${a.decision} | Reason: ${a.reason}</div>
+          </div>
+        `).join("");
+      }
+      container.innerHTML = `
+        <div class="detail-card">
+          <div class="detail-card-head">Persisted Audit Records</div>
+          <div class="detail-card-body" style="padding:0">
+            ${auditRows}
+          </div>
+        </div>
+      `;
+      break;
+
+    case "request":
+      container.innerHTML = `
+        <div class="detail-card">
+          <div class="detail-card-head">HTTP Request Echo</div>
+          <div class="detail-card-body">
+            <pre class="code-block">${esc(JSON.stringify(data.request, null, 2))}</pre>
+          </div>
+        </div>
+      `;
+      break;
+
+    default: // overview
+      container.innerHTML = `
+        <div class="verdict-card ${bannerClass}">
+          <div class="verdict-card-top">
+            <span class="verdict-heading">${bannerTitle}</span>
+            <span class="pill-badge ${verdict.includes('OK') ? 'allow' : 'deny'}">${verdict}</span>
+          </div>
+          <div class="verdict-explanation">${bannerDesc}</div>
+          <div style="margin-top:10px;font-family:var(--font-mono);font-size:11px;color:var(--text-muted);display:flex;flex-wrap:wrap;gap:14px;">
+            <span>Backend ID: <strong style="color:var(--text-primary)">${esc(data.execution_id || data.exec_id || 'Active')}</strong></span>
+            <span>Audit Log: <strong style="color:var(--emerald-400)">#${data.audit_events && data.audit_events[0] ? data.audit_events[0].id : 'None'}</strong></span>
+            <span>Timestamp: <strong style="color:var(--text-primary)">${esc(data.executed_at || 'Just now')}</strong></span>
+          </div>
+        </div>
+
+        <div class="metrics-row">
+          <div class="metric-tile">
+            <span class="metric-tile-label">HTTP Status</span>
+            <span class="metric-tile-val" style="color:${gw.status === 200 ? 'var(--emerald-500)' : 'var(--rose-500)'}">HTTP ${gw.status || 'ERR'}</span>
+          </div>
+          <div class="metric-tile">
+            <span class="metric-tile-label">Decision</span>
+            <span class="metric-tile-val">${gw.decision || 'N/A'}</span>
+          </div>
+          <div class="metric-tile">
+            <span class="metric-tile-label">Latency</span>
+            <span class="metric-tile-val" style="color:var(--sky-500)">${gw.duration_ms || 0}ms</span>
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <div class="detail-card-head">
+            <span>Authorization Context</span>
+            <span class="pill-badge allow">VERIFIED</span>
+          </div>
+          <div class="detail-card-body">
+            <div class="data-line"><span class="data-key">Principal:</span><span class="data-val">User #${data.caller.id || 'Anon'} (${data.caller.role})</span></div>
+            <div class="data-line"><span class="data-key">Target Entity:</span><span class="data-val">Object #${owner.object_id || 'N/A'} (Owner: #${owner.owner_id})</span></div>
+            <div class="data-line"><span class="data-key">Canonical Path:</span><span class="data-val">${esc(ast.canonical_paths ? ast.canonical_paths.join(', ') : 'N/A')}</span></div>
+            <div class="data-line"><span class="data-key">Policy Reason:</span><span class="data-val">${esc(gw.reason || 'NONE')}</span></div>
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <div class="detail-card-head">
+            <span>Response Payload</span>
+            <span class="pill-badge neutral">${gw.status === 200 ? 'SUCCESS' : 'DENIED'}</span>
+          </div>
+          <div class="detail-card-body">
+            <pre class="code-block">${esc(gw.body_text || JSON.stringify(gw.body, null, 2))}</pre>
+          </div>
+        </div>
+      `;
+  }
+}
+
+function pushHistoryRecord(res) {
+  const item = {
+    id: State.history.length + 1,
+    time: new Date().toLocaleTimeString(),
+    caller: `User #${res.caller.id || 'Anon'} (${res.caller.role})`,
+    target: res.ownership && res.ownership[0] ? `Object #${res.ownership[0].object_id}` : "-",
+    path: (res.ast.canonical_paths || []).join(", ") || "-",
+    status: res.gateway.status,
+    decision: res.gateway.decision,
+    verdict: res.verdict.classification,
+    raw: res
+  };
+  State.history.unshift(item);
+  $("history-count-pill").textContent = State.history.length;
+
+  const tbody = $("history-table-body");
+  let html = "";
+  State.history.slice(0, 15).forEach(h => {
+    html += `<tr>
+      <td>${h.id}</td>
+      <td>${h.time}</td>
+      <td>${esc(h.caller)}</td>
+      <td>${esc(h.target)}</td>
+      <td><code>${esc(h.path)}</code></td>
+      <td><span class="pill-badge ${h.status === 200 ? 'allow' : 'deny'}">${h.status}</span></td>
+      <td><span class="pill-badge ${h.decision === 'ALLOW' ? 'allow' : 'deny'}">${h.decision || '-'}</span></td>
+      <td><span class="pill-badge ${h.verdict.includes('OK') ? 'allow' : 'deny'}">${h.verdict}</span></td>
+      <td><button class="btn-ghost-small" onclick="loadHistoryItem(${h.id})">Load</button></td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+function loadHistoryItem(id) {
+  const item = State.history.find(x => x.id === id);
+  if (!item || !item.raw) return;
+  setEditorContent(item.raw.request.payload.query);
+  State.activeExecution = item.raw;
+  const badge = $("inspector-exec-badge");
+  if (badge) {
+    badge.textContent = item.raw.exec_id || (`exec_hist_${id}`);
+    badge.style.color = "var(--sky-400)";
+  }
+  renderExecutionInspector(item.raw);
+  renderDualComparison(item.raw);
+  notify(`Loaded execution #${id} into inspector`);
+}
+
+function renderDualComparison(data) {
+  const gw = data.gateway || {};
+  const fx = data.fixture || {};
+  const ast = data.ast || {};
+  const owner = (data.ownership && data.ownership[0]) || {};
+
+  // Pipeline flow
+  $("trace-op").textContent = ast.operation || "query";
+  $("trace-path").textContent = (ast.canonical_paths || []).join(", ") || "N/A";
+  $("trace-target").textContent = `ID #${owner.object_id || 'N/A'}`;
+  $("trace-principal").textContent = `User #${data.caller.id || 'Anon'}`;
+  $("trace-decision").textContent = gw.decision || "DENY";
+  $("trace-evidence").textContent = data.verdict.fixture_leaked ? "CONFIRMED LEAK" : "POLICY ENFORCED";
+  $("trace-audit").textContent = data.audit_events && data.audit_events[0] ? `#${data.audit_events[0].id}` : "Persisted";
+
+  // Left Gateway
+  $("comp-gw-pill").textContent = `HTTP ${gw.status || 'ERR'}`;
+  $("comp-gw-pill").className = `pill-badge ${gw.status === 200 ? 'allow' : 'deny'}`;
+  $("comp-gw-dec").textContent = gw.decision || "-";
+  $("comp-gw-reason").textContent = gw.reason || "-";
+  $("comp-gw-risk").textContent = gw.risk_level || "0/100";
+  $("comp-gw-time").textContent = `${gw.duration_ms || 0}ms`;
+  $("comp-gw-body").textContent = gw.body_text || JSON.stringify(gw.body, null, 2);
+
+  // Right Fixture
+  $("comp-fx-pill").textContent = `HTTP ${fx.status || 'ERR'} ${data.verdict.fixture_leaked ? '(LEAK)' : ''}`;
+  $("comp-fx-pill").className = `pill-badge ${data.verdict.fixture_leaked ? 'deny' : 'neutral'}`;
+  $("comp-fx-leak").textContent = data.verdict.fixture_leaked ? "YES — Unauthorized Object Exposed" : "None Detected";
+  $("comp-fx-owner").textContent = fx.returned_owner_id != null ? `#${fx.returned_owner_id}` : "N/A";
+  $("comp-fx-caller").textContent = data.caller.id != null ? `User #${data.caller.id}` : "Anonymous";
+  $("comp-fx-state").textContent = data.mutation && data.mutation.state_changed ? "MUTATED (Tamper Confirmed)" : "No Change";
+  $("comp-fx-body").textContent = fx.body_text || JSON.stringify(fx.body, null, 2);
+}
+
+/* ===========================================================================
+   SCHEMA EXPLORER VIEW & INTERACTIVE VISUALIZER
+   =========================================================================== */
+const entityMeta = {
+  Query: {
+    role: "Root Operation",
+    cardinality: "1 : N (Entry points to User, Resource, Document)",
+    sinks: "None (Entry Dispatcher)",
+    rule: "Root resolver policy gating"
+  },
+  User: {
+    role: "Principal Entity",
+    cardinality: "1 : N (User owns Resources and Documents)",
+    sinks: "secret_token (Credential token)",
+    rule: "id == caller_id || role == 'admin'"
+  },
+  Resource: {
+    role: "Protected Entity",
+    cardinality: "1 : N (Resource has child Documents)",
+    sinks: "secret_key (Live API Token)",
+    rule: "owner_id == caller_id [0.95 high confidence]"
+  },
+  Document: {
+    role: "Nested Entity",
+    cardinality: "N : 1 (Document belongs to parent Resource)",
+    sinks: "Inherits parent resource boundary",
+    rule: "parent_id ➔ Resource.id ➔ Resource.owner_id"
+  }
+};
+
+function filterSchemaByType(typeName) {
+  activeSchemaTypeFilter = typeName;
+  document.querySelectorAll(".schema-graph-node").forEach(n => {
+    const isMatch = n.dataset.type === typeName;
+    n.style.borderColor = isMatch ? "var(--emerald-500)" : "var(--border-base)";
+    n.style.boxShadow = isMatch ? "0 0 10px rgba(16, 185, 129, 0.25)" : "none";
+  });
+  const statusEl = $("schema-graph-filter-status");
+  if (statusEl) statusEl.textContent = `Filtered to type: ${typeName}`;
+
+  const drawer = $("schema-node-drawer");
+  const meta = entityMeta[typeName];
+  if (drawer && meta) {
+    drawer.style.display = "block";
+    $("drawer-entity-name").textContent = `${typeName} Schema Definition`;
+    $("drawer-entity-role").textContent = meta.role;
+    $("drawer-cardinality").textContent = meta.cardinality;
+    $("drawer-sinks").textContent = meta.sinks;
+    $("drawer-rule").textContent = meta.rule;
+  }
+
+  renderSchemaViewTable();
+}
+
+function resetSchemaGraphFilter() {
+  activeSchemaTypeFilter = null;
+  document.querySelectorAll(".schema-graph-node").forEach(n => {
+    n.style.borderColor = "var(--border-base)";
+    n.style.boxShadow = "none";
+  });
+  const statusEl = $("schema-graph-filter-status");
+  if (statusEl) statusEl.textContent = "Showing All Entity Types";
+
+  const drawer = $("schema-node-drawer");
+  if (drawer) drawer.style.display = "none";
+
+  renderSchemaViewTable();
+}
+
+function renderSchemaViewTable() {
+  const tbody = $("schema-table-body");
+  const filter = ($("schema-search-input").value || "").toLowerCase();
+
+  const filtered = State.discoveredFields.filter(f => {
+    const textMatch = f.canonical_path.toLowerCase().includes(filter) || f.path_key.toLowerCase().includes(filter);
+    if (!textMatch) return false;
+    if (activeSchemaTypeFilter) {
+      return (f.target_type && f.target_type.toLowerCase() === activeSchemaTypeFilter.toLowerCase()) ||
+             (f.root_field && f.root_field.toLowerCase().includes(activeSchemaTypeFilter.toLowerCase()));
+    }
+    return true;
+  });
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted)">No schema fields match search.</td></tr>`;
+    return;
+  }
+
+  let html = "";
+  filtered.forEach(f => {
+    html += `<tr>
+      <td><code>${esc(f.canonical_path)}</code></td>
+      <td><b>${esc(f.root_field)}</b></td>
+      <td><span style="color:var(--sky-500)">${esc(f.target_type)}</span></td>
+      <td><code>${f.arguments.join(", ") || "-"}</code></td>
+      <td><code>${f.authorization_boundary_fields.join(", ") || "-"}</code></td>
+      <td>${f.is_sensitive_sink ? '<span class="pill-badge deny">SENSITIVE</span>' : '<span style="color:var(--text-dim)">-</span>'}</td>
+      <td><span class="pill-badge ${f.relationship_status === 'discovered' ? 'allow' : 'neutral'}">${f.relationship_status}</span></td>
+      <td><button class="btn-ghost-small" onclick="launchInWorkbench('${esc(f.path_key)}')">Launch</button></td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+function launchInWorkbench(pathKey) {
+  navigateToView("workbench");
+  applyOperationToEditor(pathKey);
+}
+
+/* ===========================================================================
+   TEST RUNS VIEW
+   =========================================================================== */
+async function launchSuiteRun() {
+  $("btn-run-suite-start").disabled = true;
+  $("btn-run-suite-cancel").disabled = false;
+  notify("Starting automated test runner session...");
+
+  try {
+    const res = await callApi("/api/v1/authorization-engine/run", {
+      method: "POST",
+      body: JSON.stringify({ base_url: State.targetBase, concurrency: 4, minimize: true, reproduce: true })
+    });
+    State.activeRunId = res.session_id;
+    $("run-progress-box").style.display = "block";
+    $("active-session-id").textContent = res.session_id;
+    trackSessionProgress(res.session_id);
+  } catch (err) {
+    notify("Run initiation failed: " + err.message, true);
+    $("btn-run-suite-start").disabled = false;
+    $("btn-run-suite-cancel").disabled = true;
+  }
+}
+
+function trackSessionProgress(sessionId) {
+  if (State.runPollTimer) clearInterval(State.runPollTimer);
+  State.runPollTimer = setInterval(async () => {
+    try {
+      const data = await callApi(`/api/v1/authorization-engine/runs/${sessionId}`);
+      const pct = data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0;
+      $("active-session-counts").textContent = `${data.completed} / ${data.total} tests executed`;
+      $("active-session-pct").textContent = `${pct}%`;
+      $("active-session-bar").style.width = `${pct}%`;
+
+      if (data.status === "completed" || data.status === "cancelled" || data.status === "failed") {
+        clearInterval(State.runPollTimer);
+        $("btn-run-suite-start").disabled = false;
+        $("btn-run-suite-cancel").disabled = true;
+        notify(`Run ${sessionId} finished: ${data.status.toUpperCase()}`);
+        loadRunsHistory();
+        loadFindingsData();
+      }
+    } catch (e) {
+      clearInterval(State.runPollTimer);
+    }
+  }, 1000);
+}
+
+async function cancelActiveRun() {
+  if (!State.activeRunId) return;
+  try {
+    await callApi(`/api/v1/authorization-engine/runs/${State.activeRunId}/cancel`, { method: "POST" });
+    notify(`Cancelling session ${State.activeRunId}...`);
+  } catch (err) {
+    notify("Cancel failed: " + err.message, true);
+  }
+}
+
+async function loadRunsHistory() {
+  try {
+    const res = await callApi("/api/v1/authorization-engine/runs");
+    State.runs = res.runs || [];
+    $("nav-badge-runs").textContent = State.runs.length;
+
+    const tbody = $("runs-table-body");
+    if (!State.runs.length) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted)">No test sessions recorded.</td></tr>`;
+      return;
+    }
+
+    if (!State.activeRunId && State.runs.length > 0) {
+      State.activeRunId = State.runs[0].session_id;
+    }
+    updateExportLinks(State.activeRunId);
+
+    let html = "";
+    State.runs.forEach(r => {
+      html += `<tr>
+        <td><code>${esc(r.session_id)}</code></td>
+        <td><span class="pill-badge ${r.status === 'completed' ? 'allow' : 'neutral'}">${r.status.toUpperCase()}</span></td>
+        <td>${r.total}</td>
+        <td>${r.completed}</td>
+        <td><span class="pill-badge ${r.findings > 0 ? 'deny' : 'neutral'}">${r.findings || 0}</span></td>
+        <td>${r.started_at ? new Date(r.started_at).toLocaleTimeString() : "-"}</td>
+        <td>${r.finished_at ? new Date(r.finished_at).toLocaleTimeString() : "-"}</td>
+        <td><button class="btn-ghost-small" onclick="inspectSessionDetails('${esc(r.session_id)}')">Inspect</button></td>
+      </tr>`;
+    });
+    tbody.innerHTML = html;
+  } catch (err) {
+    console.error("Failed to load runs:", err);
+  }
+}
+
+function updateExportLinks(sessionId) {
+  const sid = sessionId || State.activeRunId || (State.runs.length ? State.runs[0].session_id : null);
+  const sarifBtn = $("btn-export-sarif-session");
+  const junitBtn = $("btn-export-junit-session");
+  const badge = $("session-export-badge");
+  const desc = $("session-export-desc");
+
+  if (sid) {
+    State.activeRunId = sid;
+    if (sarifBtn) sarifBtn.href = `/api/v1/authorization-engine/runs/${sid}/export/sarif`;
+    if (junitBtn) junitBtn.href = `/api/v1/authorization-engine/runs/${sid}/export/junit`;
+    if (badge) {
+      badge.textContent = `SESSION: ${sid}`;
+      badge.className = "pill-badge allow";
+    }
+    if (desc) desc.textContent = `Ready to export live findings from active test session ${sid}.`;
+  } else {
+    if (sarifBtn) sarifBtn.href = "#";
+    if (junitBtn) junitBtn.href = "#";
+    if (badge) {
+      badge.textContent = "NO ACTIVE RUN";
+      badge.className = "pill-badge neutral";
+    }
+    if (desc) desc.textContent = "No automated test run has been executed yet. Run a test suite in 'Automated Test Runs' to generate live session artifacts.";
+  }
+}
+
+async function inspectSessionDetails(sessionId) {
+  try {
+    const session = await callApi(`/api/v1/authorization-engine/runs/${sessionId}`);
+    notify(`Loaded run details for ${sessionId}`);
+    updateExportLinks(sessionId);
+
+    if (session.findings) {
+      renderFindingsViewTable(session.findings);
+      navigateToView("findings");
+    }
+  } catch (err) {
+    notify("Inspect failed: " + err.message, true);
+  }
+}
+
+/* ===========================================================================
+   FINDINGS VIEW
+   =========================================================================== */
+async function loadFindingsData() {
+  if (!State.activeRunId && State.runs.length) {
+    State.activeRunId = State.runs[State.runs.length - 1].session_id;
+  }
+  if (!State.activeRunId) return;
+
+  try {
+    const session = await callApi(`/api/v1/authorization-engine/runs/${State.activeRunId}`);
+    renderFindingsViewTable(session.findings || []);
+  } catch (err) {
+    console.error("Failed to load findings:", err);
+  }
+}
+
+function renderFindingsViewTable(findings) {
+  $("nav-badge-findings").textContent = findings.length;
+  $("findings-count-tag").textContent = `${findings.length} Vulnerabilities`;
+
+  const tbody = $("findings-table-body");
+  if (!findings.length) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-muted)">No vulnerabilities detected. All authorization barriers enforced.</td></tr>`;
+    return;
+  }
+
+  let html = "";
+  findings.forEach(f => {
+    html += `<tr>
+      <td><code>${esc(f.test_id)}</code></td>
+      <td><span class="pill-badge ${f.severity === 'high' ? 'deny' : 'warn'}">${f.severity.toUpperCase()}</span></td>
+      <td>${esc(f.category)}</td>
+      <td><code>${esc(f.schema_path)}</code></td>
+      <td>User #${f.caller_id} (${esc(f.caller_role)})</td>
+      <td>Object #${f.target_object_id || '-'}</td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(f.evidence)}</td>
+      <td><span class="pill-badge ${f.reproducible ? 'allow' : 'neutral'}">${f.reproducible ? 'REPRODUCIBLE' : 'NO'}</span></td>
+      <td><button class="btn-ghost-small" onclick="loadFindingInWorkbench('${esc(f.test_id)}')">Reproduce</button></td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+function loadFindingInWorkbench(testId) {
+  navigateToView("workbench");
+  notify(`Loaded finding ${testId} for interactive investigation`);
+}
+
+/* ===========================================================================
+   AUDIT TRAIL VIEW
+   =========================================================================== */
+async function loadAuditRecords() {
+  try {
+    const res = await callApi("/api/v1/audit-logs");
+    State.auditLogs = res.logs || [];
+    renderAuditViewTable();
+  } catch (err) {
+    $("audit-table-body").innerHTML = `<tr><td colspan="12" style="text-align:center;padding:30px;color:var(--rose-500)">Audit log access requires Administrator authentication (${err.message}).</td></tr>`;
+  }
+}
+
+function renderAuditViewTable() {
+  const tbody = $("audit-table-body");
+  const filter = ($("audit-search-input").value || "").toLowerCase();
+  const decision = $("audit-filter-decision").value;
+
+  const filtered = State.auditLogs.filter(l => {
+    const matchesText = !filter ||
+      (l.operation && l.operation.toLowerCase().includes(filter)) ||
+      (l.path && l.path.toLowerCase().includes(filter)) ||
+      (l.reason && l.reason.toLowerCase().includes(filter));
+    const matchesDec = decision === "ALL" || l.decision === decision;
+    return matchesText && matchesDec;
+  });
+
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:30px;color:var(--text-muted)">No audit records match filters.</td></tr>`;
+    return;
+  }
+
+  let html = "";
+  filtered.forEach(l => {
+    html += `<tr>
+      <td>#${l.id}</td>
+      <td>${esc(l.timestamp)}</td>
+      <td><b>#${l.user_id}</b></td>
+      <td>${esc(l.role)}</td>
+      <td>${esc(l.operation)}</td>
+      <td>${esc(l.object_type || '-')}</td>
+      <td>${l.object_id || '-'}</td>
+      <td><code>${esc(l.path)}</code></td>
+      <td><span class="pill-badge ${l.decision === 'ALLOW' ? 'allow' : 'deny'}">${l.decision}</span></td>
+      <td>${esc(l.reason)}</td>
+      <td><span class="pill-badge ${l.risk_level === 'HIGH' ? 'deny' : 'neutral'}">${l.risk_level}</span></td>
+      <td><button class="btn-ghost-small" onclick="replayAuditRecord(${l.id})">Replay</button></td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+function replayAuditRecord(id) {
+  const l = State.auditLogs.find(x => x.id === id);
+  if (!l) return;
+  navigateToView("workbench");
+  $("caller-identity-select").value = l.user_id;
+  $("target-id-input").value = l.object_id || 101;
+  notify(`Loaded audit event #${id} into Workbench`);
+}
+
+/* ===========================================================================
+   EXPLOIT GENERATOR MODAL
+   =========================================================================== */
+async function openExploitModal() {
+  const query = getQueryContent();
+  const callerSel = $("caller-identity-select");
+  const callerOpt = callerSel.options[callerSel.selectedIndex];
+  const callerId = callerOpt.value === "anon" ? null : parseInt(callerOpt.value, 10);
+  const callerRole = callerOpt.dataset.role || "user";
+
+  $("modal-exploit").classList.add("open");
+  $("exploit-code-display").textContent = "Generating standalone cURL and Python PoC scripts...";
+
+  try {
+    const res = await callApi("/api/v1/differential-testing/generate-exploit", {
+      method: "POST",
+      body: JSON.stringify({ query, caller_id: callerId, caller_role: callerRole })
+    });
+    State.exploitScripts = res;
+    renderExploitText();
+  } catch (err) {
+    $("exploit-code-display").textContent = "PoC generation failed: " + err.message;
+  }
+}
+
+function renderExploitText() {
+  $("exploit-code-display").textContent = State.activeExploitTab === "curl" ? State.exploitScripts.curl : State.exploitScripts.python;
+}
+
+$("btn-exploit-tab-curl").addEventListener("click", () => { State.activeExploitTab = "curl"; renderExploitText(); });
+$("btn-exploit-tab-python").addEventListener("click", () => { State.activeExploitTab = "python"; renderExploitText(); });
+$("btn-close-exploit-modal").addEventListener("click", () => $("modal-exploit").classList.remove("open"));
+$("btn-copy-exploit-code").addEventListener("click", () => {
+  const text = State.activeExploitTab === "curl" ? State.exploitScripts.curl : State.exploitScripts.python;
+  navigator.clipboard.writeText(text).then(() => notify("Copied exploit code to clipboard!"));
+});
+
+/* ===========================================================================
+   GLOBAL NAVIGATION ROUTER
+   =========================================================================== */
+function navigateToView(viewKey) {
+  State.activeView = viewKey;
+  document.querySelectorAll(".view-screen").forEach(el => el.classList.remove("active"));
+  document.querySelectorAll(".nav-item button").forEach(el => el.classList.remove("active"));
+
+  const targetScreen = $(`view-${viewKey}`);
+  const targetNav = $(`btn-nav-${viewKey}`);
+
+  if (targetScreen) targetScreen.classList.add("active");
+  if (targetNav) targetNav.classList.add("active");
+
+  const titles = {
+    workbench: "Workbench",
+    comparison: "Comparison & Evidence (Gateway vs Fixture)",
+    schema: "Schema Explorer",
+    runs: "Automated Test Runs",
+    findings: "Confirmed Vulnerabilities",
+    audit: "Security Audit Trail",
+    exports: "Exports & Research",
+    research: "CCNS Research Lab — Controlled Evaluation & Evidence Correlation",
+    settings: "Settings & Configuration"
+  };
+  $("topbar-view-title").textContent = titles[viewKey] || "Workbench";
+
+  if (viewKey === "audit") loadAuditRecords();
+  if (viewKey === "runs") loadRunsHistory();
+  if (viewKey === "findings") loadFindingsData();
+  if (viewKey === "exports") updateExportLinks();
+  if (viewKey === "research" && window.initResearchLab) window.initResearchLab();
+}
+
+document.querySelectorAll("[data-view]").forEach(btn => {
+  btn.addEventListener("click", () => navigateToView(btn.dataset.view));
+});
+
+/* Editor tabs */
+document.querySelectorAll("[data-editor-tab]").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll("[data-editor-tab]").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    State.activeEditorTab = tab.dataset.editorTab;
+
+    if (State.activeEditorTab === "query") {
+      $("editor-panel-query").classList.add("active");
+      $("editor-panel-vars").classList.remove("active");
+      if (State.cmQuery) State.cmQuery.refresh();
+    } else {
+      $("editor-panel-query").classList.remove("active");
+      $("editor-panel-vars").classList.add("active");
+      if (State.cmVars) State.cmVars.refresh();
+    }
+  });
+});
+
+/* Inspector tabs */
+document.querySelectorAll("[data-insp-tab]").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll("[data-insp-tab]").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    State.activeInspectorTab = tab.dataset.inspTab;
+    if (State.activeExecution) renderExecutionInspector(State.activeExecution);
+  });
+});
+
+/* Presets */
+$("btn-preset-legit").addEventListener("click", () => {
+  $("caller-identity-select").value = "101"; // Balanilavan
+  $("target-id-input").value = "101";
+  $("op-class-select").value = "query";
+  setEditorContent(`query LegitimateOwnerAccess {\n  resource(id: 101) {\n    id\n    name\n    ownerId\n    secretKey\n  }\n}`);
+  setVarsContent("{}");
+  notify("Loaded preset: Legitimate Owner Access (Balanilavan #101 -> Resource #101)");
+});
+$("btn-preset-direct").addEventListener("click", () => {
+  $("caller-identity-select").value = "101"; // Balanilavan
+  $("target-id-input").value = "102"; // Chinmayanand's resource
+  $("op-class-select").value = "query";
+  setEditorContent(`query DirectBOLAAttack {\n  resource(id: 102) {\n    id\n    name\n    ownerId\n    secretKey\n  }\n}`);
+  setVarsContent("{}");
+  notify("Loaded preset: Direct Object BOLA (Balanilavan #101 -> Chinmayanand's Resource #102)");
+});
+$("btn-preset-nested").addEventListener("click", () => {
+  $("caller-identity-select").value = "101"; // Balanilavan
+  $("target-id-input").value = "102"; // Chinmayanand's resource
+  $("op-class-select").value = "query";
+  setEditorContent(`query NestedRelationBOLA {\n  user(id: 101) {\n    id\n    resource(id: 102) {\n      id\n      name\n      secretKey\n    }\n  }\n}`);
+  setVarsContent("{}");
+  notify("Loaded preset: Nested Relation BOLA (Balanilavan #101 -> Chinmayanand's Resource #102)");
+});
+$("btn-preset-mutation").addEventListener("click", () => {
+  $("caller-identity-select").value = "101"; // Balanilavan
+  $("target-id-input").value = "102"; // Chinmayanand's resource
+  $("op-class-select").value = "mutation";
+  setEditorContent(`mutation UnauthorizedUpdate {\n  updateResource(id: 102, name: "Tampered by Balanilavan") {\n    id\n    name\n    ownerId\n  }\n}`);
+  setVarsContent("{}");
+  notify("Loaded preset: Mutation BOLA (Balanilavan #101 attempting to tamper Chinmayanand's Resource #102)");
+});
+
+/* Query Toolbar */
+$("btn-format-query").addEventListener("click", () => {
+  const raw = getQueryContent();
+  // Basic indentation formatter
+  let formatted = "";
+  let indent = 0;
+  raw.split("\n").forEach(line => {
+    line = line.trim();
+    if (!line) return;
+    if (line.startsWith("}")) indent = Math.max(0, indent - 1);
+    formatted += "  ".repeat(indent) + line + "\n";
+    if (line.endsWith("{")) indent++;
+  });
+  setEditorContent(formatted);
+  notify("Formatted query");
+});
+
+$("btn-validate-query").addEventListener("click", () => {
+  const q = getQueryContent();
+  const openB = (q.match(/{/g) || []).length;
+  const closeB = (q.match(/}/g) || []).length;
+  if (openB === closeB && openB > 0) {
+    notify("Query syntax validated: Balanced braces");
+  } else {
+    notify("Query validation warning: Unbalanced braces", true);
+  }
+});
+
+$("btn-copy-query").addEventListener("click", () => {
+  navigator.clipboard.writeText(getQueryContent()).then(() => notify("Query copied to clipboard!"));
+});
+
+$("btn-reset-query").addEventListener("click", () => {
+  setEditorContent(`query GetResource {\n  resource(id: 101) {\n    id\n    name\n    ownerId\n    secretKey\n  }\n}`);
+  notify("Query reset to default");
+});
+
+/* Keyboard shortcut: Ctrl+Enter executes */
+window.addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && State.activeView === "workbench") {
+    e.preventDefault();
+    executeWorkbench();
+  }
+});
+
+/* Drawer toggle */
+$("drawer-toggle").addEventListener("click", () => {
+  $("wb-drawer").classList.toggle("collapsed");
+});
+
+/* Sidebar toggle */
+$("btn-toggle-sidebar").addEventListener("click", () => {
+  $("sidebar").classList.toggle("collapsed");
+});
+
+/* Action buttons */
+$("btn-execute-test").addEventListener("click", executeWorkbench);
+$("btn-minimize-test").addEventListener("click", async () => {
+  const query = getQueryContent();
+  if (!query) { notify("No query in editor to minimize", true); return; }
+  const targetId = $("target-id-input").value ? parseInt($("target-id-input").value, 10) : null;
+  notify("Minimizing query via delta-debugging...");
+  try {
+    const res = await callApi("/api/v1/differential-testing/minimize", {
+      method: "POST",
+      body: JSON.stringify({ query, target_object_id: targetId })
+    });
+    if (res.minimized) {
+      setEditorContent(res.minimized);
+      notify("Query minimized successfully via delta-debugging.");
+    }
+  } catch (e) {
+    notify("Minimization failed: " + e.message, true);
+  }
+});
+$("btn-export-exploit").addEventListener("click", openExploitModal);
+$("btn-comp-retest").addEventListener("click", () => {
+  executeWorkbench().then(() => navigateToView("comparison"));
+});
+$("btn-topbar-sync-schema").addEventListener("click", discoverSchema);
+$("btn-schema-sync").addEventListener("click", discoverSchema);
+$("btn-run-suite-start").addEventListener("click", launchSuiteRun);
+$("btn-run-suite-cancel").addEventListener("click", cancelActiveRun);
+$("btn-audit-refresh").addEventListener("click", loadAuditRecords);
+$("ops-search-input").addEventListener("input", renderOperationsTree);
+$("schema-search-input").addEventListener("input", renderSchemaViewTable);
+$("audit-search-input").addEventListener("input", renderAuditViewTable);
+$("audit-filter-decision").addEventListener("change", renderAuditViewTable);
+
+$("btn-save-endpoints").addEventListener("click", () => {
+  const gwVal = $("setting-gw-url").value.trim();
+  if (gwVal) {
+    State.targetBase = gwVal.replace(/\/graphql\/?$/, "");
+    checkServerHealth();
+    notify("Endpoints updated: " + State.targetBase);
+  }
+});
+
+$("btn-refresh-token").addEventListener("click", async () => {
+  notify("Re-minting demo session token...");
+  await acquireDemoSession();
+  notify("Acquired fresh demo session token.");
+});
+
+$("btn-export-sarif-session").addEventListener("click", e => {
+  if (!State.activeRunId) {
+    e.preventDefault();
+    notify("No active test run selected. Run an automated test suite first.", true);
+  }
+});
+
+$("btn-export-junit-session").addEventListener("click", e => {
+  if (!State.activeRunId) {
+    e.preventDefault();
+    notify("No active test run selected. Run an automated test suite first.", true);
+  }
+});
+
+$("btn-view-bench-metrics").addEventListener("click", async () => {
+  try {
+    const res = await callApi("/api/v1/differential-testing/metrics");
+    alert(`Static Research Benchmark Metrics (115 Cases):\n\nPrevention Rate: ${res.summary.vulnerability_prevention_rate_pct}%\nPath Coverage: ${res.summary.schema_path_coverage_pct}%\nReproducibility: ${res.summary.reproducibility_rate_pct}%\nMean Latency: ${res.summary.mean_latency_per_test_ms}ms`);
+  } catch (e) {
+    notify("Metrics failed: " + e.message, true);
+  }
+});
+
+$("btn-run-anomaly-scan").addEventListener("click", async () => {
+  $("anomaly-results-box").textContent = "Running statistical outlier anomaly assessment...";
+  try {
+    const res = await callApi("/api/v1/security/anomaly?window_minutes=60");
+    $("anomaly-results-box").textContent = JSON.stringify(res, null, 2);
+  } catch (e) {
+    $("anomaly-results-box").textContent = "Anomaly scan failed: " + e.message;
+  }
+});
+
+/* ===========================================================================
+   BOOTSTRAP APPLICATION
+   =========================================================================== */
+window.addEventListener("DOMContentLoaded", async () => {
+  initCodeEditors();
+  await checkServerHealth();
+  await acquireDemoSession();
+  await loadIdentities();
+  await discoverSchema();
+  await loadRunsHistory();
+});
+</script>
+<script src="/static/research_lab.js"></script>
+<script src="/static/features_extension.js"></script>
+</body>
+</html>

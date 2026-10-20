@@ -96,18 +96,21 @@ def correlate_path_decision(
     object_id: Any,
     runtime_result: Dict[str, Any],
     taint_report: Optional[Any],
+    response_path: Optional[str] = None,
 ) -> PathCorrelation:
     """
     Correlates a runtime policy decision on a path with static taint analysis findings.
+    Supports both canonical schema paths and client-aliased response paths.
     """
     decision = runtime_result.get("decision", "DENY")
     reason = runtime_result.get("reason", "UNKNOWN")
     risk_level = runtime_result.get("risk_level", "UNKNOWN")
+    effective_path = response_path or path
 
     # If taint report is missing or invalid query
     if taint_report is None or not getattr(taint_report, "is_valid_query", True):
         return PathCorrelation(
-            path=path,
+            path=effective_path,
             object_type=object_type,
             object_id=object_id,
             runtime_decision=decision,
@@ -118,9 +121,10 @@ def correlate_path_decision(
             rationale="Static taint analysis unavailable or query unanalyzable; relying solely on dynamic runtime policy.",
         )
 
-    # Locate matching finding for this path
+    # Locate matching finding for this path or response path
     matching_findings = []
-    norm_path = path.strip().lower()
+    norm_paths = {p.strip().lower() for p in (path, response_path) if p}
+
     for finding in getattr(taint_report, "findings", []):
         f_schema = getattr(finding, "schema_path", "")
         if not f_schema and hasattr(finding, "propagation_context"):
@@ -128,29 +132,33 @@ def correlate_path_decision(
         f_resp = getattr(finding, "response_path", f_schema)
         f_schema_norm = str(f_schema).strip().lower()
         f_resp_norm = str(f_resp).strip().lower()
-        if (
-            f_schema_norm == norm_path
-            or f_resp_norm == norm_path
-            or norm_path.endswith(f_schema_norm)
-            or f_schema_norm.endswith(norm_path)
-            or norm_path.endswith(f_resp_norm)
-            or f_resp_norm.endswith(norm_path)
-        ):
-            matching_findings.append(finding)
+        for np in norm_paths:
+            if (
+                f_schema_norm == np
+                or f_resp_norm == np
+                or np.endswith(f_schema_norm)
+                or f_schema_norm.endswith(np)
+                or np.endswith(f_resp_norm)
+                or f_resp_norm.endswith(np)
+            ):
+                matching_findings.append(finding)
+                break
 
     # Check propagation steps if no direct finding match on findings list
     if not matching_findings:
         for step in getattr(taint_report, "propagation_steps", []):
             s_schema = getattr(step, "schema_path", "").strip().lower()
             s_resp = getattr(step, "response_path", "").strip().lower()
-            if (
-                s_schema == norm_path
-                or s_resp == norm_path
-                or norm_path.endswith(s_schema)
-                or s_schema.endswith(norm_path)
-            ):
-                if getattr(step, "finding", None):
-                    matching_findings.append(step.finding)
+            for np in norm_paths:
+                if (
+                    s_schema == np
+                    or s_resp == np
+                    or np.endswith(s_schema)
+                    or s_schema.endswith(np)
+                ):
+                    if getattr(step, "finding", None):
+                        matching_findings.append(step.finding)
+                        break
 
     # Check for direct or indirect BOLA candidate
     bola_candidates = [
@@ -163,7 +171,7 @@ def correlate_path_decision(
         cand_val = candidate.candidate_kind.value
         if decision == "DENY":
             return PathCorrelation(
-                path=path,
+                path=effective_path,
                 object_type=object_type,
                 object_id=object_id,
                 runtime_decision=decision,
@@ -175,7 +183,7 @@ def correlate_path_decision(
             )
         else:
             return PathCorrelation(
-                path=path,
+                path=effective_path,
                 object_type=object_type,
                 object_id=object_id,
                 runtime_decision=decision,
@@ -189,7 +197,7 @@ def correlate_path_decision(
     # No BOLA candidate identified
     if decision == "ALLOW":
         return PathCorrelation(
-            path=path,
+            path=effective_path,
             object_type=object_type,
             object_id=object_id,
             runtime_decision=decision,
@@ -201,7 +209,7 @@ def correlate_path_decision(
         )
     else:
         return PathCorrelation(
-            path=path,
+            path=effective_path,
             object_type=object_type,
             object_id=object_id,
             runtime_decision=decision,

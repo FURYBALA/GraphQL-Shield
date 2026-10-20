@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "GraphQL Shield"
@@ -11,6 +11,11 @@ class Settings(BaseSettings):
     TAINT_ANALYSIS_MODE: str = "audit_only"
     ENABLE_DEMO_SESSION: bool = True  # Disabled automatically if ENVIRONMENT == "production"
     ASYNC_AUDIT_LOGGING: bool = False  # Set to True for non-blocking asynchronous queue persistence
+    ENABLE_FIELD_LEVEL_REDACTION: bool = True  # Granular field-level redaction and masking for sensitive sinks
+
+    # Authorization Research Engine
+    ENGINE_BASE_URL: str = "http://127.0.0.1:8000"  # base URL the engine executes real HTTP against
+    ENGINE_CONCURRENCY: int = 4  # bounded concurrency for live test execution
 
     # AI Security Analyst Configuration (Disabled by default)
     AI_EXPLANATION_ENABLED: bool = False
@@ -21,7 +26,6 @@ class Settings(BaseSettings):
     AI_TIMEOUT_SECONDS: float = 15.0
     AI_MAX_TOKENS: int = 1500
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()

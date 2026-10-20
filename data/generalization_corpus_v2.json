@@ -1,0 +1,1586 @@
+[
+  {
+    "id": "GEN2-MT-01",
+    "name": "Tenant 1 User accessing own tenant resource",
+    "category": "MULTI_TENANT",
+    "syntax_type": "BASIC",
+    "split": "tuning",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { resource(id: 101) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice (101, Tenant 1) accesses her own Document #101. Fully authorized under tenant and owner isolation rules.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-MT-02",
+    "name": "Tenant 2 User accessing own tenant resource",
+    "category": "MULTI_TENANT",
+    "syntax_type": "BASIC",
+    "split": "tuning",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { resource(id: 102) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Bob (102, Tenant 2) accesses his own Document #102. Fully authorized under tenant and owner rules.",
+    "target_tenant_id": "tenant-2"
+  },
+  {
+    "id": "GEN2-MT-03",
+    "name": "Cross-tenant access attempt: Bob accessing Alice document",
+    "category": "MULTI_TENANT",
+    "syntax_type": "BASIC",
+    "split": "tuning",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { resource(id: 101) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob (102) attempts to read Alice's Document #101 across tenant boundary. BOLA cross-tenant violation.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-MT-04",
+    "name": "Cross-tenant access attempt: Alice accessing Bob document",
+    "category": "MULTI_TENANT",
+    "syntax_type": "BASIC",
+    "split": "tuning",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { resource(id: 102) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice (101) attempts to read Bob's Document #102 across tenant boundary. BOLA cross-tenant violation.",
+    "target_tenant_id": "tenant-2"
+  },
+  {
+    "id": "GEN2-MT-05",
+    "name": "Held-out cross-tenant folder access: Bob accessing Alice Project Folder",
+    "category": "MULTI_TENANT",
+    "syntax_type": "BASIC",
+    "split": "held_out",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { resource(id: 201) { id name object_type } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob (102) attempts to access Alice's Folder #201 in held-out set. Cross-tenant access must be blocked.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-MT-06",
+    "name": "Held-out authorized tenant folder access: Alice accessing own Project Folder",
+    "category": "MULTI_TENANT",
+    "syntax_type": "BASIC",
+    "split": "held_out",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { resource(id: 201) { id name object_type } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice (101) accesses her own Folder #201 in held-out set. Authorized owner access.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-MT-07",
+    "name": "Admin cross-tenant oversight: Charlie reading Alice confidential document",
+    "category": "MULTI_TENANT",
+    "syntax_type": "BASIC",
+    "split": "held_out",
+    "caller": {
+      "user_id": 103,
+      "role": "admin",
+      "tenant_id": "tenant-admin"
+    },
+    "query": "query GetResourceAudit { resource(id: 101) { id name owner_id object_type } }",
+    "variables": {},
+    "operation_name": "GetResourceAudit",
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Charlie is an Admin (103). Policy Engine contains explicit ADMIN_OVERRIDE rule granting audit access.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-MT-08",
+    "name": "Anonymous caller unauthenticated cross-tenant probing",
+    "category": "MULTI_TENANT",
+    "syntax_type": "BASIC",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": null,
+      "role": "anonymous",
+      "tenant_id": null
+    },
+    "query": "query { resource(id: 101) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Anonymous caller attempts to query Resource #101 without valid tenant principal. Must be denied.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-NEST-01",
+    "name": "Authorized nested profile resource enumeration: Alice -> Alice resources",
+    "category": "NESTED_RELATIONSHIP",
+    "syntax_type": "BASIC",
+    "split": "tuning",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { user(id: 101) { id username resources { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "user"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice queries her own user node and expands nested resources. Both user and resources belong to Alice.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-NEST-02",
+    "name": "Unauthorized nested profile enumeration: Bob -> Alice profile & resources",
+    "category": "NESTED_RELATIONSHIP",
+    "syntax_type": "BASIC",
+    "split": "tuning",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { user(id: 101) { id username resources { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "user"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob queries Alice's user profile (id 101) and nested resources. Unauthorized access to peer user entity.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-NEST-03",
+    "name": "Nested parent-child folder traversal: Alice accessing own folder children",
+    "category": "NESTED_RELATIONSHIP",
+    "syntax_type": "BASIC",
+    "split": "tuning",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { resource(id: 201) { id name children { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice queries her own Folder #201 and navigates to nested child documents. All objects owned by Alice.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-NEST-04",
+    "name": "Nested parent-child folder traversal: Bob accessing Alice folder children",
+    "category": "NESTED_RELATIONSHIP",
+    "syntax_type": "BASIC",
+    "split": "tuning",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { resource(id: 201) { id name children { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob attempts to traverse Alice's Folder #201 and children. Unauthorized BOLA at root folder.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-NEST-05",
+    "name": "Nested specific resource under user: Alice accessing own child resource",
+    "category": "NESTED_RELATIONSHIP",
+    "syntax_type": "BASIC",
+    "split": "held_out",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { user(id: 101) { username resource(id: 101) { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "user",
+      "user.resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice accesses user(101) and nested resource(101). Both entities owned by Alice.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-NEST-06",
+    "name": "Nested BOLA pivot: Alice user root but accessing Bob nested resource",
+    "category": "NESTED_RELATIONSHIP",
+    "syntax_type": "BASIC",
+    "split": "held_out",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { user(id: 101) { username resource(id: 102) { id name } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "expected_paths": [
+      "user.resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice uses authorized user(101) root but queries resource(102) owned by Bob. Classical nested BOLA pivot.",
+    "target_tenant_id": "tenant-2"
+  },
+  {
+    "id": "GEN2-NEST-07",
+    "name": "Deeply nested hierarchy traversal: Bob traversing nested children of Alice",
+    "category": "NESTED_RELATIONSHIP",
+    "syntax_type": "BASIC",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { user(id: 101) { resources { children { id name secret_key } } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "User",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "user"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob attempts deep AST traversal with secret_key extraction on Alice's object tree. Blocked at root.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-NEST-08",
+    "name": "Direct child document access without parent folder: Bob accessing Plan Alpha",
+    "category": "NESTED_RELATIONSHIP",
+    "syntax_type": "BASIC",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { resource(id: 202) { id name parent_id } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 202,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Resource #202 is a child document in Alice's folder. Bob attempts direct ID access bypassing folder hierarchy.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-ALIAS-01",
+    "name": "Benign multi-alias query: Alice fetching two own resources with distinct aliases",
+    "category": "ALIAS_DISAMBIGUATION",
+    "syntax_type": "ALIAS",
+    "split": "tuning",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { note: resource(id: 101) { id name } folder: resource(id: 201) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "note",
+      "folder"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice queries two distinct resources she owns using aliases 'note' and 'folder'. Both permitted.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-ALIAS-02",
+    "name": "Single alias attack: Bob querying Alice document with alias",
+    "category": "ALIAS_DISAMBIGUATION",
+    "syntax_type": "ALIAS",
+    "split": "tuning",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { stolenDoc: resource(id: 101) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "stolenDoc"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob queries Alice's resource using alias 'stolenDoc'. Evidence correlation must attribute violation to 'stolenDoc'.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-ALIAS-03",
+    "name": "Partial authorization split: Bob queries own doc AND Alice doc in one query",
+    "category": "ALIAS_DISAMBIGUATION",
+    "syntax_type": "ALIAS",
+    "split": "held_out",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { myDoc: resource(id: 102) { id name } victimDoc: resource(id: 101) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "myDoc",
+      "victimDoc"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob mixes authorized 'myDoc' (102) with unauthorized 'victimDoc' (101). AST-runtime correlation must pinpoint 'victimDoc'.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-ALIAS-04",
+    "name": "Partial authorization split: Alice queries own doc AND Bob doc in one query",
+    "category": "ALIAS_DISAMBIGUATION",
+    "syntax_type": "ALIAS",
+    "split": "held_out",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { safeItem: resource(id: 101) { id } hostileItem: resource(id: 102) { id } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "expected_paths": [
+      "safeItem",
+      "hostileItem"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice queries safeItem (101, benign) and hostileItem (102, unauthorized). Gateway denies overall, correlation isolates hostileItem.",
+    "target_tenant_id": "tenant-2"
+  },
+  {
+    "id": "GEN2-ALIAS-05",
+    "name": "Triple alias query with 2 safe objects and 1 hostile object",
+    "category": "ALIAS_DISAMBIGUATION",
+    "syntax_type": "ALIAS",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { docA: resource(id: 101) { id } docB: resource(id: 201) { id } unauthorizedC: resource(id: 102) { id } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "expected_paths": [
+      "docA",
+      "docB",
+      "unauthorizedC"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Stress test: two allowed aliases (101, 201) and one unauthorized alias (102). Correlation precisely isolates unauthorizedC.",
+    "target_tenant_id": "tenant-2"
+  },
+  {
+    "id": "GEN2-ALIAS-06",
+    "name": "Aliased user nodes: Alice querying self vs Bob user profile",
+    "category": "ALIAS_DISAMBIGUATION",
+    "syntax_type": "ALIAS",
+    "split": "tuning",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { me: user(id: 101) { username } other: user(id: 102) { username } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "User",
+    "true_owner_id": 102,
+    "expected_paths": [
+      "me",
+      "other"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice queries self as 'me' and Bob as 'other'. 'other' is an unauthorized peer entity lookup.",
+    "target_tenant_id": "tenant-2"
+  },
+  {
+    "id": "GEN2-ALIAS-07",
+    "name": "Admin multi-alias sweep: Charlie querying Alice and Bob docs simultaneously",
+    "category": "ALIAS_DISAMBIGUATION",
+    "syntax_type": "ALIAS",
+    "split": "held_out",
+    "caller": {
+      "user_id": 103,
+      "role": "admin",
+      "tenant_id": "tenant-admin"
+    },
+    "query": "query { aliceDoc: resource(id: 101) { id name } bobDoc: resource(id: 102) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "aliceDoc",
+      "bobDoc"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Admin Charlie inspects multiple tenant docs using aliases. Both permitted under ADMIN_OVERRIDE.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-ALIAS-08",
+    "name": "Nested alias on child field under resource",
+    "category": "ALIAS_DISAMBIGUATION",
+    "syntax_type": "ALIAS",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { target: resource(id: 101) { docName: name docSecret: secret_key } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "target"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob queries Alice's document with field-level aliases docName and docSecret. Blocked at root target.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-FRAG-01",
+    "name": "Authorized named query with fragment: Alice reading own document",
+    "category": "FRAGMENTS_NAMED_OPS",
+    "syntax_type": "FRAGMENT",
+    "split": "tuning",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "fragment DocMeta on ResourceType { id name object_type } query FetchDoc { resource(id: 101) { ...DocMeta } }",
+    "variables": {},
+    "operation_name": "FetchDoc",
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Named query FetchDoc uses fragment DocMeta to retrieve own Document #101. Authorized.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-FRAG-02",
+    "name": "Unauthorized named query with fragment: Bob reading Alice document",
+    "category": "FRAGMENTS_NAMED_OPS",
+    "syntax_type": "FRAGMENT",
+    "split": "tuning",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "fragment DocMeta on ResourceType { id name object_type } query AttackDoc { resource(id: 101) { ...DocMeta } }",
+    "variables": {},
+    "operation_name": "AttackDoc",
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob executes named query AttackDoc with fragment spread on Alice's Document #101. BOLA violation.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-FRAG-03",
+    "name": "Nested fragment expansion: Alice accessing Folder with children fragment",
+    "category": "FRAGMENTS_NAMED_OPS",
+    "syntax_type": "FRAGMENT",
+    "split": "held_out",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "fragment ChildFields on ResourceType { id name } fragment FolderFields on ResourceType { id children { ...ChildFields } } query ReadFolder { resource(id: 201) { ...FolderFields } }",
+    "variables": {},
+    "operation_name": "ReadFolder",
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Chained fragment expansion (FolderFields -> ChildFields) for Alice's Folder #201. Permitted.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-FRAG-04",
+    "name": "Nested fragment expansion attack: Bob accessing Alice folder with chained fragments",
+    "category": "FRAGMENTS_NAMED_OPS",
+    "syntax_type": "FRAGMENT",
+    "split": "held_out",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "fragment ChildFields on ResourceType { id name } fragment FolderFields on ResourceType { id children { ...ChildFields } } query ExploitFolder { resource(id: 201) { ...FolderFields } }",
+    "variables": {},
+    "operation_name": "ExploitFolder",
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob attempts chained fragment traversal on Alice's Folder #201. Direct BOLA violation at resource(201).",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-FRAG-05",
+    "name": "Multiple operations in document: execution targeted by operationName",
+    "category": "FRAGMENTS_NAMED_OPS",
+    "syntax_type": "NAMED_OPERATION",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query SafeQuery { resource(id: 101) { id } } query MaliciousQuery { resource(id: 102) { id } }",
+    "variables": {},
+    "operation_name": "MaliciousQuery",
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Document contains both SafeQuery and MaliciousQuery. Client executes MaliciousQuery targeting Bob's resource 102.",
+    "target_tenant_id": "tenant-2"
+  },
+  {
+    "id": "GEN2-FRAG-06",
+    "name": "Inline fragment with type condition on sensitive field",
+    "category": "FRAGMENTS_NAMED_OPS",
+    "syntax_type": "FRAGMENT",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { resource(id: 101) { ... on ResourceType { id secret_key } } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob uses inline fragment '... on ResourceType' to extract Alice's secret_key on Resource #101. Unauthorized BOLA.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-VAR-01",
+    "name": "Variable parameterized query: Alice accessing own resource via $id variable",
+    "category": "VARIABLE_OBJECT_IDS",
+    "syntax_type": "VARIABLE",
+    "split": "tuning",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query GetResource($id: Int!) { resource(id: $id) { id name } }",
+    "variables": {
+      "id": 101
+    },
+    "operation_name": "GetResource",
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice supplies $id=101 matching her own document. Authorized.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-VAR-02",
+    "name": "Variable parameterized query: Bob accessing Alice resource via $id variable",
+    "category": "VARIABLE_OBJECT_IDS",
+    "syntax_type": "VARIABLE",
+    "split": "tuning",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query GetResource($id: Int!) { resource(id: $id) { id name } }",
+    "variables": {
+      "id": 101
+    },
+    "operation_name": "GetResource",
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob supplies $id=101 pointing to Alice's document. Parameterized BOLA attack.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-VAR-03",
+    "name": "Nested variables: Alice accessing own user profile and own resource via variables",
+    "category": "VARIABLE_OBJECT_IDS",
+    "syntax_type": "VARIABLE",
+    "split": "held_out",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query GetUserResource($uid: Int!, $rid: Int!) { user(id: $uid) { username resource(id: $rid) { id name } } }",
+    "variables": {
+      "uid": 101,
+      "rid": 101
+    },
+    "operation_name": "GetUserResource",
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "user",
+      "user.resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice supplies $uid=101 and $rid=101. Both targets owned by Alice. Authorized.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-VAR-04",
+    "name": "Nested variable BOLA injection: Alice accessing Bob resource via variable $rid",
+    "category": "VARIABLE_OBJECT_IDS",
+    "syntax_type": "VARIABLE",
+    "split": "held_out",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query GetUserResource($uid: Int!, $rid: Int!) { user(id: $uid) { username resource(id: $rid) { id name } } }",
+    "variables": {
+      "uid": 101,
+      "rid": 102
+    },
+    "operation_name": "GetUserResource",
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "expected_paths": [
+      "user.resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "INDIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice supplies $uid=101 (own profile) but injects $rid=102 (Bob's resource). Nested variable BOLA.",
+    "target_tenant_id": "tenant-2"
+  },
+  {
+    "id": "GEN2-VAR-05",
+    "name": "Variable with AST default value fallback: Bob triggering default resource ID",
+    "category": "VARIABLE_OBJECT_IDS",
+    "syntax_type": "VARIABLE",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query GetResourceDef($id: Int = 101) { resource(id: $id) { id name } }",
+    "variables": {},
+    "operation_name": "GetResourceDef",
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Query defines AST default value $id=101. Bob passes empty variables, triggering default fallback to Alice's document.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-VAR-06",
+    "name": "Sanitized variable injection: Bob passing sensitive credential token alongside target ID",
+    "category": "VARIABLE_OBJECT_IDS",
+    "syntax_type": "VARIABLE",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query GetResAuth($id: Int!, $authToken: String) { resource(id: $id) { id name } }",
+    "variables": {
+      "id": 101,
+      "authToken": "sk_super_secret_token_12345"
+    },
+    "operation_name": "GetResAuth",
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob targets Alice's document and injects authToken variable. Verifies taint sanitizer redacts token and blocks BOLA.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-EDGE-01",
+    "name": "Non-existent resource ID lookup: Alice querying non-existent ID 999",
+    "category": "OWNERSHIP_EDGE_CASES",
+    "syntax_type": "BASIC",
+    "split": "tuning",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { resource(id: 999) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 999,
+    "target_object_type": "Resource",
+    "true_owner_id": null,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Resource #999 does not exist in database. Policy Engine denies with OBJECT_NOT_FOUND. Benign non-existence, not an authorization breach.",
+    "target_tenant_id": null
+  },
+  {
+    "id": "GEN2-EDGE-02",
+    "name": "Non-existent user entity lookup: Bob querying non-existent user 888",
+    "category": "OWNERSHIP_EDGE_CASES",
+    "syntax_type": "BASIC",
+    "split": "held_out",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { user(id: 888) { id username } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 888,
+    "target_object_type": "User",
+    "true_owner_id": null,
+    "expected_paths": [
+      "user"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "DENY",
+    "rationale": "User #888 does not exist. Handled safely as OBJECT_NOT_FOUND.",
+    "target_tenant_id": null
+  },
+  {
+    "id": "GEN2-EDGE-03",
+    "name": "Negative integer ID edge case: Bob querying resource ID -1",
+    "category": "OWNERSHIP_EDGE_CASES",
+    "syntax_type": "BASIC",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { resource(id: -1) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": -1,
+    "target_object_type": "Resource",
+    "true_owner_id": null,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Negative object ID probe. Safely resolved as OBJECT_NOT_FOUND.",
+    "target_tenant_id": null
+  },
+  {
+    "id": "GEN2-EDGE-04",
+    "name": "Large 32-bit integer boundary probe: Resource ID 2147483647",
+    "category": "OWNERSHIP_EDGE_CASES",
+    "syntax_type": "BASIC",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { resource(id: 2147483647) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 2147483647,
+    "target_object_type": "Resource",
+    "true_owner_id": null,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Maximum 32-bit signed integer boundary test. Handled gracefully without crash.",
+    "target_tenant_id": null
+  },
+  {
+    "id": "GEN2-EDGE-05",
+    "name": "Non-existent resource ID lookup: Bob querying non-existent ID 999",
+    "category": "OWNERSHIP_EDGE_CASES",
+    "syntax_type": "BASIC",
+    "split": "tuning",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { resource(id: 999) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 999,
+    "target_object_type": "Resource",
+    "true_owner_id": null,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob queries non-existent ID 999. Fails closed with OBJECT_NOT_FOUND.",
+    "target_tenant_id": null
+  },
+  {
+    "id": "GEN2-EDGE-06",
+    "name": "Zero integer ID probe: Resource ID 0",
+    "category": "OWNERSHIP_EDGE_CASES",
+    "syntax_type": "BASIC",
+    "split": "held_out",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { resource(id: 0) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 0,
+    "target_object_type": "Resource",
+    "true_owner_id": null,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "DENY",
+    "rationale": "ID zero boundary test. Denied as OBJECT_NOT_FOUND.",
+    "target_tenant_id": null
+  },
+  {
+    "id": "GEN2-MUT-01",
+    "name": "Authorized mutation: Alice updating name of own Document #101",
+    "category": "MUTATION_AUTHORIZATION",
+    "syntax_type": "MUTATION",
+    "split": "tuning",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "mutation UpdateDoc { update_resource(id: 101, name: \"Alice Note Updated\") { id name } }",
+    "variables": {},
+    "operation_name": "UpdateDoc",
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "update_resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice updates her own Document #101. Valid authorized mutation; state modification is permitted.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-MUT-02",
+    "name": "Unauthorized mutation BOLA: Bob attempting to update Alice Document #101",
+    "category": "MUTATION_AUTHORIZATION",
+    "syntax_type": "MUTATION",
+    "split": "tuning",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "mutation MaliciousUpdate { update_resource(id: 101, name: \"Defaced by Bob\") { id name } }",
+    "variables": {},
+    "operation_name": "MaliciousUpdate",
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "update_resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob attempts unauthorized state change on Alice's Document #101. Mutation BOLA must be blocked with zero state change.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-MUT-03",
+    "name": "Unauthorized delete BOLA: Bob attempting to delete Alice Document #101",
+    "category": "MUTATION_AUTHORIZATION",
+    "syntax_type": "MUTATION",
+    "split": "held_out",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "mutation MaliciousDelete { delete_resource(id: 101) }",
+    "variables": {},
+    "operation_name": "MaliciousDelete",
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "delete_resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob attempts to delete Alice's Document #101. Highly destructive BOLA mutation. Must be denied.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-MUT-04",
+    "name": "Authorized delete mutation: Alice deleting own child document",
+    "category": "MUTATION_AUTHORIZATION",
+    "syntax_type": "MUTATION",
+    "split": "held_out",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "mutation AuthorizedDelete { delete_resource(id: 203) }",
+    "variables": {},
+    "operation_name": "AuthorizedDelete",
+    "target_object_id": 203,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "delete_resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Alice deletes her own child document #203. Authorized deletion (evaluated safely with fixture rollback).",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-MUT-05",
+    "name": "Unauthorized ownership transfer: Bob transferring Alice document to Bob",
+    "category": "MUTATION_AUTHORIZATION",
+    "syntax_type": "MUTATION",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "mutation HijackOwnership { transfer_ownership(id: 101, new_owner_id: 102) { id owner_id } }",
+    "variables": {},
+    "operation_name": "HijackOwnership",
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "transfer_ownership"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob attempts to hijack ownership of Alice's Document #101 via transfer_ownership mutation. Hostile BOLA.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-MUT-06",
+    "name": "Admin authorized resource update: Charlie updating Bob Document #102",
+    "category": "MUTATION_AUTHORIZATION",
+    "syntax_type": "MUTATION",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 103,
+      "role": "admin",
+      "tenant_id": "tenant-admin"
+    },
+    "query": "mutation AdminUpdate { update_resource(id: 102, name: \"Admin Verified\") { id name } }",
+    "variables": {},
+    "operation_name": "AdminUpdate",
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "expected_paths": [
+      "update_resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Admin Charlie updates Bob's Document #102. Authorized under ADMIN_OVERRIDE policy.",
+    "target_tenant_id": "tenant-2"
+  },
+  {
+    "id": "GEN2-MUT-07",
+    "name": "Authorized mutation with variable: Bob updating own document #102",
+    "category": "MUTATION_AUTHORIZATION",
+    "syntax_type": "MUTATION",
+    "split": "tuning",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "mutation UpdateMyDoc($id: Int!, $name: String!) { update_resource(id: $id, name: $name) { id name } }",
+    "variables": {
+      "id": 102,
+      "name": "Bob Budget Final"
+    },
+    "operation_name": "UpdateMyDoc",
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "expected_paths": [
+      "update_resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Bob updates his own Document #102 using parameterized mutation variables. Fully authorized.",
+    "target_tenant_id": "tenant-2"
+  },
+  {
+    "id": "GEN2-MUT-08",
+    "name": "Unauthorized mutation with variable: Alice updating Bob document #102",
+    "category": "MUTATION_AUTHORIZATION",
+    "syntax_type": "MUTATION",
+    "split": "held_out",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "mutation UpdatePeerDoc($id: Int!, $name: String!) { update_resource(id: $id, name: $name) { id name } }",
+    "variables": {
+      "id": 102,
+      "name": "Tampered By Alice"
+    },
+    "operation_name": "UpdatePeerDoc",
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "expected_paths": [
+      "update_resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Alice supplies $id=102 pointing to Bob's document in update_resource mutation. Parameterized mutation BOLA.",
+    "target_tenant_id": "tenant-2"
+  },
+  {
+    "id": "GEN2-PART-01",
+    "name": "Partial authorization: Alice reading health check (public) AND Bob document (restricted)",
+    "category": "PARTIAL_AUTHORIZATION",
+    "syntax_type": "BASIC",
+    "split": "tuning",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { health { status } resource(id: 102) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Public health field is safe, but resource(102) is unauthorized BOLA. Correlated defense isolates resource(102).",
+    "target_tenant_id": "tenant-2"
+  },
+  {
+    "id": "GEN2-PART-02",
+    "name": "Partial authorization: Bob reading health check (public) AND own document (authorized)",
+    "category": "PARTIAL_AUTHORIZATION",
+    "syntax_type": "BASIC",
+    "split": "tuning",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { health { status } resource(id: 102) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "expected_paths": [
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Both fields are authorized for Bob (public health check + own resource #102). Entire query permitted.",
+    "target_tenant_id": "tenant-2"
+  },
+  {
+    "id": "GEN2-PART-03",
+    "name": "Multi-root query: Alice reading own user entity AND Bob document",
+    "category": "PARTIAL_AUTHORIZATION",
+    "syntax_type": "BASIC",
+    "split": "held_out",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { user(id: 101) { username } resource(id: 102) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "expected_paths": [
+      "user",
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Root user(101) is authorized, but root resource(102) is unauthorized. Correlation isolates resource path.",
+    "target_tenant_id": "tenant-2"
+  },
+  {
+    "id": "GEN2-PART-04",
+    "name": "Multi-root query: Alice reading own user entity AND own document",
+    "category": "PARTIAL_AUTHORIZATION",
+    "syntax_type": "BASIC",
+    "split": "held_out",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { user(id: 101) { username } resource(id: 101) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "user",
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Both roots user(101) and resource(101) belong to Alice. Both permitted.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-PART-05",
+    "name": "Multi-root query: Bob reading own user entity AND Alice folder",
+    "category": "PARTIAL_AUTHORIZATION",
+    "syntax_type": "BASIC",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { user(id: 102) { username } resource(id: 201) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 201,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [
+      "user",
+      "resource"
+    ],
+    "ground_truth_security": "VULNERABLE",
+    "ground_truth_attack_type": "DIRECT_BOLA",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Bob's user node is safe, but Alice's folder 201 is denied. Correlation distinguishes user from resource.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-PART-06",
+    "name": "Admin multi-root query: Charlie reading user 101 and resource 102",
+    "category": "PARTIAL_AUTHORIZATION",
+    "syntax_type": "BASIC",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 103,
+      "role": "admin",
+      "tenant_id": "tenant-admin"
+    },
+    "query": "query { user(id: 101) { username } resource(id: 102) { id name } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 102,
+    "target_object_type": "Resource",
+    "true_owner_id": 102,
+    "expected_paths": [
+      "user",
+      "resource"
+    ],
+    "ground_truth_security": "BENIGN",
+    "ground_truth_attack_type": "NONE",
+    "expected_gateway_decision": "ALLOW",
+    "rationale": "Admin Charlie executes multi-root query across multiple users/resources. Allowed under ADMIN_OVERRIDE.",
+    "target_tenant_id": "tenant-2"
+  },
+  {
+    "id": "GEN2-MAL-01",
+    "name": "Malformed syntax: Unclosed selection braces",
+    "category": "MALFORMED_SYNTAX",
+    "syntax_type": "MALFORMED",
+    "split": "tuning",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "query { resource(id: 101) { id name ",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [],
+    "ground_truth_security": "MALFORMED",
+    "ground_truth_attack_type": "SYNTAX_ERROR",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Syntax error: unclosed braces. Parser must raise GraphQLSyntaxError and reject immediately.",
+    "target_tenant_id": "tenant-1"
+  },
+  {
+    "id": "GEN2-MAL-02",
+    "name": "Malformed syntax: Missing argument value",
+    "category": "MALFORMED_SYNTAX",
+    "syntax_type": "MALFORMED",
+    "split": "held_out",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { resource(id: ) { id } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": "Resource",
+    "true_owner_id": null,
+    "expected_paths": [],
+    "ground_truth_security": "MALFORMED",
+    "ground_truth_attack_type": "SYNTAX_ERROR",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Syntax error: missing argument value. Rejected as MALFORMED.",
+    "target_tenant_id": null
+  },
+  {
+    "id": "GEN2-MAL-03",
+    "name": "Malformed syntax: Empty query document",
+    "category": "MALFORMED_SYNTAX",
+    "syntax_type": "MALFORMED",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 101,
+      "role": "user",
+      "tenant_id": "tenant-1"
+    },
+    "query": "",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": null,
+    "target_object_type": "Resource",
+    "true_owner_id": null,
+    "expected_paths": [],
+    "ground_truth_security": "MALFORMED",
+    "ground_truth_attack_type": "SYNTAX_ERROR",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Empty document payload. Rejected as MALFORMED.",
+    "target_tenant_id": null
+  },
+  {
+    "id": "GEN2-MAL-04",
+    "name": "Malformed syntax: Illegal characters in query selection",
+    "category": "MALFORMED_SYNTAX",
+    "syntax_type": "MALFORMED",
+    "split": "adversarial_stress",
+    "caller": {
+      "user_id": 102,
+      "role": "user",
+      "tenant_id": "tenant-2"
+    },
+    "query": "query { resource(id: 101) { id @@@ } }",
+    "variables": {},
+    "operation_name": null,
+    "target_object_id": 101,
+    "target_object_type": "Resource",
+    "true_owner_id": 101,
+    "expected_paths": [],
+    "ground_truth_security": "MALFORMED",
+    "ground_truth_attack_type": "SYNTAX_ERROR",
+    "expected_gateway_decision": "DENY",
+    "rationale": "Syntax error: illegal tokens '@@@' inside selection set. Rejected as MALFORMED.",
+    "target_tenant_id": "tenant-1"
+  }
+]

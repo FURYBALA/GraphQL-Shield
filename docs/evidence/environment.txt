@@ -1,0 +1,18 @@
+﻿# Environment Transcript
+timestamp_utc: 2026-10-14T18:41:01Z
+python: Python 3.14.5
+platform: Microsoft Windows NT 10.0.26200.0
+
+# Installed package versions (requirements set)
+anyio==4.13.0
+fastapi==0.109.2
+graphql-core==3.2.12
+httpx==0.27.2
+pydantic==2.13.4
+pydantic-settings==2.14.1
+PyJWT==2.8.0
+pytest==9.0.3
+pytest-asyncio==1.4.0
+starlette==0.36.3
+strawberry-graphql==0.325.0
+uvicorn==0.27.1

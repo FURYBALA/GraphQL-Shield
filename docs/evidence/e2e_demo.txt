@@ -1,0 +1,77 @@
+﻿
+======================================================================
+GRAPHQL SHIELD - END-TO-END LIVE HTTP PROOF
+======================================================================
+Target base URL: http://localhost:8000
+
+======================================================================
+STEP 0 - Health check
+======================================================================
+[PASS] health endpoint reachable -> HTTP 200
+
+======================================================================
+STEP 1 - Authenticate (real login over HTTP)
+======================================================================
+[PASS] balanilavan (user 101) login -> HTTP 200
+[PASS] kapilesh (admin 103) login -> HTTP 200
+
+======================================================================
+STEP 2 - Scenario A: legitimate access (balanilavan -> own resource 101)
+======================================================================
+HTTP 200: {"data": {"resource": {"id": 101, "name": "Alice's Secret Note"}}}
+[PASS] legit access allowed (HTTP 200 + data) -> HTTP 200
+
+======================================================================
+STEP 3 - Scenario B: BOLA attack (balanilavan -> chinmayanand's resource 102)
+======================================================================
+HTTP 403: {"detail": {"decision": "DENY", "user_id": 101, "object_id": 102, "reason": "OWNERSHIP_MISMATCH", "risk_score": 90, "risk_level": "HIGH"}}
+[PASS] BOLA direct access denied -> HTTP 403
+
+======================================================================
+STEP 4 - Scenario C: nested BOLA (balanilavan -> nested resource 102)
+======================================================================
+HTTP 403: {"detail": {"decision": "DENY", "user_id": 101, "object_id": 102, "reason": "NESTED_AUTHORIZATION_VIOLATION", "risk_score": 100, "risk_level": "HIGH"}}
+[PASS] nested BOLA denied -> HTTP 403
+
+======================================================================
+STEP 5 - Scenario D: invalid JWT
+======================================================================
+HTTP 401: {"detail": "Invalid token"}
+[PASS] invalid JWT rejected (401/403) -> HTTP 401
+
+======================================================================
+STEP 6 - Persisted audit evidence (ADMIN API)
+======================================================================
+[PASS] audit-logs endpoint accessible to admin -> HTTP 200, 50 rows
+[PASS] persisted ALLOW for own resource 101
+[PASS] persisted DENY / OWNERSHIP_MISMATCH
+[PASS] persisted DENY / NESTED_AUTHORIZATION_VIOLATION
+
+Persisted audit rows (most recent first):
+  user=101 obj=101 decision=ALLOW reason=OWNER_MATCH risk=LOW
+  user=101 obj=102 decision=DENY reason=OWNERSHIP_MISMATCH risk=HIGH
+  user=101 obj=101 decision=ALLOW reason=OWNER_MATCH risk=LOW
+  user=101 obj=102 decision=DENY reason=NESTED_AUTHORIZATION_VIOLATION risk=HIGH
+  user=101 obj=101 decision=ALLOW reason=OWNER_MATCH risk=LOW
+  user=101 obj=102 decision=DENY reason=OWNERSHIP_MISMATCH risk=HIGH
+  user=101 obj=101 decision=ALLOW reason=OWNER_MATCH risk=LOW
+  user=101 obj=102 decision=DENY reason=NESTED_AUTHORIZATION_VIOLATION risk=HIGH
+  user=101 obj=102 decision=DENY reason=OWNERSHIP_MISMATCH risk=HIGH
+  user=101 obj=102 decision=DENY reason=OWNERSHIP_MISMATCH risk=HIGH
+
+======================================================================
+SUMMARY
+======================================================================
+  PASS  health endpoint reachable
+  PASS  balanilavan (user 101) login
+  PASS  kapilesh (admin 103) login
+  PASS  legit access allowed (HTTP 200 + data)
+  PASS  BOLA direct access denied
+  PASS  nested BOLA denied
+  PASS  invalid JWT rejected (401/403)
+  PASS  audit-logs endpoint accessible to admin
+  PASS  persisted ALLOW for own resource 101
+  PASS  persisted DENY / OWNERSHIP_MISMATCH
+  PASS  persisted DENY / NESTED_AUTHORIZATION_VIOLATION
+
+11/11 checks passed

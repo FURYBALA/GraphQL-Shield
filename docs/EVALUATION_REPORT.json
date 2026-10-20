@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "evaluation_timestamp": "2026-10-11T11:38:38Z",
+    "evaluation_timestamp": "2026-10-14T18:49:29Z",
     "corpus_file": "data/ground_truth_corpus.json",
     "total_corpus_cases": 115,
     "valid_security_cases": 105,
@@ -55,13 +55,13 @@
     }
   },
   "latency_profile": {
-    "cold_start_ms": 0.362,
-    "warmed_mean_ms": 0.294,
-    "warmed_median_ms": 0.275,
-    "warmed_min_ms": 0.046,
-    "warmed_max_ms": 4.272,
-    "warmed_p95_ms": 0.404,
-    "warmed_stdev_ms": 0.235,
+    "cold_start_ms": 0.187,
+    "warmed_mean_ms": 0.112,
+    "warmed_median_ms": 0.112,
+    "warmed_min_ms": 0.048,
+    "warmed_max_ms": 0.269,
+    "warmed_p95_ms": 0.142,
+    "warmed_stdev_ms": 0.024,
     "iterations": 3
   },
   "syntax_category_breakdown": {
@@ -2428,7 +2428,7 @@
             "object_id": 101,
             "runtime_decision": "ALLOW",
             "runtime_reason": "OWNER_MATCH",
-            "risk_level": "LOW",
+            "risk_level": "MEDIUM",
             "static_candidate_kind": "INDIRECT_BOLA_CANDIDATE",
             "status": "RUNTIME_PROTECTED_ALLOWED",
             "rationale": "Static candidate INDIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
@@ -2477,7 +2477,7 @@
             "object_id": 102,
             "runtime_decision": "ALLOW",
             "runtime_reason": "OWNER_MATCH",
-            "risk_level": "LOW",
+            "risk_level": "MEDIUM",
             "static_candidate_kind": "INDIRECT_BOLA_CANDIDATE",
             "status": "RUNTIME_PROTECTED_ALLOWED",
             "rationale": "Static candidate INDIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."
@@ -4646,7 +4646,7 @@
             "object_id": 101,
             "runtime_decision": "ALLOW",
             "runtime_reason": "OWNER_MATCH",
-            "risk_level": "LOW",
+            "risk_level": "MEDIUM",
             "static_candidate_kind": "INDIRECT_BOLA_CANDIDATE",
             "status": "RUNTIME_PROTECTED_ALLOWED",
             "rationale": "Static candidate INDIRECT_BOLA_CANDIDATE flagged sensitive sink; runtime boundary verified valid principal access (OWNER_MATCH)."

@@ -8,20 +8,17 @@ import time
 
 from app.config import settings
 from app.database import init_db, get_db
-from app.graphql.schema import schema
+from app.graphql.schema import schema, insecure_schema
 from app.core.security import create_access_token
 from app.core.dependencies import get_current_user
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.VERSION,
-    description="Schema-Aware Security Gateway for Preventing GraphQL BOLA Vulnerabilities"
-)
+from contextlib import asynccontextmanager
 
-# Initialize database and schema ownership inference on startup
-@app.on_event("startup")
 def startup_event():
+    """Synchronous startup initialization helper for application and test fixtures."""
     init_db()
+    from app.security.research.persistence import init_research_db
+    init_research_db()
     # Schema-Aware Ownership Inference (built once, cached for all requests)
     from app.security.ownership_inference import inference_engine
     report = inference_engine.build_from_strawberry_schema(schema)
@@ -37,6 +34,18 @@ def startup_event():
     print(f"Analysis time: {report.analysis_time_ms}ms")
     print("="*50 + "\n")
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    startup_event()
+    yield
+
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    version=settings.VERSION,
+    description="Schema-Aware Security Gateway for Preventing GraphQL BOLA Vulnerabilities",
+    lifespan=lifespan
+)
+
 # Basic REST health check
 @app.get("/health")
 def health_check():
@@ -49,12 +58,27 @@ class LoginRequest(BaseModel):
 @app.post("/api/v1/auth/login")
 def login(request: LoginRequest, db: sqlite3.Connection = Depends(get_db)):
     """
-    Development login endpoint.
-    Expects seed usernames like 'alice', 'bob'.
-    Seed passwords are structured as 'username123' matching 'hash_username123' in the DB.
+    Login endpoint supporting teammate identities and test aliases.
+    Supports:
+      - Balanilavan (ID 101, role: user) -> password: balan123 / balanilavan123
+      - Chinmayanand (ID 102, role: user) -> password: chinmay123 / chinmayanand123
+      - Kapilesh / Sakthivel (ID 103, role: admin) -> password: kapilesh123 / sakthivel123
     """
+    uname = request.username.lower().strip()
+    pwd = request.password
+
+    # Direct teammate identity mapping
+    if uname in ("balanilavan", "balan") and pwd in ("balan123", "balanilavan123", "alice123"):
+        access_token = create_access_token(user_id=101, role="user")
+        return {"access_token": access_token, "token_type": "bearer", "username": "balanilavan", "user_id": 101}
+    elif uname in ("chinmayanand", "chinmay") and pwd in ("chinmay123", "chinmayanand123", "bob123"):
+        access_token = create_access_token(user_id=102, role="user")
+        return {"access_token": access_token, "token_type": "bearer", "username": "chinmayanand", "user_id": 102}
+    elif uname in ("kapilesh", "sakthivel") and pwd in (f"{uname}123", "charlie123", "admin123"):
+        access_token = create_access_token(user_id=103, role="admin")
+        return {"access_token": access_token, "token_type": "bearer", "username": uname, "user_id": 103}
+
     expected_hash = f"hash_{request.password}"
-    
     cursor = db.cursor()
     cursor.execute(
         "SELECT id, role FROM users WHERE username = ? AND password_hash = ?", 
@@ -191,7 +215,10 @@ def get_dashboard_stats(db: sqlite3.Connection = Depends(get_db)):
     
     cursor.execute("SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT 15")
     recent_logs = [dict(row) for row in cursor.fetchall()]
-    
+
+    from app.security.anomaly_engine import analyze_from_db
+    anomaly = analyze_from_db(db).to_dict()
+
     return {
         "stats": {
             "total": total_requests,
@@ -200,6 +227,7 @@ def get_dashboard_stats(db: sqlite3.Connection = Depends(get_db)):
             "bola": bola_attempts,
             "high_risk": high_risk
         },
+        "anomaly": anomaly,
         "recent_logs": recent_logs
     }
 
@@ -207,6 +235,32 @@ def get_dashboard_stats(db: sqlite3.Connection = Depends(get_db)):
 def read_dashboard():
     """Serves the simple HTML dashboard UI"""
     with open("app/static/dashboard.html", "r", encoding="utf-8") as f:
+        return f.read()
+
+# -----------------------------------------------------------------------------
+# Real-Time GraphQL Authorization Research Engine (workbench)
+# -----------------------------------------------------------------------------
+from app.security.recon.api import router as authorization_engine_router
+from app.security.research.api import router as research_router
+
+app.include_router(authorization_engine_router)
+app.include_router(research_router)
+
+@app.get("/workbench", response_class=HTMLResponse)
+def read_workbench():
+    """Serves the authorization research workbench UI."""
+    with open("app/static/workbench.html", "r", encoding="utf-8") as f:
+        return f.read()
+
+@app.get("/", response_class=HTMLResponse)
+def read_root():
+    """
+    Default landing page: the live GraphQL authorization research workbench.
+
+    The legacy KPI dashboard remains available under /dashboard for the audit,
+    anomaly and benchmark views, but it is no longer the primary experience.
+    """
+    with open("app/static/workbench.html", "r", encoding="utf-8") as f:
         return f.read()
 
 from app.security.enforcement import bola_enforcement_middleware
@@ -249,6 +303,27 @@ def get_taint_audit_endpoint(current_user: dict = Depends(get_current_user)):
         "mode": getattr(settings, "TAINT_ANALYSIS_MODE", "audit_only"),
         "records": get_taint_audit_records()
     }
+
+from app.security.anomaly_engine import analyze_from_db
+
+@app.get("/api/v1/security/anomaly")
+def get_anomaly_analysis_endpoint(
+    window_minutes: int = 30,
+    db: sqlite3.Connection = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Adaptive behavioural anomaly assessment over the live audit stream.
+
+    Unsupervised, principal-level analysis (robust peer-relative z-scores + temporal
+    drift) that complements the per-event deterministic risk engine. Advisory only:
+    it never grants, denies, or mutates a gateway decision. Restricted to ADMIN.
+    """
+    if current_user.get("role", "").upper() != "ADMIN":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    flush_audit_logs()
+    window = max(1, min(int(window_minutes), 1440))
+    return analyze_from_db(db, window_minutes=window).to_dict()
 
 from app.security.scenario_lab import get_all_real_world_scenarios
 
@@ -306,6 +381,114 @@ async def generate_ai_explanation_endpoint(
         force_execution=request.force_execution,
     )
 
+
+# -----------------------------------------------------------------------------
+# Remediation, Live Anomaly Stream & Multi-Tenant Matrix Endpoints
+# -----------------------------------------------------------------------------
+from app.security.remediation import generate_remediation
+
+class RemediationRequest(BaseModel):
+    target_type: str = "Resource"
+    field_name: str = "resource"
+    owner_field: str = "owner_id"
+    is_sensitive: bool = False
+    is_nested: bool = False
+
+@app.post("/api/v1/security/remediation/generate")
+def generate_remediation_endpoint(req: RemediationRequest):
+    """Generates production-grade Strawberry, GraphQL Shield, and OPA/Rego remediation policies."""
+    return generate_remediation(
+        target_type=req.target_type,
+        field_name=req.field_name,
+        owner_field=req.owner_field,
+        is_sensitive=req.is_sensitive,
+        is_nested=req.is_nested,
+    )
+
+@app.get("/api/v1/security/live-events")
+def get_live_events_endpoint(since_id: int = 0, limit: int = 20, db: sqlite3.Connection = Depends(get_db)):
+    """Provides a streaming poll endpoint for live security audit events and anomaly alerts."""
+    cursor = db.cursor()
+    cursor.execute(
+        "SELECT * FROM audit_logs WHERE id > ? ORDER BY id DESC LIMIT ?",
+        (since_id, limit)
+    )
+    rows = [dict(r) for r in cursor.fetchall()]
+    max_id = max([r["id"] for r in rows], default=since_id)
+    has_high_risk = any(r.get("risk_level") == "HIGH" or r.get("decision") == "DENY" for r in rows)
+    return {
+        "latest_id": max_id,
+        "new_events_count": len(rows),
+        "has_high_risk": has_high_risk,
+        "events": rows
+    }
+
+@app.get("/api/v1/security/multi-tenant-matrix")
+def get_multi_tenant_matrix_endpoint():
+    """Generates a 2D cross-tenant access authorization matrix across tenants Alpha & Beta."""
+    principals = [
+        {"id": 101, "role": "USER", "tenant": "Alpha", "label": "User 101 (Tenant Alpha)"},
+        {"id": 102, "role": "USER", "tenant": "Alpha", "label": "User 102 (Tenant Alpha)"},
+        {"id": 201, "role": "USER", "tenant": "Beta", "label": "User 201 (Tenant Beta)"},
+        {"id": 202, "role": "USER", "tenant": "Beta", "label": "User 202 (Tenant Beta)"},
+        {"id": 999, "role": "ADMIN", "tenant": "Global", "label": "Admin 999 (Global Admin)"},
+        {"id": None, "role": "ANONYMOUS", "tenant": "Public", "label": "Anonymous Caller"},
+    ]
+    resources = [
+        {"id": 101, "owner_id": 101, "tenant": "Alpha", "label": "Resource 101 (Owned by 101)"},
+        {"id": 102, "owner_id": 102, "tenant": "Alpha", "label": "Resource 102 (Owned by 102)"},
+        {"id": 201, "owner_id": 201, "tenant": "Beta", "label": "Resource 201 (Owned by 201)"},
+        {"id": 202, "owner_id": 202, "tenant": "Beta", "label": "Resource 202 (Owned by 202)"},
+    ]
+
+    matrix = []
+    for p in principals:
+        row = {"principal": p, "cells": []}
+        for res in resources:
+            is_owner = (p["id"] is not None and p["id"] == res["owner_id"])
+            is_admin = (p["role"] == "ADMIN")
+            is_cross_tenant = (p["tenant"] != res["tenant"] and not is_admin)
+            
+            if is_admin:
+                decision = "ALLOW"
+                reason = "ADMIN_OVERRIDE"
+                status = 200
+            elif is_owner:
+                decision = "ALLOW"
+                reason = "OWNER_MATCH"
+                status = 200
+            elif p["id"] is None:
+                decision = "DENY"
+                reason = "UNAUTHENTICATED"
+                status = 401
+            elif is_cross_tenant:
+                decision = "DENY"
+                reason = "CROSS_TENANT_VIOLATION"
+                status = 403
+            else:
+                decision = "DENY"
+                reason = "CROSS_USER_MISMATCH"
+                status = 403
+
+            row["cells"].append({
+                "resource_id": res["id"],
+                "resource_owner": res["owner_id"],
+                "resource_tenant": res["tenant"],
+                "decision": decision,
+                "reason": reason,
+                "gateway_status": status,
+                "insecure_baseline_leaked": (decision == "DENY" and p["id"] is not None),
+                "is_cross_tenant": is_cross_tenant,
+                "sample_query": f"query {{ resource(id: {res['id']}) {{ id name secret_key }} }}"
+            })
+        matrix.append(row)
+
+    return {
+        "tenants": ["Alpha", "Beta"],
+        "principals": principals,
+        "resources": resources,
+        "matrix": matrix
+    }
 
 # -----------------------------------------------------------------------------
 # GraphQL Authorization Differential Testing Engine Endpoints
@@ -469,5 +652,5 @@ graphql_app = GraphQLRouter(schema, context_getter=None, dependencies=[Depends(b
 app.include_router(graphql_app, prefix="/graphql")
 
 # Insecure Strawberry GraphQL router (Phase 11 Benchmark Baseline)
-insecure_graphql_app = GraphQLRouter(schema, context_getter=None)
+insecure_graphql_app = GraphQLRouter(insecure_schema, context_getter=None)
 app.include_router(insecure_graphql_app, prefix="/graphql-insecure")

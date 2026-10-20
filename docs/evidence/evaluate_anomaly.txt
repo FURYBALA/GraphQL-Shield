@@ -1,0 +1,20 @@
+# Anomaly Evaluation Transcript
+command: python scripts/evaluate_anomaly.py
+---
+========================================================================
+Adaptive Behavioural Anomaly Detection - Empirical Evaluation
+========================================================================
+Audit events analysed: 26
+
+ User   Truth  Events  MaxStatic  Static  Adaptive   Level  Pattern
+------------------------------------------------------------------------
+  101  benign       3          0   False        34  MEDIUM  NO_PATTERN
+  102  attack      15          0   False        65    HIGH  HIGH_VELOCITY_ENUMERATION
+  103  benign       2          0   False        25     LOW  NO_PATTERN
+  104  attack       6         90    True        80    HIGH  SUSTAINED_AUTHORIZATION_ABUSE
+------------------------------------------------------------------------
+Static baseline : detection 50.0%  false-positive 0.0%
+Adaptive engine : detection 100.0%  false-positive 0.0%
+
+Written to anomaly_evaluation.json
+exit_code: 0

@@ -3,6 +3,7 @@ from graphql import (
     VariableNode,
     IntValueNode,
     StringValueNode,
+    BooleanValueNode,
     OperationDefinitionNode,
     FragmentSpreadNode,
     FragmentDefinitionNode,
@@ -15,7 +16,8 @@ MAX_AST_DEPTH = 25
 def normalize_query(query: str, variables: dict = None) -> dict | None:
     """
     Analyzes GraphQL queries to identify operation type, fields, object IDs, and paths.
-    Supports variables, nested queries, named fragments with cycle detection, and inline fragments.
+    Supports variables, nested queries, named fragments with cycle detection, inline fragments,
+    and directive-aware pruning (@skip and @include).
     
     Returns a normalized internal representation, e.g.:
     {
@@ -57,16 +59,41 @@ def normalize_query(query: str, variables: dict = None) -> dict | None:
                 for var_def in definition.variable_definitions:
                     var_name = var_def.variable.name.value
                     if var_name not in effective_vars and var_def.default_value is not None:
-                        if isinstance(var_def.default_value, (IntValueNode, StringValueNode)):
+                        if isinstance(var_def.default_value, (IntValueNode, StringValueNode, BooleanValueNode)):
                             effective_vars[var_name] = var_def.default_value.value
 
-            def visit(node, current_path, visited_fragments=None, depth=0):
+            def visit(node, current_path, visited_fragments=None, depth=0, current_resp_path=""):
                 if depth > MAX_AST_DEPTH:
                     return
 
                 if isinstance(node, FieldNode):
+                    # Directive-aware pruning: evaluate @skip and @include
+                    if node.directives:
+                        skip_field = False
+                        for directive in node.directives:
+                            d_name = directive.name.value
+                            val = None
+                            for arg in directive.arguments:
+                                if arg.name.value == "if":
+                                    if isinstance(arg.value, VariableNode):
+                                        val = effective_vars.get(arg.value.name.value)
+                                    elif hasattr(arg.value, "value"):
+                                        val = arg.value.value
+                            if d_name == "skip" and val is True:
+                                skip_field = True
+                                break
+                            elif d_name == "include" and val is False:
+                                skip_field = True
+                                break
+                        if skip_field:
+                            return
+
                     field_name = node.name.value
+                    alias_name = node.alias.value if node.alias else None
+                    resp_name = alias_name if alias_name else field_name
+
                     path = f"{current_path}.{field_name}" if current_path else field_name
+                    resp_path = f"{current_resp_path}.{resp_name}" if current_resp_path else resp_name
                     
                     obj_id = None
                     for arg in node.arguments:
@@ -109,12 +136,14 @@ def normalize_query(query: str, variables: dict = None) -> dict | None:
                             "type": inferred_type,
                             "id": obj_id,
                             "path": path,
+                            "alias": alias_name,
+                            "response_path": resp_path,
                             "has_sensitive_field": has_sensitive_field,
                         })
                         
                     if node.selection_set:
                         for selection in node.selection_set.selections:
-                            visit(selection, path, visited_fragments, depth + 1)
+                            visit(selection, path, visited_fragments, depth + 1, resp_path)
                             
                 elif isinstance(node, FragmentSpreadNode):
                     frag_name = node.name.value
@@ -128,17 +157,17 @@ def normalize_query(query: str, variables: dict = None) -> dict | None:
                         fragment = fragments[frag_name]
                         if fragment.selection_set:
                             for selection in fragment.selection_set.selections:
-                                visit(selection, current_path, active_fragments, depth + 1)
+                                visit(selection, current_path, active_fragments, depth + 1, current_resp_path)
 
                 elif isinstance(node, InlineFragmentNode):
                     # Handle inline fragments (... on Type { ... })
                     if node.selection_set:
                         for selection in node.selection_set.selections:
-                            visit(selection, current_path, visited_fragments, depth + 1)
+                            visit(selection, current_path, visited_fragments, depth + 1, current_resp_path)
 
             if definition.selection_set:
                 for selection in definition.selection_set.selections:
-                    visit(selection, "", None, 0)
+                    visit(selection, "", None, 0, "")
                     
     return result
 

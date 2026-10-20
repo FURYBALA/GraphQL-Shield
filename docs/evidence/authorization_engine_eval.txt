@@ -1,0 +1,59 @@
+========================================================================
+AUTHORIZATION ENGINE EVALUATION
+========================================================================
+Generated: 2026-10-14T19:17:14.127826+00:00
+Target:    http://engine.test
+Status:    completed
+
+Run results
+------------------------------------------------------------------------
+  total tests ................ 18
+  passed ..................... 17
+  failed ..................... 0
+  inconclusive ............... 1
+  confirmed vulnerabilities .. 0
+  false positives ............ 0
+  fixture baseline leaks ..... 11
+  mean latency (ms/test) ..... 118.12
+  suite duration (ms) ........ 812.73
+  provenance ................. {'seeded_fixture': 18}
+
+Research metrics
+------------------------------------------------------------------------
+  schema path coverage ....... 87.5% (7/8 fields)
+  seeded defect detection .... 100.0% (9/9)
+  false positive count ....... 0
+  reproducibility ............ None% (0/0 confirmed)
+  execution cost ............. 118.12 ms/test
+
+Manual baseline comparison
+------------------------------------------------------------------------
+  test cases ................. manual 4 -> engine 18
+  schema paths ............... manual 2 -> engine 7
+  seeded defects detected .... manual 2 -> engine 9
+  nested path attribution .... manual False -> engine True
+  automatic minimization ..... manual False -> engine True
+
+Per-category results
+------------------------------------------------------------------------
+  ADMIN_OVERRIDE     total=2   pass=2   fail=0   inconclusive=0   fixture_leaks=0
+  ALIAS_MASKING      total=1   pass=1   fail=0   inconclusive=0   fixture_leaks=1
+  ANONYMOUS          total=2   pass=2   fail=0   inconclusive=0   fixture_leaks=2
+  BENIGN_OWNER       total=5   pass=4   fail=0   inconclusive=1   fixture_leaks=0
+  DIRECT_BOLA        total=2   pass=2   fail=0   inconclusive=0   fixture_leaks=2
+  MUTATION_BOLA      total=2   pass=2   fail=0   inconclusive=0   fixture_leaks=2
+  NESTED_BOLA        total=3   pass=3   fail=0   inconclusive=0   fixture_leaks=3
+  VARIABLE_INJECTION total=1   pass=1   fail=0   inconclusive=0   fixture_leaks=1
+
+Exports
+------------------------------------------------------------------------
+  SARIF 2.1.0 valid=True results=0
+  JUnit XML bytes ............ 5721
+
+Notes
+------------------------------------------------------------------------
+  - Fixture leaks are demonstrated against the labelled deliberately-vulnerable local reference backend (/graphql-insecure); they are baseline sensitivity signals and are never counted as findings against the protected gateway.
+  - A finding is only confirmed from a contradiction between declared expectation and observed object identity / database state — never from an HTTP status alone.
+  - Schema discovery is performed against the live running service (standard introspection is served by the introspection-capable route because the protected gateway's AST budget deliberately rejects the standard introspection query).
+
+========================================================================

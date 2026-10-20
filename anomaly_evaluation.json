@@ -1,0 +1,77 @@
+{
+  "generated_at": "2026-10-14 18:50:53 UTC",
+  "method": "Real traffic generated through the live gateway (TestClient). Baseline = maximum single-event static risk score; adaptive = principal-level behavioural anomaly score. Flag threshold = 60 (HIGH) for both.",
+  "traffic_generated": {
+    "benign_alice_own_reads": 3,
+    "benign_admin_reads": 2,
+    "attack_direct_bola_foreign_reads": 6,
+    "attack_mass_authorized_enumeration": 15
+  },
+  "total_audit_events": 26,
+  "flag_threshold": {
+    "static": 60,
+    "adaptive": 60
+  },
+  "principals": [
+    {
+      "user_id": 101,
+      "ground_truth": "benign",
+      "events": 3,
+      "max_static_risk": 0,
+      "static_flagged": false,
+      "adaptive_score": 34,
+      "adaptive_level": "MEDIUM",
+      "adaptive_pattern": "NO_PATTERN",
+      "adaptive_flagged": false
+    },
+    {
+      "user_id": 102,
+      "ground_truth": "attack",
+      "events": 15,
+      "max_static_risk": 0,
+      "static_flagged": false,
+      "adaptive_score": 65,
+      "adaptive_level": "HIGH",
+      "adaptive_pattern": "HIGH_VELOCITY_ENUMERATION",
+      "adaptive_flagged": true
+    },
+    {
+      "user_id": 103,
+      "ground_truth": "benign",
+      "events": 2,
+      "max_static_risk": 0,
+      "static_flagged": false,
+      "adaptive_score": 25,
+      "adaptive_level": "LOW",
+      "adaptive_pattern": "NO_PATTERN",
+      "adaptive_flagged": false
+    },
+    {
+      "user_id": 104,
+      "ground_truth": "attack",
+      "events": 6,
+      "max_static_risk": 90,
+      "static_flagged": true,
+      "adaptive_score": 80,
+      "adaptive_level": "HIGH",
+      "adaptive_pattern": "SUSTAINED_AUTHORIZATION_ABUSE",
+      "adaptive_flagged": true
+    }
+  ],
+  "static_baseline_metrics": {
+    "true_positives": 1,
+    "false_negatives": 1,
+    "false_positives": 0,
+    "true_negatives": 2,
+    "detection_rate_pct": 50.0,
+    "false_positive_rate_pct": 0.0
+  },
+  "adaptive_metrics": {
+    "true_positives": 2,
+    "false_negatives": 0,
+    "false_positives": 0,
+    "true_negatives": 2,
+    "detection_rate_pct": 100.0,
+    "false_positive_rate_pct": 0.0
+  }
+}

@@ -1,6 +1,11 @@
 venv/
+.venv/
 __pycache__/
 *.pyc
 .env
 *.db
 .pytest_cache/
+node_modules/
+*.log
+
+scratch/

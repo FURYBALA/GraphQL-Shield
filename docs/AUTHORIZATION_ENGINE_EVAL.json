@@ -1,0 +1,132 @@
+{
+  "generated_at": "2026-10-14T19:17:14.127826+00:00",
+  "target": "http://engine.test",
+  "status": "completed",
+  "run": {
+    "total_tests": 18,
+    "passed": 17,
+    "failed": 0,
+    "inconclusive": 1,
+    "confirmed_vulnerabilities": 0,
+    "false_positives": 0,
+    "fixture_baseline_leaks": 11,
+    "mean_latency_ms": 118.12,
+    "duration_ms": 812.73,
+    "provenance": {
+      "seeded_fixture": 18
+    }
+  },
+  "metrics": {
+    "schema_path_coverage_pct": 87.5,
+    "schema_fields_discovered": 8,
+    "schema_paths_tested": 7,
+    "seeded_defect_detection_pct": 100.0,
+    "seeded_defects_exercised": 9,
+    "seeded_defects_blocked": 9,
+    "false_positive_count": 0,
+    "reproducibility_pct": null,
+    "confirmed_findings": 0,
+    "reproduced_findings": 0,
+    "execution_cost_ms_per_test": 118.12,
+    "execution_cost_total_ms": 812.73
+  },
+  "manual_baseline": {
+    "cases": 4,
+    "root_paths": 2,
+    "seeded_defects": 2,
+    "nested_attribution": false,
+    "minimization": false,
+    "source": "Hand-written cases documented in README / dashboard before automation."
+  },
+  "comparison": {
+    "test_cases": {
+      "manual": 4,
+      "engine": 18
+    },
+    "schema_paths": {
+      "manual": 2,
+      "engine": 7
+    },
+    "seeded_defects": {
+      "manual": 2,
+      "engine": 9
+    },
+    "nested_path_attribution": {
+      "manual": false,
+      "engine": true
+    },
+    "automatic_minimization": {
+      "manual": false,
+      "engine": true
+    }
+  },
+  "categories": {
+    "ADMIN_OVERRIDE": {
+      "total": 2,
+      "pass": 2,
+      "fail": 0,
+      "inconclusive": 0,
+      "fixture_leaks": 0
+    },
+    "ALIAS_MASKING": {
+      "total": 1,
+      "pass": 1,
+      "fail": 0,
+      "inconclusive": 0,
+      "fixture_leaks": 1
+    },
+    "ANONYMOUS": {
+      "total": 2,
+      "pass": 2,
+      "fail": 0,
+      "inconclusive": 0,
+      "fixture_leaks": 2
+    },
+    "BENIGN_OWNER": {
+      "total": 5,
+      "pass": 4,
+      "fail": 0,
+      "inconclusive": 1,
+      "fixture_leaks": 0
+    },
+    "DIRECT_BOLA": {
+      "total": 2,
+      "pass": 2,
+      "fail": 0,
+      "inconclusive": 0,
+      "fixture_leaks": 2
+    },
+    "MUTATION_BOLA": {
+      "total": 2,
+      "pass": 2,
+      "fail": 0,
+      "inconclusive": 0,
+      "fixture_leaks": 2
+    },
+    "NESTED_BOLA": {
+      "total": 3,
+      "pass": 3,
+      "fail": 0,
+      "inconclusive": 0,
+      "fixture_leaks": 3
+    },
+    "VARIABLE_INJECTION": {
+      "total": 1,
+      "pass": 1,
+      "fail": 0,
+      "inconclusive": 0,
+      "fixture_leaks": 1
+    }
+  },
+  "exports": {
+    "sarif_version": "2.1.0",
+    "sarif_results": 0,
+    "sarif_valid": true,
+    "junit_bytes": 5721
+  },
+  "notes": [
+    "Fixture leaks are demonstrated against the labelled deliberately-vulnerable local reference backend (/graphql-insecure); they are baseline sensitivity signals and are never counted as findings against the protected gateway.",
+    "A finding is only confirmed from a contradiction between declared expectation and observed object identity / database state \u2014 never from an HTTP status alone.",
+    "Schema discovery is performed against the live running service (standard introspection is served by the introspection-capable route because the protected gateway's AST budget deliberately rejects the standard introspection query)."
+  ]
+}

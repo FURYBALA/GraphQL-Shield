@@ -4,9 +4,9 @@ Live Demonstration Script:
 GraphQL BOLA Security Gateway with Context-Sensitive Taint Analysis
 
 Demonstrates the 7-step sequence required for faculty defense:
-1. Direct BOLA Attack: Alice attempts to access Bob's private resource and is denied.
-2. Nested Relationship Attack: Alice attempts unauthorized nested collection traversal and is denied.
-3. Legitimate Tenant Access: Alice accesses her own resource successfully.
+1. Direct BOLA Attack: Balanilavan attempts to access Chinmayanand's private resource and is denied.
+2. Nested Relationship Attack: Balanilavan attempts unauthorized nested collection traversal and is denied.
+3. Legitimate Tenant Access: Balanilavan accesses his own resource successfully.
 4. Aliased Query Path Attribution: Demonstrates difference between schema path and response path.
 5. Real-World Case Study: Hoppscotch-inspired controlled collection IDOR (GHSA-m5pg-r4jp-qq75 pattern).
 6. Rich Audit Explanation: Shows actual authorization boundary evidence and uncertainty disclosure.
@@ -54,17 +54,17 @@ def run_demo():
     print("Baseline Defense: Gateway Pre-Execution Policy Engine")
     print("Extension       : Context-Sensitive AST Taint Engine & Boundary Evidence Correlation")
 
-    # Authenticated Principals
-    alice_token = create_access_token(user_id=101, role="user")
-    bob_token = create_access_token(user_id=102, role="user")
-    charlie_token = create_access_token(user_id=103, role="admin")
+    # Authenticated Principals (Teammate Identities)
+    balan_token = create_access_token(user_id=101, role="user")
+    chinmay_token = create_access_token(user_id=102, role="user")
+    admin_token = create_access_token(user_id=103, role="admin")
 
     # =========================================================================
     # STEP 1: DIRECT BOLA ATTEMPT
     # =========================================================================
-    print_banner("Step 1: Direct BOLA Access Attempt (Alice -> Bob's Resource 102)")
-    print("Attacker: Alice (User ID 101, Role: user)")
-    print("Target  : Resource ID 102 (Owned by Bob, User ID 102)")
+    print_banner("Step 1: Direct BOLA Access Attempt (Balanilavan -> Chinmayanand's Resource 102)")
+    print("Attacker: Balanilavan (User ID 101, Role: user)")
+    print("Target  : Resource ID 102 (Owned by Chinmayanand, User ID 102)")
     print("Query   : query { resource(id: 102) { id name } }")
 
     query_1 = "query { resource(id: 102) { id name } }"
@@ -72,7 +72,7 @@ def run_demo():
     t0 = time.perf_counter()
     resp_1 = client.post(
         "/graphql",
-        headers={"Authorization": f"Bearer {alice_token}"},
+        headers={"Authorization": f"Bearer {balan_token}"},
         json={"query": query_1},
     )
     gw_latency_1 = (time.perf_counter() - t0) * 1000.0
@@ -101,14 +101,14 @@ def run_demo():
     # STEP 2: UNAUTHORIZED NESTED RELATIONSHIP ACCESS
     # =========================================================================
     print_banner("Step 2: Unauthorized Nested Relationship Access (Nested Collection Traversal)")
-    print("Attacker: Alice (User ID 101, Role: user)")
-    print("Target  : Bob's user node (ID 102) -> child resources collection")
+    print("Attacker: Balanilavan (User ID 101, Role: user)")
+    print("Target  : Chinmayanand's user node (ID 102) -> child resources collection")
     print("Query   : query { user(id: 102) { resources { id name } } }")
 
     query_2 = "query { user(id: 102) { resources { id name } } }"
     resp_2 = client.post(
         "/graphql",
-        headers={"Authorization": f"Bearer {alice_token}"},
+        headers={"Authorization": f"Bearer {balan_token}"},
         json={"query": query_2},
     )
     print_section("Gateway Enforcement")
@@ -125,15 +125,15 @@ def run_demo():
     # =========================================================================
     # STEP 3: LEGITIMATE TENANT ACCESS
     # =========================================================================
-    print_banner("Step 3: Legitimate Tenant Access (Alice -> Resource 101)")
-    print("Caller: Alice (User ID 101, Role: user)")
-    print("Target: Resource ID 101 (Owned by Alice)")
+    print_banner("Step 3: Legitimate Tenant Access (Balanilavan -> Resource 101)")
+    print("Caller: Balanilavan (User ID 101, Role: user)")
+    print("Target: Resource ID 101 (Owned by Balanilavan)")
     print("Query : query { resource(id: 101) { id name } }")
 
     query_3 = "query { resource(id: 101) { id name } }"
     resp_3 = client.post(
         "/graphql",
-        headers={"Authorization": f"Bearer {alice_token}"},
+        headers={"Authorization": f"Bearer {balan_token}"},
         json={"query": query_3},
     )
     print_section("Gateway Enforcement")
@@ -186,13 +186,13 @@ def run_demo():
         name="Hoppscotch Collection IDOR Reproduction",
         security_objective="Verify cross-tenant collection lookup is blocked with structured attribution",
         real_world_context="Hoppscotch GraphQL userCollection IDOR advisory GHSA-m5pg-r4jp-qq75",
-        caller_info={"user_id": 101, "username": "alice", "role": "user"},
-        resource_owner_info={"user_id": 102, "username": "bob", "role": "user", "resource_id": 102},
+        caller_info={"user_id": 101, "username": "balanilavan", "role": "user"},
+        resource_owner_info={"user_id": 102, "username": "chinmayanand", "role": "user", "resource_id": 102},
         query="query GetCollection($colId: Int!) { resource(id: $colId) { id name objectType } }",
         variables={"colId": 102},
         expected_decision="DENY",
         explanation=(
-            "Alice (101) requested Bob's collection resource (102). The pre-execution PolicyEngine resolved "
+            "Balanilavan (101) requested Chinmayanand's collection resource (102). The pre-execution PolicyEngine resolved "
             "DB ownership (owner_id=102), detected OWNERSHIP_MISMATCH, assigned High Risk (90), and dropped "
             "the request with HTTP 403. AST taint analysis identified argument $colId reaching sensitive sink "
             "ResourceType, and correlation engine confirmed TRUE_POSITIVE_BLOCKED with full boundary verification."

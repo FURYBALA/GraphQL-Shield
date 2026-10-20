@@ -1,0 +1,39 @@
+﻿# Dependency Resolution Transcript
+timestamp_utc: 2026-10-14T18:41:22Z
+command: pip install --dry-run -r requirements.txt -c constraints.txt
+---
+Requirement already satisfied: fastapi>=0.109.0 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from -r requirements.txt (line 1)) (0.109.2)
+Requirement already satisfied: uvicorn>=0.27.0 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from -r requirements.txt (line 2)) (0.27.1)
+Requirement already satisfied: strawberry-graphql>=0.325.0 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from -r requirements.txt (line 3)) (0.325.0)
+Requirement already satisfied: graphql-core>=3.2.0 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from -r requirements.txt (line 4)) (3.2.12)
+Requirement already satisfied: PyJWT>=2.8.0 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from -r requirements.txt (line 5)) (2.8.0)
+Requirement already satisfied: pydantic>=2.6.0 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from -r requirements.txt (line 6)) (2.13.4)
+Requirement already satisfied: pydantic-settings>=2.1.0 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from -r requirements.txt (line 7)) (2.14.1)
+Requirement already satisfied: httpx==0.27.2 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from -r requirements.txt (line 8)) (0.27.2)
+Requirement already satisfied: pytest>=8.0.0 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from -r requirements.txt (line 9)) (9.0.3)
+Requirement already satisfied: pytest-asyncio>=0.23.0 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from -r requirements.txt (line 10)) (1.4.0)
+Requirement already satisfied: anyio in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from httpx==0.27.2->-r requirements.txt (line 8)) (4.13.0)
+Requirement already satisfied: certifi in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from httpx==0.27.2->-r requirements.txt (line 8)) (2026.5.20)
+Requirement already satisfied: httpcore==1.* in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from httpx==0.27.2->-r requirements.txt (line 8)) (1.0.9)
+Requirement already satisfied: idna in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from httpx==0.27.2->-r requirements.txt (line 8)) (3.18)
+Requirement already satisfied: sniffio in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from httpx==0.27.2->-r requirements.txt (line 8)) (1.3.1)
+Requirement already satisfied: h11>=0.16 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from httpcore==1.*->httpx==0.27.2->-r requirements.txt (line 8)) (0.16.0)
+Requirement already satisfied: starlette<0.37.0,>=0.36.3 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from fastapi>=0.109.0->-r requirements.txt (line 1)) (0.36.3)
+Requirement already satisfied: typing-extensions>=4.8.0 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from fastapi>=0.109.0->-r requirements.txt (line 1)) (4.15.0)
+Requirement already satisfied: annotated-types>=0.6.0 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from pydantic>=2.6.0->-r requirements.txt (line 6)) (0.7.0)
+Requirement already satisfied: pydantic-core==2.46.4 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from pydantic>=2.6.0->-r requirements.txt (line 6)) (2.46.4)
+Requirement already satisfied: typing-inspection>=0.4.2 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from pydantic>=2.6.0->-r requirements.txt (line 6)) (0.4.2)
+Requirement already satisfied: click>=7.0 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from uvicorn>=0.27.0->-r requirements.txt (line 2)) (8.1.8)
+Requirement already satisfied: python-dateutil>=2.7 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from strawberry-graphql>=0.325.0->-r requirements.txt (line 3)) (2.9.0.post0)
+Requirement already satisfied: packaging>=23 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from strawberry-graphql>=0.325.0->-r requirements.txt (line 3)) (26.2)
+Requirement already satisfied: cross-web>=0.6.0 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from strawberry-graphql>=0.325.0->-r requirements.txt (line 3)) (0.7.0)
+Requirement already satisfied: python-dotenv>=0.21.0 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from pydantic-settings>=2.1.0->-r requirements.txt (line 7)) (1.2.2)
+Requirement already satisfied: colorama>=0.4 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from pytest>=8.0.0->-r requirements.txt (line 9)) (0.4.6)
+Requirement already satisfied: iniconfig>=1.0.1 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from pytest>=8.0.0->-r requirements.txt (line 9)) (2.3.0)
+Requirement already satisfied: pluggy<2,>=1.5 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from pytest>=8.0.0->-r requirements.txt (line 9)) (1.6.0)
+Requirement already satisfied: pygments>=2.7.2 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from pytest>=8.0.0->-r requirements.txt (line 9)) (2.20.0)
+Requirement already satisfied: six>=1.5 in C:\Users\balan\AppData\Local\Programs\Python\Python314\Lib\site-packages (from python-dateutil>=2.7->strawberry-graphql>=0.325.0->-r requirements.txt (line 3)) (1.17.0)
+
+[notice] A new release of pip is available: 26.1.2 -> 26.2.1
+[notice] To update, run: python.exe -m pip install --upgrade pip
+exit_code: 0

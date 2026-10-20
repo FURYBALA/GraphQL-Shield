@@ -1,0 +1,176 @@
+{
+  "schema": "graphql-shield/results-summary/v1",
+  "project": "GraphQL Shield: Schema-Aware Security Gateway for Preventing GraphQL BOLA Vulnerabilities",
+  "generated_utc": "2026-10-14T18:50:14Z",
+  "provenance": {
+    "python": "3.14.5",
+    "corpus_file": "data/ground_truth_corpus.json",
+    "evidence_transcripts": [
+      "docs/evidence/pytest_output.txt",
+      "docs/evidence/environment.txt",
+      "docs/evidence/dependency_resolution.txt",
+      "docs/evidence/e2e_demo.txt",
+      "docs/evidence/server_boot.log",
+      "docs/evidence/evaluate_taint_corpus.txt",
+      "docs/evidence/evaluate_phase_7.txt",
+      "docs/evidence/evaluate_performance.txt",
+      "docs/evidence/evaluate_anomaly.txt"
+    ],
+    "raw_artifacts": [
+      "docs/EVALUATION_REPORT.json",
+      "docs/PHASE_7_RESULTS.json",
+      "performance_evaluation.json",
+      "anomaly_evaluation.json",
+      "ownership_inference_report.json"
+    ],
+    "note": "All metrics below were reproduced locally from the scripts referenced in SETUP.md section 5. Deterministic security/attribution metrics reproduce exactly; latency metrics are machine- and warm-state-dependent and vary between runs."
+  },
+  "primary_contribution": {
+    "name": "Schema-aware GraphQL AST taint analysis with dual-path attribution through runtime authorization evidence",
+    "benchmark_corpus": {
+      "total_cases": 115,
+      "valid_security_cases": 105,
+      "vulnerable_bola_cases": 52,
+      "benign_authorized_cases": 53,
+      "malformed_syntax_cases": 10,
+      "attack_type_breakdown": {
+        "direct_bola": 29,
+        "nested_indirect_bola": 23
+      }
+    },
+    "detection_105_valid_cases": {
+      "method_1_gateway_alone": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "false_alarm_rate": 0.0,
+        "tp": 52,
+        "fp": 0,
+        "fn": 0,
+        "tn": 53
+      },
+      "method_2_static_taint_alone": {
+        "precision": 0.547,
+        "recall": 1.0,
+        "f1": 0.708,
+        "false_alarm_rate": 0.811,
+        "tp": 52,
+        "fp": 43,
+        "fn": 0,
+        "tn": 10
+      },
+      "method_3_correlated_defense": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "false_alarm_rate": 0.0,
+        "tp": 52,
+        "fp": 0,
+        "fn": 0,
+        "tn": 53
+      }
+    },
+    "path_attribution_105_valid_cases": {
+      "method_1_gateway_alone": {
+        "exact": 59,
+        "partial": 34,
+        "incorrect": 2,
+        "missing": 10,
+        "exact_rate": 0.562,
+        "semantic_exact": 69,
+        "semantic_rate": 0.657
+      },
+      "method_2_static_taint_alone": {
+        "exact": 95,
+        "partial": 10,
+        "incorrect": 0,
+        "missing": 0,
+        "exact_rate": 0.905,
+        "semantic_exact": 105,
+        "semantic_rate": 1.0
+      },
+      "method_3_correlated_defense": {
+        "exact": 95,
+        "partial": 10,
+        "incorrect": 0,
+        "missing": 0,
+        "exact_rate": 0.905,
+        "semantic_exact": 105,
+        "semantic_rate": 1.0
+      }
+    },
+    "boundary_evidence_transparency_105_valid_cases": {
+      "method_1_gateway_alone": {"criteria_represented": 0.0, "criteria_verified": 0.0, "uncertainties_stated": 0.0},
+      "method_2_static_taint_alone": {"criteria_represented": 1.0, "criteria_verified": 0.0, "uncertainties_stated": 1.0},
+      "method_3_correlated_defense": {"criteria_represented": 1.0, "criteria_verified": 0.905, "uncertainties_stated": 1.0}
+    },
+    "explanation_rubric_12_archetypes": {
+      "note": "Illustrative capability rubric; does not claim independent human review.",
+      "max_score": 8,
+      "method_1_gateway_alone": {"mean": 3.33, "percent": 41.6},
+      "method_2_static_taint_alone": {"mean": 5.75, "percent": 71.9},
+      "method_3_correlated_defense": {"mean": 7.83, "percent": 97.9}
+    },
+    "behavioral_compatibility": {
+      "valid_security_decision_preservation_rate": 1.0,
+      "valid_security_cases": 105,
+      "zero_divergence_preservation_rate": 1.0,
+      "all_cases": 115
+    }
+  },
+  "secondary_contribution": {
+    "name": "Adaptive principal-level behavioural anomaly detection (advisory only, never alters enforcement)",
+    "evaluation": {
+      "audit_events_analyzed": 26,
+      "static_per_event_baseline": {"detection_rate": 0.5, "false_positive_rate": 0.0},
+      "adaptive_engine": {"detection_rate": 1.0, "false_positive_rate": 0.0},
+      "principals": [
+        {"id": 101, "ground_truth": "benign", "events": 3, "max_static_risk": 0, "static_flagged": false, "adaptive_score": 34, "adaptive_level": "MEDIUM", "pattern": "NO_PATTERN"},
+        {"id": 102, "ground_truth": "attack", "events": 15, "max_static_risk": 0, "static_flagged": false, "adaptive_score": 65, "adaptive_level": "HIGH", "pattern": "HIGH_VELOCITY_ENUMERATION"},
+        {"id": 103, "ground_truth": "benign", "events": 2, "max_static_risk": 0, "static_flagged": false, "adaptive_score": 25, "adaptive_level": "LOW", "pattern": "NO_PATTERN"},
+        {"id": 104, "ground_truth": "attack", "events": 6, "max_static_risk": 90, "static_flagged": true, "adaptive_score": 80, "adaptive_level": "HIGH", "pattern": "SUSTAINED_AUTHORIZATION_ABUSE"}
+      ]
+    }
+  },
+  "runtime_overhead": {
+    "in_memory_ast_taint_phase_7_ms": {"cold_start": 0.192, "warmed_median": 0.112, "warmed_p95": 0.146},
+    "end_to_end_http_ms": {
+      "iterations_per_type": 500,
+      "total_requests": 2000,
+      "without_gateway_avg": 9.276,
+      "with_gateway_avg": 26.26,
+      "authorization_decision_overhead": 16.984
+    },
+    "note": "Latency is machine- and warm-state-dependent. Observed authorization-decision overhead across runs is approximately 15-17 ms on the evaluation host; verify on your own hardware with `python -m scripts.evaluate_performance`."
+  },
+  "security_enforcement_under_load": {
+    "total_legitimate_requests": 500,
+    "total_bola_attempts": 500,
+    "insecure_endpoint": {"blocked_bola": 0, "detection_rate": 0.0},
+    "secure_gateway": {"blocked_bola": 500, "detection_rate": 1.0, "false_positives": 0, "false_positive_rate": 0.0}
+  },
+  "end_to_end_live_proof": {
+    "script": "scripts/e2e_live_proof.py",
+    "checks_passed": 11,
+    "checks_total": 11,
+    "scenarios": [
+      "health endpoint reachable",
+      "alice (user 101) real HTTP login",
+      "charlie (admin 103) real HTTP login",
+      "legitimate access allowed (HTTP 200 + data)",
+      "direct BOLA denied (HTTP 403, OWNERSHIP_MISMATCH)",
+      "nested BOLA denied (HTTP 403, NESTED_AUTHORIZATION_VIOLATION)",
+      "invalid JWT rejected (HTTP 401)",
+      "admin audit API accessible",
+      "persisted ALLOW for own resource 101",
+      "persisted DENY / OWNERSHIP_MISMATCH",
+      "persisted DENY / NESTED_AUTHORIZATION_VIOLATION"
+    ]
+  },
+  "test_suite": {"files": 26, "collected": 226, "passed": 226, "failed": 0},
+  "measurement_notes": [
+    "Deterministic metrics (detection, path attribution, boundary evidence, anomaly) reproduced exactly across runs.",
+    "Latency figures vary by host, CPU warm state and background load; treat them as representative, not exact.",
+    "The 12-scenario real-world dataset and the live-LLM explanation experiment are documented but the latter is formally unexecuted (no API credentials)."
+  ]
+}

@@ -1,0 +1,30 @@
+# ==============================================================================
+# GraphQL Shield - Tested Dependency Constraints
+# ==============================================================================
+# Exact versions that were installed and validated in a clean environment.
+#
+# Validation environment:
+#   - Python 3.14.5 (Windows)
+#   - Full test suite: `python -m pytest tests/ -q`  ->  226 passed
+#
+# Usage (preferred, reproducible):
+#   pip install -r requirements.txt -c constraints.txt
+#
+# These pins are intentionally exact so that an external reviewer reproduces the
+# same dependency graph that the results were produced with. They are NOT added
+# to requirements.txt directly so that the project keeps broad compatibility
+# ranges there and stays dependency-light.
+# ==============================================================================
+
+fastapi==0.109.2
+uvicorn==0.27.1
+strawberry-graphql==0.325.0
+graphql-core==3.2.12
+PyJWT==2.8.0
+pydantic==2.13.4
+pydantic-settings==2.14.1
+starlette==0.36.3
+anyio==4.13.0
+httpx==0.27.2
+pytest==9.0.3
+pytest-asyncio==1.4.0

@@ -4,9 +4,9 @@
         "total_requests": 2000
     },
     "performance_latency_ms": {
-        "without_gateway_avg_ms": 7.325,
-        "with_gateway_avg_ms": 16.445,
-        "authorization_decision_overhead_ms": 9.121
+        "without_gateway_avg_ms": 9.276,
+        "with_gateway_avg_ms": 26.26,
+        "authorization_decision_overhead_ms": 16.984
     },
     "security_metrics": {
         "total_legitimate_requests": 500,

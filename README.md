@@ -3,7 +3,7 @@
 **Project Title:** GraphQL Shield: Schema-Aware Security Gateway for Preventing GraphQL BOLA Vulnerabilities  
 **Course/Domain:** Computer Communication and Network Security  
 **Team:** Agnihotram Chinmayanand, B.V.Balanilavan, Kapilesh.N, Sakthivel  
-**Status:** ✅ 100% Complete (Phases 1-12)
+**Status:** ✅ Complete — core gateway (Phases 1–14), differential-testing engine, adaptive anomaly detection, multi-tenant identity integrity, and full test suite (299 passing)
 
 ---
 
@@ -31,7 +31,7 @@ Traditional GraphQL implementations struggle with **Broken Object Level Authoriz
 
 ### **Authentication**
 - `POST /api/v1/auth/login`
-  - Body: `{"username": "alice", "password": "alice123"}`
+  - Body: `{"username": "balanilavan", "password": "balan123"}` (or alias `{"username": "alice", "password": "alice123"}`)
   - Returns: `{"access_token": "...", "token_type": "bearer"}`
 
 ### **GraphQL Endpoints**
@@ -48,11 +48,26 @@ Traditional GraphQL implementations struggle with **Broken Object Level Authoriz
 - `GET /api/v1/audit-logs`
   - Secured audit feed. **Requires `ADMIN` JWT role.** Returns recent security events.
 - `GET /api/v1/security/schema-ownership`
-  - Schema inference inspection feed. **Requires `ADMIN` JWT role.** Returns the ownership rules the gateway inferred from the GraphQL schema, the rejected/ambiguous relationships, and the priority order used during authorization (see section 6).
+  - Schema inference inspection feed. **Requires `ADMIN` JWT role.** Returns the ownership rules the gateway inferred from the GraphQL schema, the rejected/ambiguous relationships, and the priority order used during authorization (see section 7).
+- `GET /api/v1/security/anomaly`
+  - Adaptive behavioural anomaly feed. **Requires `ADMIN` JWT role.** Returns the per-principal anomaly scores derived from the live audit stream (see section 8).
 
 ---
 
 ## 🚀 3. Setup Instructions
+
+**Fastest path (one command: creates a virtualenv, installs a validated dependency set, seeds the database, and runs the tests):**
+
+```powershell
+# Windows (PowerShell)
+powershell -ExecutionPolicy Bypass -File scripts/bootstrap.ps1
+```
+```bash
+# Linux / macOS / Git Bash / WSL
+bash scripts/bootstrap.sh
+```
+
+**Manual path:**
 
 1. **Clone the Repository**
    ```bash
@@ -60,22 +75,23 @@ Traditional GraphQL implementations struggle with **Broken Object Level Authoriz
    cd GraphQL-Shield
    ```
 
-2. **Setup Virtual Environment**
+2. **Create and activate a virtual environment**
    ```bash
-   python -m venv venv
+   python -m venv .venv
    # Windows:
-   venv\Scripts\activate
+   .venv\Scripts\activate
    # Mac/Linux:
-   source venv/bin/activate
+   source .venv/bin/activate
    ```
 
-3. **Install Dependencies**
+3. **Install dependencies (reproducible, constraint-pinned)**
    ```bash
-   pip install -r requirements.txt
+   pip install -r requirements.txt -c constraints.txt
    ```
 
-4. **Initialize Database**
+4. **Create the environment file and initialize the database**
    ```bash
+   cp .env.example .env
    python -m app.seed
    ```
    *(This creates `shield.db` and populates `users`, `objects`, and ownership structures).*
@@ -85,24 +101,31 @@ Traditional GraphQL implementations struggle with **Broken Object Level Authoriz
    uvicorn app.main:app --reload
    ```
 
+> Full setup, reproduction steps, and troubleshooting: **[`SETUP.md`](./SETUP.md)**.
+> Canonical, machine-readable metrics: **[`docs/RESULTS_SUMMARY.json`](./docs/RESULTS_SUMMARY.json)**.
+
 ---
 
 ## 🧪 4. Test Instructions
 
-The system features an automated test suite covering authentication, authorization, BOLA (direct, nested, multi-ID, variable and fragment based), the policy engine, risk scoring, audit logging, dashboards, and schema-aware ownership inference.
+The system features an automated test suite covering authentication, authorization, BOLA (direct, nested, multi-ID, variable and fragment based), the policy engine, risk scoring, audit logging, dashboards, schema-aware ownership inference, multi-tenant boundaries, and a dedicated 15-test audit remediation suite.
 
 Current totals (run `python -m pytest tests/ -q`):
 
 | Metric | Count |
 |---|---|
-| Tests collected | 86 |
-| Passing | 86 |
+| Test files | 28 |
+| Tests collected | 299 |
+| Passing | 299 |
 | Failing | 0 |
+| Audit Remediation checks | 15 / 15 |
 
-- **59** pre-existing tests (unchanged, all still passing)
-- **27** new tests for schema-aware ownership inference (`tests/test_ownership_inference.py`), including backward-compatibility checks for Demos 1-4
+To execute the 15-check independent audit verification suite (<7s):
+```bash
+python scripts/verify_audit_remediation.py
+```
 
-To execute the full suite across all system modules:
+To execute the full test suite across all system modules:
 ```bash
 python -m pytest tests/ -v
 ```
@@ -146,7 +169,29 @@ Navigate to `http://localhost:8000/dashboard` to view the live GUI reflecting yo
 
 ---
 
-## 🔬 6. Schema-Aware Ownership Inference
+## 🧬 6. Primary Research Contribution: AST Taint Analysis & Dual-Path Attribution
+
+The primary contribution of this work is a **schema-aware, pre-execution AST taint analysis** whose findings are correlated with **runtime authorization evidence**, producing accurate *source-to-sink path attribution* without changing any enforcement decision.
+
+- **Schema-aware AST taint analysis** (`app/security/object_extractor.py` plus the taint model and propagation modules) parses every query before execution, resolves variables and fragment spreads, and traces client-controlled object identifiers to sensitive field sinks.
+- **Dual-path attribution** records both the **client response path** (the alias the client sees) and the **canonical schema path** (e.g. `Query.resource`), defeating GraphQL field aliasing that blinds ordinary gateways.
+- **Runtime correlation** (see `scripts/evaluate_phase_7.py`, Method 3) pairs each taint finding with the deterministic gateway decision, so static false alarms on legitimately-owned resources are suppressed instead of alerted.
+
+Measured on the independent **115-case benchmark** (105 valid: 52 vulnerable / 53 benign, 10 malformed):
+
+| Method | Precision | Recall | F1 | False-Alarm Rate | Exact Path Attribution | Semantic Attribution |
+|---|---|---|---|---|---|---|
+| M1 — Gateway alone | 100.0% | 100.0% | 1.000 | 0.0% | 56.2% (59/105) | 65.7% (69/105) |
+| M2 — Static taint alone | 54.7% | 100.0% | 0.708 | **81.1%** | **90.5%** (95/105) | **100.0%** (105/105) |
+| M3 — Correlated (ours) | 100.0% | 100.0% | 1.000 | 0.0% | **90.5%** (95/105) | **100.0%** (105/105) |
+
+**Headline result:** correlation preserves the gateway's 100% precision/recall while eliminating static analysis's 81.1% false-alarm rate, and raises exact path attribution from 56.2% to 90.5% (95/105) under strict canonical matching and 100.0% (105/105) under semantic target attribution — with **zero** behavioral divergence across all 115 cases. The full academic treatment (formal model, algorithms, ablation, related work) is in [`docs/RESEARCH_PAPER_DRAFT.md`](./docs/RESEARCH_PAPER_DRAFT.md).
+
+Reproduce with `SETUP.md` §5; canonical metrics in `docs/RESULTS_SUMMARY.json`; raw run transcripts in `docs/evidence/`.
+
+---
+
+## 🔬 7. Schema-Aware Ownership Inference
 
 ### Why hard-coded ownership rules are limited
 
@@ -210,10 +255,10 @@ If neither an explicit rule nor a validated inferred rule explains a requested o
 ### Inspecting the inferred rules
 
 ```bash
-# Login as the seeded ADMIN (charlie)
+# Login as the seeded ADMIN (kapilesh / sakthivel)
 curl -X POST "http://localhost:8000/api/v1/auth/login" \
   -H "Content-Type: application/json" \
-  -d "{\"username\":\"charlie\",\"password\":\"charlie123\"}"
+  -d "{\"username\":\"kapilesh\",\"password\":\"kapilesh123\"}"
 
 curl "http://localhost:8000/api/v1/security/schema-ownership" \
   -H "Authorization: Bearer <ADMIN_TOKEN>"
@@ -247,14 +292,186 @@ The numbers are computed at generation time; they are never hard-coded.
 
 ---
 
-## ⚠️ 7. Known Limitations
+## 8. Adaptive Behavioural Anomaly Detection (Complementary Novelty)
+
+### The gap in per-event scoring
+
+The deterministic `risk_engine.py` scores every authorization decision *in isolation*: an ownership
+mismatch is `80 / HIGH`, a clean access is `0 / LOW`. It is stateless across requests, so it cannot tell a
+one-off mistake from sustained abuse, and it assigns **risk 0** to a compromised account that stays fully
+authorized while rapidly enumerating every record it can reach (mass data access). It also cannot see a
+low-and-slow scan that hides between ordinary reads.
+
+### What the novelty adds
+
+`app/security/anomaly_engine.py` adds a complementary, **unsupervised principal-level** layer. It reads
+the audit events the gateway has already persisted and derives four behavioural signals per principal:
+
+| Signal | Meaning |
+|---|---|
+| `deny_ratio` | share of the principal's requests that were denied |
+| `target_breadth` | number of distinct object identifiers requested |
+| `velocity` | requests per minute within the principal's own activity span |
+| `deny_trend` | escalation of the deny ratio between the older and recent half of the history |
+
+Two adaptive mechanisms turn these into a score instead of a fixed table:
+
+1. **Robust peer-relative baseline** — each feature becomes a median/MAD robust z-score against the
+   observed principal population, so "normal" moves with the traffic rather than being hard-coded.
+2. **Temporal drift** — `deny_trend` compares a principal against its *own* earlier behaviour, catching a
+   stable principal that suddenly turns abusive.
+
+Each feature's deviation is `max(peer z-score, value / documented absolute threshold)` — the absolute term
+is a floor that keeps the engine usable on the 3-user demo population and during cold start. Per-feature
+contributions are combined as a blend of the weighted mean and the **peak** signal, so one unmistakable
+indicator is not diluted. The result is a `0–100` score and a `LOW/MEDIUM/HIGH` level plus an explainable
+pattern label (`HIGH_VELOCITY_ENUMERATION`, `SUSTAINED_AUTHORIZATION_ABUSE`, `BROAD_TARGET_SCAN`,
+`ESCALATING_DENY_PATTERN`).
+
+The layer is **advisory only**: it never grants, denies, or mutates an enforcement decision. It is exposed
+at `GET /api/v1/security/anomaly` (ADMIN) and rendered live on the dashboard.
+
+### Measured evaluation vs the baseline
+
+```bash
+python scripts/evaluate_anomaly.py
+```
+
+The script generates **real traffic through the live gateway** (so every audit row is produced by the real
+enforcement middleware) and compares the static per-event baseline (max single-event risk ≥ 60) against the
+adaptive engine (score ≥ 60) on the identical audit stream. Actual output:
+
+| Principal | Ground truth | Events | Max static risk | Static flagged | Adaptive score | Adaptive level | Pattern |
+|---|---|---|---|---|---|---|---|
+| 101 | benign | 3 | 0 | no | 34 | MEDIUM | NO_PATTERN |
+| 102 | attack (mass authorized enumeration) | 15 | 0 | **no** | 65 | HIGH | HIGH_VELOCITY_ENUMERATION |
+| 103 | benign (admin) | 2 | 0 | no | 25 | LOW | NO_PATTERN |
+| 104 | attack (direct BOLA burst) | 6 | 90 | yes | 80 | HIGH | SUSTAINED_AUTHORIZATION_ABUSE |
+
+| Engine | Detection rate | False-positive rate |
+|---|---|---|
+| Static per-event baseline | 50.0% | 0.0% |
+| Adaptive behavioural engine | **100.0%** | **0.0%** |
+
+The static engine flags the direct BOLA burst (risk 90) but **structurally cannot** flag the mass authorized
+enumeration (every event is a legitimate `ALLOW` with risk 0). The adaptive engine detects both behaviours
+from aggregate signals without flagging either benign principal. Full machine-readable output is written to
+`anomaly_evaluation.json`.
+
+### Honest limitations
+
+- The mass-enumeration case is **authorized** activity (no BOLA bypass); it is a behavioural anomaly, not
+  an authorization failure. The layer complements — it does not replace — the per-event BOLA enforcement.
+- Thresholds (60 = HIGH) and feature weights are configurable and were tuned on the small demo population.
+  The benign principal scored 34 (MEDIUM, below the flag threshold); a slower or lower-breadth profile
+  scores lower. Larger deployments should re-tune on real traffic.
+- The peer-relative term needs at least two active principals to discriminate; below that it falls back to
+  absolute behavioural thresholds.
+- The dashboard automatically runs the built-in differential-testing suite when it loads. Those are real
+  requests through the gateway, so the anomaly panel aggregates them too, and test callers that repeatedly
+  provoke denials will legitimately score HIGH. The controlled evaluation above uses an isolated database
+  with no harness traffic.
+
+---
+
+## 9. Known Limitations
 - **Type Inference:** The AST parser infers Object Types based directly on field names (e.g., `resource` -> `Resource`) rather than utilizing full internal schema reflection. Highly complex polymorphic GraphQL schemas may bypass this.
 - **Role-Based Limitations:** The system currently relies strictly on Ownership matching and a global `ADMIN` override. Fine-grained RBAC per-field is not supported in this prototype.
 - **Database Overhead:** Ownership lookup queries the SQLite database directly per requested object. In a massive production system, this would require Redis/Memcached caching to maintain low latency.
 
 ---
 
-## 🔮 8. Future Work
-- **Machine Learning Integration:** Replace the deterministic rule-based Risk Engine with an ML anomaly detection model to catch slow, highly distributed reconnaissance attacks.
+## 🔮 10. Future Work
+- **Learned Anomaly Models:** The current adaptive layer is unsupervised and explainable; future work is to
+  compare it against trained models (isolation forests, sequence models) once multi-day traffic is available.
 - **Rate Limiting Engine:** Add a strict rate-limiting gateway specifically for high-risk IP addresses or users exhibiting medium-risk querying patterns.
 - **Full Schema Introspection Validation:** Integrate the Gateway directly with the Strawberry Schema registry to perfectly map all incoming aliases and unions to their exact Database tables without relying on inference.
+
+---
+
+## 11. Real-Time Authorization Research Engine
+
+A live research engine built on top of the existing gateway, ownership
+inference, AST analysis, audit logging and exporters. It turns GraphQL Shield
+from a static gateway into an end-to-end authorization testing tool:
+
+```
+Discover schema  ->  Generate tests  ->  Run real HTTP  ->  Inspect finding
+       ->  Reproduce/minimize  ->  Export (SARIF + JUnit)
+```
+
+Implementation lives in `app/security/recon/`:
+
+| Module | Responsibility |
+| --- | --- |
+| `introspection.py` | **Live schema reconnaissance**: introspects the running service (or SDL) and builds a navigation graph of operations, arguments, nested relations, identifiers and authorization boundaries. Nothing is hardcoded. |
+| `generator.py` | **Automated test generation** from the discovered schema using the seeded accounts/resources, with per-test provenance (`seeded_fixture` vs `exploratory`) and the expected authorization outcome. |
+| `oracle.py` | **Differential oracle (expectation side)**: replays `normalize_query -> resolve_ownership -> PolicyEngine`, the exact pipeline the gateway uses. |
+| `executor.py` | **Real HTTP execution** against `/graphql` (protected) and `/graphql-insecure` (deliberately vulnerable local reference backend), with bounded concurrency, cancellation, and object-identity / database-state inspection. |
+| `reproducer.py` | **Automatic reproduction & AST minimization** (delta debugging) for confirmed violations; keeps the original query if minimization cannot make progress. |
+| `engine_exporters.py` | **Validated SARIF 2.1.0 and JUnit XML** generated only from executed results. |
+| `engine.py` / `api.py` | Orchestration (sessions, progress, cancellation) and the workbench REST API. |
+
+### Guarantees
+
+- A vulnerability is **never asserted from an HTTP status alone**. Query leaks
+  are confirmed by the returned object's owner; mutation leaks by the resulting
+  database state.
+- **Fixture leaks are separated from gateway findings.** Leaks observed on the
+  labelled vulnerable backend (`/graphql-insecure`) are baseline sensitivity
+  signals and never emitted as SARIF findings.
+- Discovery is **schema-driven**; supplying a different schema yields different
+  discovered paths (verified by test).
+- Standard introspection is served by the introspection-capable route because
+  the **protected gateway's AST budget deliberately rejects the standard
+  introspection query** — this hardening is not weakened.
+
+### Workbench
+
+Start the server and open [http://127.0.0.1:8000/workbench](http://127.0.0.1:8000/workbench)
+for the dark research console (6 areas: schema graph, generated tests, live
+execution console, gateway-vs-fixture comparison, confirmed findings + evidence,
+audit trace + exports).
+
+### Running it
+
+```bash
+python -m app.seed
+uvicorn app.main:app --reload
+# then open /workbench, or drive the API:
+#   POST /api/v1/authorization-engine/discover
+#   POST /api/v1/authorization-engine/generate
+#   POST /api/v1/authorization-engine/run        -> { session_id }
+#   GET  /api/v1/authorization-engine/runs/{id}
+#   GET  /api/v1/authorization-engine/runs/{id}/export/sarif
+#   GET  /api/v1/authorization-engine/runs/{id}/export/junit
+```
+
+### Evaluation
+
+```bash
+python scripts/evaluate_authorization_engine.py
+```
+
+Writes `docs/AUTHORIZATION_ENGINE_EVAL.json` and
+`docs/evidence/authorization_engine_eval.txt`. Every number is measured from the
+latest run against the documented manual baseline (4 hand-written cases).
+
+### Tests
+
+```bash
+python -m pytest tests/test_authorization_engine.py -q
+```
+
+13 acceptance tests covering discovery, generation, real execution, legitimate
+owner access, gateway denial of cross-owner access, fixture leakage with
+evidence, reproduction/minimization, export validity and the API/UI surface.
+
+### Honest limitations
+
+- Evaluation is performed against this application's own schema and seeded data.
+  It does **not** prove compatibility with arbitrary production schemas.
+- The deliberately vulnerable backend is a local fixture, not a real third-party
+  service; leakage there demonstrates resolver behaviour without the gateway.
+- Minimization reduces scalar selections; it does not attempt argument synthesis.
+

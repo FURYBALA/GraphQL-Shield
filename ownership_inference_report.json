@@ -7,7 +7,7 @@
     "medium_confidence_rules": 1,
     "low_confidence_rules": 0,
     "rejected_or_ambiguous_relationships": 0,
-    "analysis_time_ms": 0.759
+    "analysis_time_ms": 0.571
   },
   "analyzed_types": [
     "HealthCheckType",

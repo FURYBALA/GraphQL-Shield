@@ -1,0 +1,14 @@
+# Submission Package Verification Transcript
+timestamp_utc: 2026-10-15T00:00:00Z
+---
+[build] python scripts/package_submission.py
+Built GraphQLShield_Submission.zip
+  files:  158 (incl. MANIFEST.sha256)
+  size:   1,638,138 bytes
+  manifest: MANIFEST.sha256 (157 entries)
+Verified 157 files in GraphQLShield_Submission.zip: OK
+  leaked excluded types: NONE
+
+[fresh-extract] Expand-Archive -> C:\Users\balan\AppData\Local\Temp\opencode\subtest_engine; python -m app.seed; python -m pytest tests/ -q
+Database successfully seeded.
+239 passed, 893 warnings in 49.60s

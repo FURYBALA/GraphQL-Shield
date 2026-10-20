@@ -2,7 +2,7 @@
   "metadata": {
     "evaluation_phase": "Phase 7",
     "research_question": "Does context-sensitive AST-driven taint analysis correlated with runtime authorization evidence provide more useful source-to-sink explanations and authorization-boundary evidence than the existing gateway alone, without changing existing authorization outcomes?",
-    "timestamp": "2026-10-12T17:17:47Z",
+    "timestamp": "2026-10-15T17:57:40Z",
     "corpus_file": "data/ground_truth_corpus.json",
     "total_corpus_cases": 115,
     "valid_security_cases": 105,
@@ -66,29 +66,35 @@
       "missing_paths": 10,
       "unsupported_cases": 10,
       "exact_match_rate": 0.5619,
-      "attribution_coverage_rate": 0.8857
+      "attribution_coverage_rate": 0.8857,
+      "semantic_exact_matches": 69,
+      "semantic_match_rate": 0.6571
     },
     "m2_static_taint_alone": {
       "method_name": "Method 2: Static Taint Alone",
       "total_cases": 115,
-      "exact_matches": 94,
-      "partial_matches": 11,
+      "exact_matches": 95,
+      "partial_matches": 10,
       "incorrect_paths": 0,
       "missing_paths": 0,
       "unsupported_cases": 10,
-      "exact_match_rate": 0.8952,
-      "attribution_coverage_rate": 1.0
+      "exact_match_rate": 0.9048,
+      "attribution_coverage_rate": 1.0,
+      "semantic_exact_matches": 105,
+      "semantic_match_rate": 1.0
     },
     "m3_correlated_defense": {
       "method_name": "Method 3: Correlated Defense",
       "total_cases": 115,
-      "exact_matches": 94,
-      "partial_matches": 11,
+      "exact_matches": 95,
+      "partial_matches": 10,
       "incorrect_paths": 0,
       "missing_paths": 0,
       "unsupported_cases": 10,
-      "exact_match_rate": 0.8952,
-      "attribution_coverage_rate": 1.0
+      "exact_match_rate": 0.9048,
+      "attribution_coverage_rate": 1.0,
+      "semantic_exact_matches": 105,
+      "semantic_match_rate": 1.0
     }
   },
   "dimension_3_boundary_evidence": {
@@ -473,13 +479,13 @@
     ]
   },
   "dimension_5_runtime_overhead": {
-    "cold_start_ms": 0.171,
-    "warmed_mean_ms": 0.115,
-    "warmed_median_ms": 0.114,
-    "warmed_min_ms": 0.048,
-    "warmed_max_ms": 0.502,
-    "warmed_p95_ms": 0.145,
-    "warmed_stdev_ms": 0.032,
+    "cold_start_ms": 0.215,
+    "warmed_mean_ms": 0.117,
+    "warmed_median_ms": 0.116,
+    "warmed_min_ms": 0.049,
+    "warmed_max_ms": 0.264,
+    "warmed_p95_ms": 0.155,
+    "warmed_stdev_ms": 0.026,
     "total_profiling_samples": 345
   },
   "dimension_6_behavioral_compatibility": {

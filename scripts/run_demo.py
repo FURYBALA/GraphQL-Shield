@@ -5,7 +5,20 @@ import os
 import subprocess
 import sys
 
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except (AttributeError, ValueError):
+    pass
+
 BASE_URL = "http://localhost:8000"
+
+
+def wait_for_enter(prompt):
+    if os.environ.get("SHIELD_NONSTOP") == "1":
+        print(prompt + " [auto-continue: SHIELD_NONSTOP=1]")
+        return
+    input(prompt)
 
 def print_header(title):
     print("\n" + "="*60)
@@ -26,7 +39,7 @@ def main():
     print("✅ Database reset and seeded with standard users/objects.\n")
     print("Please ensure the FastAPI server is currently running in a SECOND terminal:")
     print("Command: uvicorn app.main:app --reload\n")
-    input("Press [ENTER] when you are ready to begin the demonstration...")
+    wait_for_enter("Press [ENTER] when you are ready to begin the demonstration...")
 
     try:
         client = httpx.Client(base_url=BASE_URL)
@@ -38,12 +51,12 @@ def main():
     
     # =========================================================================
     print_header("DEMO 1 — LEGITIMATE ACCESS")
-    print("→ User 101 (Alice) logs in...")
-    res = client.post("/api/v1/auth/login", json={"username": "alice", "password": "alice123"})
+    print("→ User 101 (Balanilavan) logs in...")
+    res = client.post("/api/v1/auth/login", json={"username": "balanilavan", "password": "balan123"})
     token = res.json().get("access_token")
     print("✅ JWT Generated")
     
-    print("\n→ User 101 requests Object 101...")
+    print("\n→ User 101 (Balanilavan) requests Object 101...")
     query = {"query": "{ resource(id: 101) { id name } }"}
     res = client.post("/graphql", json=query, headers={"Authorization": f"Bearer {token}"})
     print(f"\n[HTTP {res.status_code}]\n{json.dumps(res.json(), indent=2)}")
@@ -52,11 +65,11 @@ def main():
     print("✅ GraphQL backend executes & Data returned")
     print("✅ Audit event recorded (LOW RISK)")
     
-    input("\nPress [ENTER] to execute Demo 2...")
+    wait_for_enter("\nPress [ENTER] to execute Demo 2...")
 
     # =========================================================================
     print_header("DEMO 2 — BOLA ATTACK")
-    print("→ User 101 (Alice) modifies object ID to 102 (Bob's Resource)...")
+    print("→ User 101 (Balanilavan) modifies object ID to 102 (Chinmayanand's Resource)...")
     query = {"query": "{ resource(id: 102) { id name } }"}
     res = client.post("/graphql", json=query, headers={"Authorization": f"Bearer {token}"})
     print(f"\n[HTTP {res.status_code}]\n{json.dumps(res.json(), indent=2)}")
@@ -68,12 +81,12 @@ def main():
     print("✅ GraphQL backend never executes")
     print("✅ Audit event recorded")
 
-    input("\nPress [ENTER] to execute Demo 3...")
+    wait_for_enter("\nPress [ENTER] to execute Demo 3...")
 
     # =========================================================================
     print_header("DEMO 3 — NESTED BOLA")
-    print("→ User 101 requests their own parent object (User 101)")
-    print("→ Attempts to access nested resource belonging to Bob (Resource 102)...")
+    print("→ User 101 (Balanilavan) requests their own parent object (User 101)")
+    print("→ Attempts to access nested resource belonging to Chinmayanand (Resource 102)...")
     query = {"query": "{ user(id: 101) { username resource(id: 102) { name } } }"}
     res = client.post("/graphql", json=query, headers={"Authorization": f"Bearer {token}"})
     print(f"\n[HTTP {res.status_code}]\n{json.dumps(res.json(), indent=2)}")
@@ -82,7 +95,7 @@ def main():
     print("✅ HTTP 403 Blocked")
     print("✅ Audit event recorded")
 
-    input("\nPress [ENTER] to execute Demo 4...")
+    wait_for_enter("\nPress [ENTER] to execute Demo 4...")
 
     # =========================================================================
     print_header("DEMO 4 — INVALID JWT")

@@ -1,14 +1,17 @@
 import jwt
-from datetime import datetime, timedelta
+from typing import Optional
+from datetime import datetime, timedelta, timezone
 from app.config import settings
 
-def create_access_token(user_id: int, role: str, expires_delta: timedelta = None) -> str:
+def create_access_token(user_id: int, role: str, expires_delta: timedelta = None, tenant_id: Optional[str] = None) -> str:
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=60)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=60)
         
     to_encode = {"user_id": user_id, "role": role, "exp": expire}
+    if tenant_id is not None:
+        to_encode["tenant_id"] = str(tenant_id)
     encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
     return encoded_jwt
 

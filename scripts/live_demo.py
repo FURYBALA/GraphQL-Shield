@@ -3,6 +3,12 @@ import json
 import os
 import sys
 
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except (AttributeError, ValueError):
+    pass
+
 BASE_URL = "http://localhost:8000"
 JWT_TOKEN = None
 
@@ -26,9 +32,9 @@ def display_response(res):
 
 def login():
     global JWT_TOKEN
-    print("\n[Authenticating as User 101 (Alice)]...")
+    print("\n[Authenticating as User 101 (Balanilavan)]...")
     try:
-        res = httpx.post(f"{BASE_URL}/api/v1/auth/login", json={"username": "alice", "password": "alice123"})
+        res = httpx.post(f"{BASE_URL}/api/v1/auth/login", json={"username": "balanilavan", "password": "balan123"})
         if res.status_code == 200:
             JWT_TOKEN = res.json().get("access_token")
             print(f"✅ Success! Received JWT Token: {JWT_TOKEN[:15]}...[TRUNCATED]")
@@ -44,7 +50,7 @@ def legitimate_request():
         input("\nPress [ENTER] to return to menu...")
         return
         
-    print("\n[Sending Legitimate Request] User 101 requests Object 101...")
+    print("\n[Sending Legitimate Request] User 101 (Balanilavan) requests Object 101...")
     query = {"query": "{ resource(id: 101) { id name } }"}
     res = httpx.post(f"{BASE_URL}/graphql", json=query, headers={"Authorization": f"Bearer {JWT_TOKEN}"})
     display_response(res)
@@ -55,7 +61,7 @@ def direct_bola_attack():
         input("\nPress [ENTER] to return to menu...")
         return
         
-    print("\n[Sending BOLA Attack] User 101 requests Object 102 (Bob's Resource)...")
+    print("\n[Sending BOLA Attack] User 101 (Balanilavan) requests Object 102 (Chinmayanand's Resource)...")
     query = {"query": "{ resource(id: 102) { id name } }"}
     res = httpx.post(f"{BASE_URL}/graphql", json=query, headers={"Authorization": f"Bearer {JWT_TOKEN}"})
     display_response(res)
@@ -66,7 +72,7 @@ def nested_bola_attack():
         input("\nPress [ENTER] to return to menu...")
         return
         
-    print("\n[Sending Nested BOLA] User 101 requests nested Object 102...")
+    print("\n[Sending Nested BOLA] User 101 (Balanilavan) requests nested Object 102...")
     query = {"query": "{ user(id: 101) { username resource(id: 102) { name } } }"}
     res = httpx.post(f"{BASE_URL}/graphql", json=query, headers={"Authorization": f"Bearer {JWT_TOKEN}"})
     display_response(res)
@@ -82,7 +88,7 @@ def main():
         clear_screen()
         print_header()
         print(f"Current Status: {'Logged In (Token Active)' if JWT_TOKEN else 'Not Logged In'}")
-        print("\n1. Login as User 101 (Alice)")
+        print("\n1. Login as User 101 (Balanilavan)")
         print("2. Send Legitimate Resource Request")
         print("3. Send Direct BOLA Attack (Object ID Manipulation)")
         print("4. Send Nested BOLA Attack")

@@ -484,6 +484,19 @@ class TaintPropagationEngine:
         field_name = node.name.value
         response_name = node.alias.value if node.alias else field_name
 
+        # Directive-aware evaluation (@skip and @include)
+        if node.directives:
+            for directive in node.directives:
+                d_name = directive.name.value
+                val = None
+                for arg in directive.arguments:
+                    if arg.name.value == "if":
+                        val, _ = resolve_ast_value(arg.value, variables)
+                if d_name == "skip" and val is True:
+                    return
+                elif d_name == "include" and val is False:
+                    return
+
         curr_schema_path = f"{schema_path}.{field_name}" if schema_path else field_name
         curr_response_path = f"{response_path}.{response_name}" if response_path else response_name
 

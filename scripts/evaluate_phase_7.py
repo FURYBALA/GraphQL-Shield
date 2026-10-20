@@ -33,6 +33,7 @@ from typing import Any, Dict, List, Optional, Tuple
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.security.authorization import AuthorizationContext, PolicyEngine
+from app.security.graphql_parser import parse_query
 from app.security.object_extractor import normalize_query
 from app.security.ownership import resolve_ownership
 from app.security.taint_correlation import (
@@ -42,6 +43,7 @@ from app.security.taint_correlation import (
 )
 from app.security.taint_engine import analyze_query_taint
 from app.security.taint_model import CandidateKind
+from graphql import FieldNode, OperationDefinitionNode
 
 
 # =============================================================================
@@ -79,6 +81,8 @@ class PathAttributionMetrics:
     unsupported_cases: int
     exact_match_rate: float
     attribution_coverage_rate: float
+    semantic_exact_matches: int = 0
+    semantic_match_rate: float = 0.0
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -128,6 +132,9 @@ def determine_expected_paths(case: Dict[str, Any]) -> Tuple[str, str]:
     """
     Independently determines expected canonical schema path and response path
     from query string without relying on analyzer output.
+    Uses exact GraphQL AST schema coordinate resolution for root operations
+    and introspection fields, eliminating naive substring collisions
+    (such as '__type' matching '__typename').
     """
     query = case["query"]
     category = case.get("category", "")
@@ -136,6 +143,23 @@ def determine_expected_paths(case: Dict[str, Any]) -> Tuple[str, str]:
     # Handle syntax error cases
     if category == "SYNTAX_ERROR" or case.get("ground_truth_security") == "MALFORMED":
         return ("UNSUPPORTED", "UNSUPPORTED")
+
+    # Exact AST-based schema coordinate resolution for root operations & introspection
+    # Avoids substring collision (e.g. '__type' matching '__typename')
+    try:
+        ast = parse_query(query)
+        if ast:
+            for defn in ast.definitions:
+                if isinstance(defn, OperationDefinitionNode) and defn.selection_set:
+                    selections = [s for s in defn.selection_set.selections if isinstance(s, FieldNode)]
+                    if len(selections) == 1:
+                        f = selections[0]
+                        field_name = f.name.value
+                        alias_name = f.alias.value if f.alias else field_name
+                        if field_name in ("__typename", "__schema", "__type", "health", "publicHealth"):
+                            return (field_name, alias_name)
+    except Exception:
+        pass
 
     # Public queries
     if "publicHealth" in query:
@@ -155,17 +179,17 @@ def determine_expected_paths(case: Dict[str, Any]) -> Tuple[str, str]:
     if "resource(id:" in query and "user(id:" in query:
         return ("resource, user", "resource, user")
 
-    # Public queries & Introspection
+    # Public queries & Introspection (fallback heuristic)
     if "health" in query:
         if "ping: health" in query:
             return ("health", "ping")
         return ("health", "health")
     if "__schema" in query:
         return ("__schema", "__schema")
-    if "__type(" in query or "__type" in query:
-        return ("__type", "__type")
     if "__typename" in query:
         return ("__typename", "__typename")
+    if "__type(" in query or "__type " in query:
+        return ("__type", "__type")
     if "publicHealth" in query:
         if "healthAlias" in query:
             return ("publicHealth", "healthAlias")
@@ -394,21 +418,58 @@ def evaluate_case_comprehensive(
         # Check if incorrect (alias used instead of schema path)
         return "INCORRECT"
 
+    def assess_semantic_target_attribution(paths_found: List[str], exp_p: str, is_malformed: bool) -> str:
+        """
+        Evaluates attribution using explicit target-path semantics:
+        Verifies that each expected target entity is fully identified across
+        root or hierarchical coordinates without penalizing composite formatting divergences.
+        """
+        if is_malformed or exp_p == "UNSUPPORTED":
+            return "UNSUPPORTED"
+        if not paths_found:
+            return "MISSING"
+
+        # Check multi-target / composite target set
+        if ", " in exp_p:
+            parts = [p.strip() for p in exp_p.split(",")]
+            def target_matched(p: str) -> bool:
+                return any(
+                    p == f or f.startswith(p + ".") or f.endswith("." + p) or ("." + p + ".") in f or p in f.split(".")
+                    for f in paths_found
+                )
+            if all(target_matched(p) for p in parts):
+                return "EXACT"
+            if any(target_matched(p) for p in parts):
+                return "PARTIAL"
+            return "INCORRECT"
+
+        # Check exact match
+        if exp_p in paths_found:
+            return "EXACT"
+        # Check partial match (e.g. prefix matches)
+        if any(exp_p.startswith(p) or p.startswith(exp_p) for p in paths_found):
+            return "PARTIAL"
+        return "INCORRECT"
+
     is_syntax_case = case.get("ground_truth_security") == "MALFORMED"
 
     # M1 Gateway path assessment
     m1_path_status = assess_path_attribution(m1_paths_extracted, exp_schema_path, is_syntax_case)
+    m1_semantic_status = assess_semantic_target_attribution(m1_paths_extracted, exp_schema_path, is_syntax_case)
     # If alias was used, M1 extracts alias as path instead of schema path -> INCORRECT
     if exp_resp_path != exp_schema_path and m1_paths_extracted:
         if any(p == exp_resp_path for p in m1_paths_extracted):
             m1_path_status = "INCORRECT"  # Opaque alias used instead of canonical schema field
+            m1_semantic_status = "INCORRECT"
 
     # M2 Static path assessment
     m2_path_status = assess_path_attribution(m2_schema_paths, exp_schema_path, is_syntax_case)
+    m2_semantic_status = assess_semantic_target_attribution(m2_schema_paths, exp_schema_path, is_syntax_case)
 
     # M3 Correlated path assessment
     # Correlated defense has access to both static AST paths and runtime paths
     m3_path_status = m2_path_status
+    m3_semantic_status = m2_semantic_status
 
     # -------------------------------------------------------------------------
     # Boundary Evidence Assessment
@@ -442,6 +503,7 @@ def evaluate_case_comprehensive(
             "reason": m1_reason,
             "extracted_paths": m1_paths_extracted,
             "path_attribution_status": m1_path_status,
+            "semantic_path_attribution_status": m1_semantic_status,
             "has_structured_boundary_evidence": m1_has_structured_evidence,
             "has_explicit_uncertainties": m1_has_uncertainties,
         },
@@ -452,6 +514,7 @@ def evaluate_case_comprehensive(
             "response_paths": m2_resp_paths,
             "findings_count": len(m2_findings),
             "path_attribution_status": m2_path_status,
+            "semantic_path_attribution_status": m2_semantic_status,
             "has_structured_boundary_evidence": m2_has_structured_evidence,
             "has_explicit_uncertainties": m2_has_uncertainties,
             "error": m2_error,
@@ -461,6 +524,7 @@ def evaluate_case_comprehensive(
             "attack_type": m3_attack_type,
             "correlations": [c.to_dict() for c in correlations],
             "path_attribution_status": m3_path_status,
+            "semantic_path_attribution_status": m3_semantic_status,
             "has_structured_boundary_evidence": m3_has_structured_evidence,
             "has_explicit_uncertainties": m3_has_uncertainties,
         },
@@ -695,8 +759,10 @@ def run_phase_7_evaluation(
     # -------------------------------------------------------------------------
     def compute_path_metrics(m_key: str, name: str) -> PathAttributionMetrics:
         exact = partial = incorrect = missing = unsupported = 0
+        semantic_exact = 0
         for r in all_results:
             st = r[m_key]["path_attribution_status"]
+            sem_st = r[m_key].get("semantic_path_attribution_status", st)
             if st == "EXACT":
                 exact += 1
             elif st == "PARTIAL":
@@ -708,9 +774,13 @@ def run_phase_7_evaluation(
             elif st == "UNSUPPORTED":
                 unsupported += 1
 
+            if sem_st == "EXACT":
+                semantic_exact += 1
+
         valid_count = len(corpus) - unsupported
         exact_rate = exact / valid_count if valid_count > 0 else 0.0
         coverage_rate = (exact + partial) / valid_count if valid_count > 0 else 0.0
+        sem_rate = semantic_exact / valid_count if valid_count > 0 else 0.0
 
         return PathAttributionMetrics(
             method_name=name,
@@ -722,6 +792,8 @@ def run_phase_7_evaluation(
             unsupported_cases=unsupported,
             exact_match_rate=round(exact_rate, 4),
             attribution_coverage_rate=round(coverage_rate, 4),
+            semantic_exact_matches=semantic_exact,
+            semantic_match_rate=round(sem_rate, 4),
         )
 
     m1_path = compute_path_metrics("method_1_gateway", "Method 1: Gateway Alone")
@@ -971,7 +1043,8 @@ def run_phase_7_evaluation(
     print(f"  Partial Matches     | {m1_path.partial_matches:17d} | {m2_path.partial_matches:17d} | {m3_path.partial_matches:14d}")
     print(f"  Incorrect Paths     | {m1_path.incorrect_paths:17d} | {m2_path.incorrect_paths:17d} | {m3_path.incorrect_paths:14d}")
     print(f"  Missing Paths       | {m1_path.missing_paths:17d} | {m2_path.missing_paths:17d} | {m3_path.missing_paths:14d}")
-    print(f"  Exact Match Rate    | {m1_path.exact_match_rate * 100:16.1f}% | {m2_path.exact_match_rate * 100:16.1f}% | {m3_path.exact_match_rate * 100:13.1f}%")
+    print(f"  Strict Exact Rate   | {m1_path.exact_match_rate * 100:16.1f}% | {m2_path.exact_match_rate * 100:16.1f}% | {m3_path.exact_match_rate * 100:13.1f}%")
+    print(f"  Semantic Match Rate | {m1_path.semantic_match_rate * 100:16.1f}% | {m2_path.semantic_match_rate * 100:16.1f}% | {m3_path.semantic_match_rate * 100:13.1f}%")
     print("-" * 80)
     print("DIMENSION 3: BOUNDARY EVIDENCE TRANSPARENCY (105 Valid Cases)")
     print(f"  Criteria Represented| {m1_bound.representation_rate * 100:16.1f}% | {m2_bound.representation_rate * 100:16.1f}% | {m3_bound.representation_rate * 100:13.1f}%")

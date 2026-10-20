@@ -16,7 +16,7 @@ class ResourceType:
     parent_id: Optional[int]
 
     @strawberry.field
-    def secret_key(self) -> str:
+    def secret_key(self) -> Optional[str]:
         """Sensitive API secret key associated with the resource. Subject to field-level leakage."""
         return f"sk_live_token_{self.id}_{self.owner_id}"
 
@@ -44,7 +44,7 @@ class UserType:
     role: str
     
     @strawberry.field
-    def secret_token(self) -> str:
+    def secret_token(self) -> Optional[str]:
         """Sensitive account credential token for the user. Subject to field-level leakage."""
         return f"tok_secret_user_{self.id}"
 

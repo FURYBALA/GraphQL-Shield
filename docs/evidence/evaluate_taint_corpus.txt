@@ -1,0 +1,63 @@
+# Taint Corpus Benchmark Transcript
+timestamp_utc: 2026-10-14T18:49:27Z
+command: python scripts/evaluate_taint_corpus.py --corpus data/ground_truth_corpus.json --output docs/EVALUATION_REPORT.json
+---
+
+================================================================================
+  GRAPHQL BOLA SECURITY EVALUATION: MULTI-METHOD COMPARISON (PHASE 6)
+================================================================================
+Total Benchmark Corpus Cases : 115
+Evaluated Valid Security Cases : 105
+Malformed Syntax Edge Cases   : 10
+--------------------------------------------------------------------------------
+Metric                         | M1: Gateway Alone | M2: Static Alone | M3: Correlated 
+--------------------------------------------------------------------------------
+Precision                      |         100.0% |           54.7% |         100.0%
+Recall                         |         100.0% |          100.0% |         100.0%
+F1-Score                       |          1.000 |           0.708 |          1.000
+Accuracy                       |         100.0% |           59.1% |         100.0%
+True Positives (TP)            |             52 |              52 |             52
+False Positives (FP)           |              0 |              43 |              0
+False Negatives (FN)           |              0 |               0 |              0
+Legitimate Denial Rate (FP Rate) |           0.0% |           81.1% |           0.0%
+Direct BOLA Recall             |         100.0% |          100.0% |         100.0%
+Indirect BOLA Recall           |         100.0% |          100.0% |         100.0%
+--------------------------------------------------------------------------------
+Latency Overhead Profiling (Static Taint Propagation Engine):
+  Cold-Start (Initial Run)    : 0.187 ms
+  Warmed-Up Median Latency    : 0.112 ms
+  Warmed-Up Mean Latency      : 0.112 ms
+  Warmed-Up P95 Latency       : 0.142 ms
+  Warmed-Up Min / Max Latency : 0.048 ms / 0.269 ms
+--------------------------------------------------------------------------------
+Detection Breakdown by GraphQL Syntax Category:
+  Syntax Type          | Cases  | M1 Rec   | M2 Rec   | M3 Rec   | M2 FP  | M3 FP 
+  ----------------------------------------------------------------------------
+  ADMIN_MULTI          | 1      |  100.0% |  100.0% |  100.0% | 1      | 0     
+  ALIAS                | 7      |  100.0% |  100.0% |  100.0% | 3      | 0     
+  ALIAS_VARIABLE       | 1      |  100.0% |  100.0% |  100.0% | 0      | 0     
+  BASIC                | 39     |  100.0% |  100.0% |  100.0% | 18     | 0     
+  BOUNDARY_ID          | 2      |  100.0% |  100.0% |  100.0% | 0      | 0     
+  DEEP_TRAVERSAL       | 2      |  100.0% |  100.0% |  100.0% | 1      | 0     
+  FRAGMENT             | 6      |  100.0% |  100.0% |  100.0% | 3      | 0     
+  FRAGMENT_ALIAS       | 1      |  100.0% |  100.0% |  100.0% | 0      | 0     
+  INLINE_FRAGMENT      | 3      |  100.0% |  100.0% |  100.0% | 1      | 0     
+  INTROSPECTION        | 3      |  100.0% |  100.0% |  100.0% | 0      | 0     
+  INTROSPECTION_FRAGMENT | 1      |  100.0% |  100.0% |  100.0% | 0      | 0     
+  MIXED_LEGIT          | 1      |  100.0% |  100.0% |  100.0% | 1      | 0     
+  MIXED_ROOT           | 4      |  100.0% |  100.0% |  100.0% | 0      | 0     
+  MULTI_ATTACK         | 1      |  100.0% |  100.0% |  100.0% | 0      | 0     
+  MULTI_FIELD          | 2      |  100.0% |  100.0% |  100.0% | 2      | 0     
+  MULTI_FRAGMENT       | 1      |  100.0% |  100.0% |  100.0% | 1      | 0     
+  MULTI_LEGIT          | 3      |  100.0% |  100.0% |  100.0% | 3      | 0     
+  MULTI_VAR            | 2      |  100.0% |  100.0% |  100.0% | 1      | 0     
+  NESTED_PARAM         | 6      |  100.0% |  100.0% |  100.0% | 2      | 0     
+  NESTED_PARAM_VAR     | 1      |  100.0% |  100.0% |  100.0% | 0      | 0     
+  PUBLIC               | 5      |  100.0% |  100.0% |  100.0% | 0      | 0     
+  PUBLIC_ALIAS         | 1      |  100.0% |  100.0% |  100.0% | 0      | 0     
+  RELATIONSHIP         | 2      |  100.0% |  100.0% |  100.0% | 1      | 0     
+  VARIABLE             | 10     |  100.0% |  100.0% |  100.0% | 5      | 0     
+================================================================================
+
+Report exported to docs/EVALUATION_REPORT.json
+exit_code: 0
