@@ -1,0 +1,25 @@
+{
+  "target": {
+    "name": "GraphQL Shield FastAPI app (/graphql-insecure, in-process enforcement bypassed)",
+    "graphql_path": "/graphql-insecure",
+    "login_path": "/api/v1/auth/login",
+    "token_field": "access_token",
+    "reset_path": "/api/v1/benchmark/reset-seed",
+    "corpus": "attacks.corpus_fastapi",
+    "results_dir": "results_fastapi"
+  },
+  "mode": "shield",
+  "principal_type": "UserType",
+  "public_fields": { "UserType": ["id", "username", "role"] },
+  "owner_fields": {},
+  "id_argument_overrides": { "query": {}, "mutation": {} },
+  "bypass_roles": ["admin", "service"],
+  "max_depth": 8,
+  "max_aliases": 15,
+  "max_batch": 5,
+  "fail_closed": true,
+  "owner_cache_ttl_s": 30,
+  "enum_window_s": 60,
+  "enum_threshold": 5,
+  "enum_lockout_s": 30
+}

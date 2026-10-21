@@ -30,6 +30,10 @@ class Mutation:
                 )
             return None
         finally:
+            # A failed statement (e.g. a foreign-key error) can keep its write transaction open; on Python 3.11
+            # close() is deferred while that statement is still referenced, so roll back explicitly first.
+            if conn.in_transaction:
+                conn.rollback()
             conn.close()
 
     @strawberry.mutation
@@ -46,6 +50,10 @@ class Mutation:
             conn.commit()
             return True
         finally:
+            # A failed statement (e.g. a foreign-key error) can keep its write transaction open; on Python 3.11
+            # close() is deferred while that statement is still referenced, so roll back explicitly first.
+            if conn.in_transaction:
+                conn.rollback()
             conn.close()
 
     @strawberry.mutation
@@ -72,4 +80,8 @@ class Mutation:
                 )
             return None
         finally:
+            # A failed statement (e.g. a foreign-key error) can keep its write transaction open; on Python 3.11
+            # close() is deferred while that statement is still referenced, so roll back explicitly first.
+            if conn.in_transaction:
+                conn.rollback()
             conn.close()

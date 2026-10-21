@@ -3,7 +3,7 @@
 **Project Title:** GraphQL Shield: Schema-Aware Security Gateway for Preventing GraphQL BOLA Vulnerabilities  
 **Course/Domain:** Computer Communication and Network Security  
 **Team:** Agnihotram Chinmayanand, B.V.Balanilavan, Kapilesh.N, Sakthivel  
-**Status:** ✅ Complete — core gateway (Phases 1–14), differential-testing engine, adaptive anomaly detection, multi-tenant identity integrity, and full test suite (299 passing)
+**Status:** ✅ Complete — core gateway (Phases 1–14), differential-testing engine, adaptive anomaly detection, multi-tenant identity integrity, the integrated external ownership gateway (`ownership_gateway/`, see §12), and full test suite (386 passing)
 
 ---
 
@@ -110,13 +110,13 @@ bash scripts/bootstrap.sh
 
 The system features an automated test suite covering authentication, authorization, BOLA (direct, nested, multi-ID, variable and fragment based), the policy engine, risk scoring, audit logging, dashboards, schema-aware ownership inference, multi-tenant boundaries, and a dedicated 15-test audit remediation suite.
 
-Current totals (run `python -m pytest tests/ -q`):
+Current totals (run `python -m pytest -q` from the repository root; it collects `tests/` and `ownership_gateway/tests/`):
 
 | Metric | Count |
 |---|---|
-| Test files | 28 |
-| Tests collected | 299 |
-| Passing | 299 |
+| Test files | 28 + 2 (ownership gateway) |
+| Tests collected | 386 (299 core + 87 ownership gateway) |
+| Passing | 386 |
 | Failing | 0 |
 | Audit Remediation checks | 15 / 15 |
 
@@ -475,3 +475,65 @@ evidence, reproduction/minimization, export validity and the API/UI surface.
   service; leakage there demonstrates resolver behaviour without the gateway.
 - Minimization reduces scalar selections; it does not attempt argument synthesis.
 
+---
+
+## 12. External Ownership Gateway (`ownership_gateway/`, contributed by Agnihotram Chinmayanand)
+
+The team built two complementary enforcement points, and this repository now contains both:
+
+| | In-process gateway (`app/`) | External ownership gateway (`ownership_gateway/`) |
+|---|---|---|
+| Where it runs | Inside the FastAPI app, as middleware on `/graphql` | Separate Flask reverse proxy (`:5000`) in front of an **unmodified** GraphQL backend |
+| How it learns ownership | Strawberry schema analysis (`app/security/ownership_inference.py`) | Introspection of the running backend (`gateway/schema_analyzer.py`) |
+| Enforcement | AST taint analysis, policy engine, risk scoring, anomaly detection | Pre-flight owner look-up for mutations + query augmentation and response verification/redaction for reads |
+| Evidence | Sections 4–11 | `ownership_gateway/eval/results*/results.md`, `ownership_gateway/docs/` |
+
+**Integration.** The external gateway was originally evaluated only on its own demo backend (ClinicHub). It now also protects
+this project's FastAPI application through the unprotected `/graphql-insecure` endpoint, which gives a second, independently
+written schema for the evaluation:
+
+* The schema analyzer accepts `Int` identifiers (`id: Int!`, `ownerId: Int`) and `…Type`-suffixed type names, so it infers
+  `UserType` (principal) and `ResourceType` (owned via `ownerId`) with no manual rules.
+* The gateway accepts this app's HS256 JWTs (`GS_JWT_SECRET` = the app's `JWT_SECRET`) and maps `user_id`/`role` to its own claims.
+* Per-target settings (GraphQL path, login path, corpus, reset path) live in `ownership_gateway/gateway/policy_fastapi.json`.
+* `POST /api/v1/benchmark/reset-seed` restores the seed rows in place between runs (non-production, loopback only).
+* `ownership_gateway/attacks/corpus_fastapi.py` holds 12 attacks across 8 categories and 10 benign requests for this target.
+
+**Results** (50 iterations, Windows laptop, development servers):
+
+| Configuration | ClinicHub: prevented / FP | FastAPI app: prevented / FP |
+|---|---|---|
+| No protection | 0/14 · 0/14 | 0/12 · 0/10 |
+| Depth/alias limits | 0/14 · 0/14 | 0/12 · 0/10 |
+| Argument-level ID check (baseline) | 12/14 · 1/14 | 11/12 · 1/10 |
+| Response verification only (ablation) | 11/14 · 0/14 | 9/12 · 0/10 |
+| **Full ownership gateway** | **14/14 · 0/14** | **12/12 · 0/10** |
+
+The pattern holds on both schemas. The argument check misses nested look-ups (F07: a foreign `resource(id)` nested under the
+attacker's own profile) and blocks legitimate public-profile reads. Response-only verification misses every mutation, which is
+why pre-flight checks exist. The gateway logic costs about 3 ms p50 over a plain proxy on both targets; full tables are in
+`ownership_gateway/eval/results/results.md` and `ownership_gateway/eval/results_fastapi/results.md`.
+
+**Running it**
+
+```powershell
+# ClinicHub demo (original):          two terminals, inside ownership_gateway/
+python -m backend.app
+python -m gateway.app                  # http://127.0.0.1:5000/dashboard
+
+# Protect this FastAPI app instead:   terminal 1 at the repo root, terminal 2 inside ownership_gateway/
+python -c "from app.database import init_db; from app.seed import restore_seed_rows; init_db(); restore_seed_rows()"
+python -m uvicorn app.main:app --port 8000
+$env:GS_POLICY="policy_fastapi.json"; $env:GS_BACKEND="http://127.0.0.1:8000"; $env:GS_JWT_SECRET="super_secret_dev_key"; python -m gateway.app
+
+# Evaluation (same GS_POLICY / GS_BACKEND as the running gateway)
+python -m eval.run_eval
+```
+
+`ownership_gateway/run.ps1` starts either setup in one command (`.\run.ps1` or `.\run.ps1 -Target fastapi`).
+un.ps1` or `.
+un.ps1 -Target fastapi`).
+
+**Limitations.** Both corpora were written by the team, so 100% is a result on our benchmark, not a guarantee. Shared or
+relationship-based ownership (for example a doctor reading a patient's record) is still a planned milestone, and the backend
+must be reachable only through the gateway in deployment.

@@ -1,0 +1,15 @@
+case,category,title,off,depth,argcheck,response_only,shield
+A01,Direct object reference,Read another patient's medical record by ID,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+A02,Direct object reference,Read another patient's invoice by ID,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+A03,Alias enumeration,Enumerate 5 foreign objects in one request using aliases,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+A04,Query batching,Batched array of operations targeting other users,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+A05,Variables,Victim ID hidden in GraphQL variables,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+A06,Fragments,Victim fields requested through a named fragment,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+A07,Node interface,Relay node(id) with base64 global ID,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+A08,Nested traversal,Pivot from a PUBLIC profile into private nested records,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+A09,Nested traversal,Pivot through a foreign record to its patient's contact details,LEAKED,LEAKED,LEAKED,BLOCKED,BLOCKED
+A10,Unscoped list,Search endpoint returns everybody's records,LEAKED,LEAKED,LEAKED,BLOCKED,BLOCKED
+A11,Field-level exposure,Read private fields (email/phone) of a public type,LEAKED,LEAKED,BLOCKED,BLOCKED,BLOCKED
+A12,Mutation tampering,Overwrite another patient's prescription,LEAKED,LEAKED,BLOCKED,LEAKED,BLOCKED
+A13,Mutation tampering,Mark another patient's invoice as paid (invoiceId arg),LEAKED,LEAKED,BLOCKED,LEAKED,BLOCKED
+A14,Mutation tampering,"Delete another patient's invoice (Boolean return, no object)",LEAKED,LEAKED,BLOCKED,LEAKED,BLOCKED

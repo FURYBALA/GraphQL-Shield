@@ -1,5 +1,6 @@
 import json
 import time
+from typing import Optional
 from fastapi import Request, HTTPException, Depends
 from app.config import settings
 from app.core.dependencies import get_current_user

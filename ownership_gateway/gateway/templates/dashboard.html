@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GraphQLShield Console</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --panel: #ffffff; --ink: #1b1f27; --muted: #5d6573; --line: #e2e5ea;
+    --accent: #2a5bd7; --ok: #1a7f4b; --ok-bg: #e5f4ec; --bad: #b42318; --bad-bg: #fde9e7;
+    --warn: #9a5b00; --warn-bg: #fff3dc; --code: #f1f3f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #111318; --panel: #1a1d24; --ink: #e7e9ee; --muted: #9aa2b1; --line: #2b2f39;
+      --accent: #7fa2ff; --ok: #5cd394; --ok-bg: #12301f; --bad: #ff8a80; --bad-bg: #3a1714;
+      --warn: #ffc266; --warn-bg: #3a2a0c; --code: #22262f; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+    padding: 14px 20px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; }
+  header h1 { font-size: 18px; margin: 0; letter-spacing: -0.01em; }
+  header h1 span { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 8px; }
+  main { max-width: 1280px; margin: 0 auto; padding: 18px 16px 40px; display: grid; gap: 16px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+  .panel h2 { font-size: 14px; margin: 0 0 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .kpi .v { font-size: 26px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .kpi .l { color: var(--muted); font-size: 12px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+  select, button, textarea, input { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 6px 10px; }
+  button { cursor: pointer; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .mode { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .cases { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+  .case { text-align: left; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); }
+  .case:hover, .case.sel { border-color: var(--accent); }
+  .case b { font-variant-numeric: tabular-nums; } .case small { display: block; color: var(--muted); }
+  pre { background: var(--code); border-radius: 8px; padding: 10px; margin: 6px 0 0; overflow: auto; max-height: 300px; font-size: 12px; white-space: pre-wrap; word-break: break-word; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+  .b-ok { color: var(--ok); background: var(--ok-bg); } .b-bad { color: var(--bad); background: var(--bad-bg); } .b-warn { color: var(--warn); background: var(--warn-bg); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; }
+  td.num { font-variant-numeric: tabular-nums; text-align: right; }
+  .scroll { overflow-x: auto; }
+  .muted { color: var(--muted); }
+  textarea { width: 100%; min-height: 120px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+  code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>GraphQLShield <span id="tname">schema-aware BOLA gateway</span></h1>
+  <div class="mode">
+    <label for="mode" class="muted">Protection mode</label>
+    <select id="mode"></select>
+    <button id="reset">Reset data &amp; logs</button>
+  </div>
+</header>
+<main>
+  <section class="kpis" id="kpis"></section>
+
+  <section class="panel">
+    <h2>Attack lab: same request, unprotected backend vs. through GraphQLShield (attacker = <span id="attacker">bob</span>)</h2>
+    <div class="cases" id="cases"></div>
+    <div id="labout" class="muted" style="margin-top:12px">Pick an attack to run it against both targets.</div>
+  </section>
+
+  <section class="grid2">
+    <div class="panel">
+      <h2>Query console (through the gateway)</h2>
+      <div class="row">
+        <select id="cuser"></select>
+        <button class="primary" id="csend">Send</button>
+      </div>
+      <textarea id="cquery"></textarea>
+      <pre id="cout" class="muted">Response appears here.</pre>
+    </div>
+    <div class="panel">
+      <h2>Inferred ownership model (from schema introspection)</h2>
+      <div class="scroll"><table id="model"></table></div>
+      <div id="idargs" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Security event log</h2>
+    <div class="scroll"><table id="logs"></table></div>
+  </section>
+
+  <section class="grid2">
+    <div class="panel"><h2>Alerts (enumeration detector)</h2><div id="alerts" class="muted">None yet.</div></div>
+    <div class="panel"><h2>Latest evaluation results</h2><div id="results" class="muted">Run <code>python -m eval.run_eval</code> to populate.</div></div>
+  </section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = (o) => esc(JSON.stringify(o, null, 2));
+const decisionBadge = (d) => `<span class="badge ${d === "allowed" ? "b-ok" : d === "redacted" ? "b-warn" : "b-bad"}">${d}</span>`;
+const tokens = {};
+let pw = {};
+
+async function j(url, opts) { const r = await fetch(url, opts); return r.json(); }
+async function post(url, body) { return j(url, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body || {})}); }
+
+async function refresh() {
+  const s = await j("/api/stats");
+  const sel = $("mode");
+  if (!sel.options.length) s.modes.forEach(m => sel.add(new Option(m, m)));
+  if (document.activeElement !== sel) sel.value = s.mode;
+  const tiles = [["Requests", s.total], ["Allowed", s.allowed], ["Redacted", s.redacted], ["Blocked", s.blocked],
+                 ["BOLA violations", s.violations], ["Alerts", s.alerts], ["Avg latency (ms)", s.avg_latency_ms]];
+  $("kpis").innerHTML = tiles.map(([l, v]) => `<div class="kpi"><div class="v">${esc(v)}</div><div class="l">${l}</div></div>`).join("");
+
+  const logs = await j("/api/logs?limit=25");
+  $("logs").innerHTML = "<tr><th>Time</th><th>User</th><th>Mode</th><th>Case</th><th>Op</th><th>Decision</th><th>Violations</th><th>Latency</th><th>Query</th></tr>" +
+    logs.map(l => `<tr><td>${new Date(l.ts * 1000).toLocaleTimeString()}</td><td>${esc(l.uid)} <span class="muted">${esc(l.role)}</span></td>
+      <td>${esc(l.mode)}</td><td>${esc(l.test_case || "")}</td><td>${esc(l.operation)}</td><td>${decisionBadge(l.decision)}</td>
+      <td>${l.violations.map(v => `${esc(v.type)}:${esc(v.id ?? "?")} <span class="muted">(${esc(v.stage)})</span>`).join("<br>") || "-"}</td>
+      <td class="num">${l.latency_ms}</td><td><code>${esc(l.query.slice(0, 90))}</code></td></tr>`).join("");
+
+  const alerts = await j("/api/alerts");
+  if (alerts.length) $("alerts").innerHTML = alerts.map(a =>
+    `<div style="margin-bottom:6px"><span class="badge b-bad">${esc(a.kind)}</span> ${new Date(a.ts * 1000).toLocaleTimeString()} - ${esc(a.detail)}</div>`).join("");
+}
+
+async function loadTarget() {
+  const t = await j("/api/target");
+  pw = t.credentials;
+  $("tname").textContent = "schema-aware BOLA gateway · " + t.name;
+  $("attacker").textContent = t.attacker;
+  (t.console.users || Object.keys(pw)).forEach(u => $("cuser").add(new Option(u, u)));
+  $("cquery").value = t.console.query || "";
+}
+
+async function loadModel() {
+  const m = await j("/api/schema-model");
+  $("model").innerHTML = "<tr><th>Owned type</th><th>Owner field</th><th>Inferred by</th><th>Lookup field</th><th>Public fields</th></tr>" +
+    m.owned_types.map(t => `<tr><td><b>${esc(t.type)}</b></td><td><code>${esc(t.owner_field)}</code></td><td>${esc(t.inferred_by)}</td>
+      <td><code>${esc(t.lookup_field || "-")}</code></td><td>${esc(t.public_fields.join(", ") || "-")}</td></tr>`).join("");
+  const rows = [];
+  for (const kind of ["query", "mutation"]) for (const [f, args] of Object.entries(m.id_arguments[kind] || {}))
+    for (const [a, t] of Object.entries(args)) rows.push(`<code>${kind} ${esc(f)}(${esc(a)})</code> → ${esc(t)}`);
+  $("idargs").innerHTML = `<div class="muted" style="margin-bottom:4px">ID arguments mapped to owned types (node field: <code>${esc(m.node_field)}</code>)</div>` + rows.join("<br>");
+}
+
+async function loadCases() {
+  const c = await j("/api/cases");
+  $("cases").innerHTML = c.attacks.map(a => `<button class="case" data-id="${a.id}"><b>${a.id}</b> ${esc(a.title)}<small>${esc(a.category)}</small></button>`).join("");
+  document.querySelectorAll(".case").forEach(b => b.onclick = () => runAttack(b));
+}
+
+function verdict(r, protectedSide) {
+  if (r.succeeded) return `<span class="badge b-bad">ATTACK SUCCEEDED</span> ${r.leaked.length ? "leaked " + esc(r.leaked.join(", ")) : ""} ${r.tampered ? "victim data modified" : ""}`;
+  return `<span class="badge b-ok">${protectedSide ? "PREVENTED" : "no leak"}</span>`;
+}
+
+async function runAttack(btn) {
+  document.querySelectorAll(".case").forEach(b => b.classList.remove("sel"));
+  btn.classList.add("sel");
+  $("labout").innerHTML = "Running...";
+  const r = await post("/api/attack/" + btn.dataset.id);
+  $("labout").innerHTML = `<div style="color:var(--ink)"><b>${esc(r.case.id)} · ${esc(r.case.title)}</b> <span class="muted">(gateway mode: ${esc(r.mode)})</span></div>
+    <pre>${fmt(r.case.body)}</pre>
+    <div class="grid2" style="margin-top:10px">
+      <div><div>Direct to backend - ${verdict(r.direct, false)} <span class="muted">${r.direct.latency_ms} ms</span></div><pre>${fmt(r.direct.response)}</pre></div>
+      <div><div>Through GraphQLShield - ${verdict(r.gateway, true)} <span class="muted">${r.gateway.latency_ms} ms</span></div><pre>${fmt(r.gateway.response)}</pre></div>
+    </div>`;
+  refresh();
+}
+
+async function loadResults() {
+  const r = await j("/api/results");
+  if (r.error) return;
+  $("results").innerHTML = `<div class="scroll"><table><tr><th>Configuration</th><th>Prevented</th><th>FPR</th><th>p50 ms</th><th>p95 ms</th></tr>` +
+    ["off", "depth", "argcheck", "response_only", "shield"].map(k => r.summary[k]).filter(Boolean).map(s => `<tr><td>${esc(s.label)}</td><td class="num">${s.attacks_prevented}/${s.attacks_total}</td>
+      <td class="num">${Math.round(s.fpr * 100)}%</td><td class="num">${s.p50_ms}</td><td class="num">${s.p95_ms}</td></tr>`).join("") +
+    `</table></div><div class="muted" style="margin-top:6px">Generated ${esc(r.timestamp)}</div>`;
+}
+
+$("mode").onchange = async (e) => { await post("/api/mode", {mode: e.target.value}); refresh(); };
+$("reset").onclick = async () => { await fetch("/api/reset?logs=1", {method: "POST"}); $("alerts").textContent = "None yet."; refresh(); };
+$("csend").onclick = async () => {
+  const u = $("cuser").value;
+  if (!tokens[u]) tokens[u] = (await post("/login", {username: u, password: pw[u]})).token;
+  let body;
+  const text = $("cquery").value.trim();
+  try { body = JSON.parse(text); } catch { body = {query: text}; }
+  const r = await fetch("/graphql", {method: "POST", headers: {"Content-Type": "application/json", Authorization: "Bearer " + tokens[u]}, body: JSON.stringify(body)});
+  $("cout").innerHTML = `HTTP ${r.status}\n` + fmt(await r.json());
+  refresh();
+};
+
+loadTarget(); loadCases(); loadModel(); loadResults(); refresh();
+setInterval(refresh, 3000);
+</script>
+</body>
+</html>

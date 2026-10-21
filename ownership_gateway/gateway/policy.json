@@ -1,0 +1,16 @@
+{
+  "mode": "shield",
+  "principal_type": "User",
+  "public_fields": { "User": ["id", "name", "role"] },
+  "owner_fields": {},
+  "id_argument_overrides": { "query": {}, "mutation": {} },
+  "bypass_roles": ["admin", "service"],
+  "max_depth": 8,
+  "max_aliases": 15,
+  "max_batch": 5,
+  "fail_closed": true,
+  "owner_cache_ttl_s": 30,
+  "enum_window_s": 60,
+  "enum_threshold": 5,
+  "enum_lockout_s": 30
+}

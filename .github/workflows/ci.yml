@@ -37,7 +37,7 @@ jobs:
           python -m app.seed
 
       - name: Run test suite
-        run: python -m pytest tests/ -q
+        run: python -m pytest -q
 
       - name: Run security performance evaluation (smoke)
         run: python -m scripts.evaluate_performance
