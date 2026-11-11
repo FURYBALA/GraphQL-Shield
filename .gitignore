@@ -23,3 +23,8 @@ run_relationship_benchmark_tomorrow.ps1
 *.db-wal
 *.db-shm
 *.db-journal
+
+# local scratch work, Node tooling and server logs
+scratch/
+node_modules/
+docs/evidence/*.log

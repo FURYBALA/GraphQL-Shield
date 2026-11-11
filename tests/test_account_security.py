@@ -17,7 +17,18 @@ from app.core.security import create_access_token
 from app.database import get_db_connection
 from app.main import app
 
-client = TestClient(app)
+def _with_client_address(asgi_app, address=("testclient", 50000)):
+    """Give every test request a client address, as a real server does. Older
+    Starlette test clients send none, which would silently skip the per-address
+    sign-in lockout these tests check."""
+    async def wrapped(scope, receive, send):
+        if scope["type"] in ("http", "websocket") and not scope.get("client"):
+            scope = {**scope, "client": address}
+        await asgi_app(scope, receive, send)
+    return wrapped
+
+
+client = TestClient(_with_client_address(app))
 
 
 def login(username, password):

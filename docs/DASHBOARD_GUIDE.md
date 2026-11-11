@@ -165,7 +165,7 @@ Key idea in plain words: Layer 2 automatically writes down every object Layer 1 
 
 - **Evaluation table:** how well the model and the simple rule ("flag queries containing children") find these gaps. Both now score 100%.
 - **What drives the prediction:** which query features matter most. `relationship_field_count` (a `children`-style field) dominates.
-- **Discovery run: gaps found in Layer 1:** the result to highlight. Before the fix, every query using a **default value for a variable** slipped past Layer 1. The simple rule missed all 585; the model found them. That was a real bug, now fixed, and attacks only Layer 2 could stop dropped by 66% (401 to 138 per 4,000 requests).
+- **Discovery run: gaps found in Layer 1:** the result to highlight. Before the fix, every query using a **default value for a variable** slipped past Layer 1 (585 requests, 263 of them attacks that only Layer 2 stopped). The simple rule caught only 22.8% of those attacks (F1 0.639); the model found them all (F1 1.000). That was a real bug, now fixed, and attacks only Layer 2 could stop dropped by 66% (401 to 138 per 4,000 requests).
 - **Score a query without running it:** paste a query and click **Predict blind spot** (admin sign-in needed). Example: *LIKELY BLIND SPOT · p=99.8% · relationship_field_count=1 (+6.69)* means 99.8% likely, mainly because of the `children` field.
 
 ---
@@ -176,7 +176,7 @@ This tab is the evidence: the record of every decision, so anyone can check what
 
 - **Request decision mix:** a ring chart of allowed versus denied decisions. It shows the mix, not a detection accuracy.
 - **Authorization overview:** bars comparing allowed and denied counts, and how many records were high risk.
-- **Verified non-interference property tests:** six cards, each a security property the automated tests check, e.g. *Single resource access* (owners are never wrongly blocked), *High-to-low confidentiality* (others' private records can't be reached through nesting), *Derived-value independence* (even a count of children does not reveal hidden documents). These cards are a fixed summary of tests that pass when you run `python -m pytest`; the dashboard does not run them.
+- **Verified security property tests:** twelve cards, each a security property the automated tests check: *P1 Safety* (no answer contains a foreign object), *P2 Non-interference*, *P3 Write safety*, *P4 Availability* (owners are never wrongly blocked), *Properties fail without protection*, *Leak channels closed*, and six more such as *Derived-value independence* (even a count of children does not reveal hidden documents). Each card shows the result of the **last `python -m pytest` run** on this computer, with its date; the dashboard does not run the tests itself.
 - **Recent authorization decisions and runtime provenance evidence:** latest decisions with full context: who asked, their role, the object and its real owner (*Owned* or *Foreign*), where in the query it was reached, the parent object, decision, reason and risk. Admin only.
 - **Recent audit events:** the raw audit log, newest first, with search, decision and risk filters, plus **Export CSV**. Times stored in UTC, shown in Indian time (IST). Admin only.
 
@@ -184,13 +184,13 @@ This tab is the evidence: the record of every decision, so anyone can check what
 
 ## 5-minute demo script
 
-**Before you start:** run `python -m uvicorn app.main:app --port 8000` in the project folder, keep that window open, and open http://127.0.0.1:8000/dashboard.
+**Before you start:** in the project folder run `python -m app.seed --with-shared-folder` (without it, document 204 does not exist and the folder attack in steps 2, 3 and 5 shows nothing), then `python -m uvicorn app.main:app --port 8000`. Keep that window open and open http://127.0.0.1:8000/dashboard.
 
 1. **The problem (30 s).** "BOLA means a user reads or changes someone else's data just by changing an ID. It is the number one API risk on the OWASP list, and GraphQL makes it harder to stop."
 2. **The attack works without protection (1 min).** In the test console, log in as `balanilavan` / `balanilavan123`, choose *Insecure baseline*, *Implicit children relationship*, folder 201, and run. Point at document 204, *Kapilesh's Shared Draft*: Balanilavan should not see it.
 3. **The same attack with protection (30 s).** Switch to *Protected GraphQL Shield*, retype the password, run again. Only documents 202 and 203 (Balanilavan's own) come back.
 4. **A direct attack is stopped at the door (30 s).** Choose *Direct resource lookup*, resource 102 (Kapilesh's), run. HTTP 403, and the five flow boxes explain: *OWNERSHIP_MISMATCH*.
-5. **Why two layers (1 min).** Sign in as admin (`chinmayanand` / `chinmayanand123`). Show the counters, especially *Layer 1 blind spots*. Optional: click *Turn Layer 2 OFF*, rerun step 3 and document 204 leaks; then turn Layer 2 back ON.
+5. **Why two layers (1 min).** Sign in as admin (`chinmayanand` / `chinmayanand123`). Show the counters, especially *Layer 1 blind spots*. Optional: click *Turn Layer 2 OFF* and confirm, rerun step 3 and document 204 leaks; then click *Turn both layers back on* in the red banner.
 6. **The research contribution (1 min).** Open Research & ML → *Layer 1 blind-spot predictor*. "Layer 2's records trained this model with no hand labelling. It found a real Layer 1 bug, variable default values, that our own rule missed; fixing it cut these attacks by 66%." Click *Predict blind spot*.
 7. **The evidence (30 s).** Open Audit & Verification and show the decisions with real owners marked *Owned* or *Foreign*.
 
@@ -209,7 +209,7 @@ This tab is the evidence: the record of every decision, so anyone can check what
 | Does the ML block attacks? | No. Both models only advise. Every allow or deny is decided by fixed ownership rules, so decisions stay predictable and auditable. |
 | What is new in your work? | Using Layer 2's records of what Layer 1 missed as free training data. The model found a real Layer 1 bug that our own rule missed. |
 | Is the ML better than a simple rule? | Not after the bug fix: both score 100%. Its value was the discovery, which we say openly. |
-| How fast is it? | After database connection pooling, protection adds about 60–81% per request in lab tests (about 20–38 ms per request). |
+| How fast is it? | With database connection pooling, protection adds about 1 ms or less per request in lab tests (0–10.5%, means of about 10–11 ms per protected request). Without pooling it was 33–66 ms per request. |
 | Does it work on other apps? | Yes for our second test app (clinic records), protected by configuration alone. Testing on a third-party app is the next step. |
 | What are the limits? | Both test apps and attacks were built by us; policy is owner-or-admin only; numbers come from a laptop. |
 | Is the 100% block rate real? | Yes on our test set: 2,267 of 2,267 attacks blocked, 0 legitimate requests blocked. It shows the design works on these attacks, not on every possible attack. |

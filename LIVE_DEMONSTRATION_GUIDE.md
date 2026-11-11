@@ -11,7 +11,7 @@ Because we added **Live Console Logging**, the server's terminal will print a co
 
 Open your first terminal and start the server:
 ```bash
-python -m app.seed
+python -m app.seed --with-shared-folder
 uvicorn app.main:app --reload
 ```
 *(Leave this terminal visible on your screen. The security trace logs will print here.)*
